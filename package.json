@@ -6,7 +6,7 @@
   "homepage": "https://garu.com.br",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Garu-Pagamentos/garu-node.git"
+    "url": "git+https://github.com/Garu-Pagamentos/garu-node.git"
   },
   "bugs": {
     "url": "https://github.com/Garu-Pagamentos/garu-node/issues"
