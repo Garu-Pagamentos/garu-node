@@ -1,0 +1,62 @@
+{
+  "name": "@garuhq/node",
+  "version": "0.1.0",
+  "description": "Official Node.js / TypeScript SDK for the Garu payment gateway.",
+  "license": "MIT",
+  "homepage": "https://garu.com.br",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Garu-Pagamentos/garu-node.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Garu-Pagamentos/garu-node/issues"
+  },
+  "keywords": [
+    "garu",
+    "payments",
+    "pix",
+    "boleto",
+    "credit-card",
+    "brazil",
+    "fintech",
+    "sdk"
+  ],
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "generate": "curl -sf https://garu.com.br/api/swagger-json -o src/generated/openapi.json && openapi-typescript src/generated/openapi.json -o src/generated/schema.d.ts",
+    "prepublishOnly": "npm run typecheck && npm test && npm run build"
+  },
+  "devDependencies": {
+    "@types/node": "20.12.7",
+    "openapi-typescript": "7.4.2",
+    "tsup": "8.0.2",
+    "typescript": "5.4.5",
+    "vitest": "1.5.0"
+  },
+  "dependencies": {
+    "openapi-fetch": "0.9.7"
+  }
+}
