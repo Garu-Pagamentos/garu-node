@@ -3,6 +3,15 @@
 All notable changes to `@garuhq/node` are documented in this file. Format:
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [SemVer](https://semver.org/).
 
+## [0.1.1] — 2026-04-08
+
+### Security
+
+- Upgrade dev dependencies to clear `npm audit` findings:
+  - `vitest` 1.5.0 → 4.1.3 (closes critical GHSA — vitest RCE in dev server)
+  - `tsup` 8.0.2 → 8.5.1 (closes moderate DOM clobbering advisory)
+- All upgrades are dev-only; no runtime-code changes in `@garuhq/node` itself.
+
 ## [0.1.0] — 2026-04-08
 
 ### Added
