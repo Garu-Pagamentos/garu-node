@@ -1,6 +1,6 @@
 {
   "name": "@garuhq/node",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Official Node.js / TypeScript SDK for the Garu payment gateway.",
   "license": "MIT",
   "homepage": "https://garu.com.br",

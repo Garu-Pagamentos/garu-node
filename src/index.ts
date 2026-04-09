@@ -15,13 +15,21 @@ export {
 } from './errors.js';
 export type {
   Charge,
+  ChargeList,
   ChargeStatus,
   CreateChargeParams,
-  RefundChargeParams,
+  CreateCustomerParams,
   Customer,
+  CustomerList,
+  CustomerRecord,
   CardInfo,
-  PaymentMethod,
-  WirePaymentMethodId,
+  ListChargesParams,
+  ListCustomersParams,
+  MetaFeatures,
   MetaResponse,
-  MetaFeatures
+  PaginatedList,
+  PaymentMethod,
+  RefundChargeParams,
+  UpdateCustomerParams,
+  WirePaymentMethodId
 } from './types.js';

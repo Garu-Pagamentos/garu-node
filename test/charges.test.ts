@@ -124,3 +124,35 @@ describe('charges.get', () => {
     expect(calls[0]!.method).toBe('GET');
   });
 });
+
+describe('charges.list', () => {
+  it('lists charges with default params', async () => {
+    const listBody = {
+      data: [{ id: 1, status: 'paid' }],
+      meta: { page: 1, limit: 20, total: 1, totalPages: 1 }
+    };
+    const { fetch, calls } = mockFetch([{ status: 200, body: listBody }]);
+    const garu = new Garu({ apiKey: 'sk_test_abc', fetch, maxRetries: 0 });
+
+    const result = await garu.charges.list();
+
+    expect(result.data).toHaveLength(1);
+    expect(result.meta.total).toBe(1);
+    expect(calls[0]!.url).toBe('https://garu.com.br/api/transactions');
+    expect(calls[0]!.method).toBe('GET');
+  });
+
+  it('passes filters as query params', async () => {
+    const listBody = { data: [], meta: { page: 2, limit: 10, total: 0, totalPages: 0 } };
+    const { fetch, calls } = mockFetch([{ status: 200, body: listBody }]);
+    const garu = new Garu({ apiKey: 'sk_test_abc', fetch, maxRetries: 0 });
+
+    await garu.charges.list({ page: 2, limit: 10, status: 'paid', paymentMethod: 'pix' });
+
+    const url = calls[0]!.url;
+    expect(url).toContain('page=2');
+    expect(url).toContain('limit=10');
+    expect(url).toContain('status=paid');
+    expect(url).toContain('paymentMethod=pix');
+  });
+});

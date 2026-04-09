@@ -4,7 +4,9 @@ import { generateIdempotencyKey } from '../idempotency.js';
 import {
   toWirePaymentMethod,
   type Charge,
+  type ChargeList,
   type CreateChargeParams,
+  type ListChargesParams,
   type RefundChargeParams
 } from '../types.js';
 
@@ -40,7 +42,7 @@ export class Charges {
    *     phone: '11987654321'
    *   }
    * });
-   * console.log(charge.id, charge.status);
+   * // charge.id, charge.status
    *
    * @example
    * // Credit card charge, 3 installments
@@ -68,6 +70,31 @@ export class Charges {
           headers: { 'X-Idempotency-Key': idempotencyKey },
           signal
         }) as Promise<{ data?: Charge; error?: unknown; response: Response }>
+    );
+  }
+
+  /**
+   * List charges for the authenticated seller, with pagination and filters.
+   *
+   * @example
+   * const { data, meta } = await garu.charges.list({ status: 'paid', limit: 10 });
+   * // meta.total paid charges
+   */
+  async list(params: ListChargesParams = {}): Promise<ChargeList> {
+    const query: Record<string, string> = {};
+    if (params.page !== undefined) query.page = String(params.page);
+    if (params.limit !== undefined) query.limit = String(params.limit);
+    if (params.status) query.status = params.status;
+    if (params.search) query.search = params.search;
+    if (params.paymentMethod) query.paymentMethod = params.paymentMethod;
+
+    const qs = new URLSearchParams(query).toString();
+    const url = `/api/transactions${qs ? `?${qs}` : ''}`;
+
+    return this.http.call<ChargeList>((signal) =>
+      (this.http.client.GET as Function)(url, { signal }).then(
+        (r: { data?: ChargeList; error?: unknown; response: Response }) => r
+      )
     );
   }
 

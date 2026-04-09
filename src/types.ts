@@ -111,6 +111,92 @@ export interface RefundChargeParams {
   idempotencyKey?: string;
 }
 
+export interface ListChargesParams {
+  /** Page number (1-based). Default: 1. */
+  page?: number;
+  /** Items per page (1–100). Default: 20. */
+  limit?: number;
+  /** Filter by status (e.g. `paid`, `pending`). */
+  status?: string;
+  /** Search by customer name, email, or document. */
+  search?: string;
+  /** Filter by payment method (`pix`, `creditcard`, `boleto`). */
+  paymentMethod?: string;
+}
+
+export interface PaginatedList<T> {
+  data: T[];
+  meta: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
+export type ChargeList = PaginatedList<Charge>;
+
+export interface CustomerRecord {
+  id: number;
+  name: string;
+  email: string;
+  document: string;
+  phone: string;
+  personType: string;
+  zipCode?: string | null;
+  street?: string | null;
+  number?: string | null;
+  complement?: string | null;
+  neighborhood?: string | null;
+  city?: string | null;
+  state?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  [key: string]: unknown;
+}
+
+export type CustomerList = PaginatedList<CustomerRecord>;
+
+export interface CreateCustomerParams {
+  name: string;
+  email: string;
+  /** CPF (11 digits) or CNPJ (14 digits), digits only. */
+  document: string;
+  /** 10 or 11 digits with area code. */
+  phone: string;
+  /** `fisica` or `juridica`. */
+  personType: 'fisica' | 'juridica';
+  zipCode?: string;
+  street?: string;
+  number?: string;
+  complement?: string;
+  neighborhood?: string;
+  city?: string;
+  /** 2-letter uppercase state code, e.g. `SP`. */
+  state?: string;
+}
+
+export interface UpdateCustomerParams {
+  name?: string;
+  email?: string;
+  document?: string;
+  phone?: string;
+  personType?: 'fisica' | 'juridica';
+  zipCode?: string;
+  street?: string;
+  number?: string;
+  complement?: string;
+  neighborhood?: string;
+  city?: string;
+  state?: string;
+}
+
+export interface ListCustomersParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+}
+
 export interface MetaFeatures {
   subscriptions: boolean;
   checkout_sessions: boolean;

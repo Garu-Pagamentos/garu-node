@@ -1,5 +1,6 @@
 import { HttpClient } from './http.js';
 import { Charges } from './resources/charges.js';
+import { Customers } from './resources/customers.js';
 import { Meta } from './resources/meta.js';
 import { webhooks } from './webhooks.js';
 
@@ -22,7 +23,7 @@ export interface GaruOptions {
 const DEFAULT_BASE_URL = 'https://garu.com.br';
 const DEFAULT_TIMEOUT_MS = 30_000;
 const DEFAULT_MAX_RETRIES = 2;
-const SDK_VERSION = '0.1.0';
+const SDK_VERSION = '0.2.0';
 
 /**
  * The Garu SDK client.
@@ -45,6 +46,7 @@ const SDK_VERSION = '0.1.0';
  */
 export class Garu {
   public readonly charges: Charges;
+  public readonly customers: Customers;
   public readonly meta: Meta;
 
   /**
@@ -64,6 +66,7 @@ export class Garu {
       fetch: options.fetch
     });
     this.charges = new Charges(http);
+    this.customers = new Customers(http);
     this.meta = new Meta(http);
   }
 }
