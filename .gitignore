@@ -6,6 +6,10 @@ coverage
 .env
 .env.*
 
+# Generated specs (fetched on-demand by `npm run generate`)
+src/generated/openapi.json
+src/generated/openapi-sdk.json
+
 # Claude
 CLAUDE.md
 .claude/

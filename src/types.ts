@@ -208,7 +208,7 @@ export interface MetaFeatures {
 export interface MetaResponse {
   name: string;
   version: string;
-  environment: 'production' | 'staging' | 'development' | string;
+  environment: string;
   api_version: string;
   payment_methods: string[];
   currencies: string[];
