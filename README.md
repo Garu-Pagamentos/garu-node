@@ -63,12 +63,35 @@ API key.
 | Method                | What it does                                 |
 | --------------------- | -------------------------------------------- |
 | `create(params)`      | Create a PIX, credit-card, or boleto charge. |
+| `list(params?)`       | List charges with pagination and filters.    |
 | `get(id)`             | Fetch a single charge by ID.                 |
 | `refund(id, params?)` | Refund a charge fully or partially.          |
 
 Every mutation automatically attaches an `X-Idempotency-Key` header (UUIDv4) unless you pass
 one via `params.idempotencyKey`. Safe to retry — the backend caches the first response for
 24h.
+
+### `garu.customers`
+
+| Method                    | What it does                                  |
+| ------------------------- | --------------------------------------------- |
+| `create(params)`          | Create a new customer.                        |
+| `list(params?)`           | List customers with pagination and search.    |
+| `get(id)`                 | Fetch a single customer by ID.                |
+| `update(id, params)`      | Update a customer's profile.                  |
+| `delete(id)`              | Delete a customer.                            |
+
+```ts
+const customer = await garu.customers.create({
+  name: 'Maria Silva',
+  email: 'maria@exemplo.com.br',
+  document: '12345678909',
+  phone: '11987654321',
+  personType: 'fisica'
+});
+
+const { data, meta } = await garu.customers.list({ search: 'maria', limit: 10 });
+```
 
 ### `garu.meta`
 
@@ -168,6 +191,11 @@ import type {
   MetaResponse
 } from '@garuhq/node';
 ```
+
+## Security
+
+To report a vulnerability, **do not open a public issue**. See [SECURITY.md](SECURITY.md) for
+responsible disclosure instructions.
 
 ## License
 
