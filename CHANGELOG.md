@@ -3,6 +3,20 @@
 All notable changes to `@garuhq/node` are documented in this file. Format:
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [SemVer](https://semver.org/).
 
+## [0.3.0] — 2026-04-28
+
+### Added
+
+- `products` resource on the `Garu` client.
+  - `products.list({ page, limit, search, tab })` — paginated listing of the
+    authenticated seller's products (`GET /api/products/seller`).
+  - `products.get(uuid)` — fetch a single product by UUID
+    (`GET /api/products/uuid/{uuid}`). The UUID is the same identifier
+    accepted by `charges.create({ productId })`, so `products.list` is
+    the discovery path before creating a charge.
+- `Product`, `ProductList`, `ListProductsParams` types exported from the
+  package root.
+
 ## [0.1.1] — 2026-04-08
 
 ### Security

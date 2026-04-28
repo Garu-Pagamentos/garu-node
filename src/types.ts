@@ -197,6 +197,44 @@ export interface ListCustomersParams {
   search?: string;
 }
 
+export interface Product {
+  id: number;
+  uuid: string;
+  name: string;
+  description: string;
+  image: string;
+  /** Price in centavos (BRL × 100). */
+  value: number;
+  sellerId: number;
+  sellerName?: string;
+  pix: boolean;
+  boleto: boolean;
+  creditCard: boolean;
+  installments: number[];
+  tags?: string[];
+  isSubscription?: boolean;
+  subscriptionType?: string;
+  unitLabel?: string;
+  comission?: string;
+  valueWithComission?: number;
+  returnUrl?: string;
+  returnUrlButtonText?: string;
+  createdAt: string;
+  updatedAt: string;
+  [key: string]: unknown;
+}
+
+export type ProductList = PaginatedList<Product>;
+
+export interface ListProductsParams {
+  page?: number;
+  limit?: number;
+  /** Search by product name. */
+  search?: string;
+  /** Backend tab filter (e.g. `active`, `archived`). Backend default is used when omitted. */
+  tab?: string;
+}
+
 export interface MetaFeatures {
   subscriptions: boolean;
   checkout_sessions: boolean;

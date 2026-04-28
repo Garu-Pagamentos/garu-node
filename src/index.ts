@@ -25,10 +25,13 @@ export type {
   CardInfo,
   ListChargesParams,
   ListCustomersParams,
+  ListProductsParams,
   MetaFeatures,
   MetaResponse,
   PaginatedList,
   PaymentMethod,
+  Product,
+  ProductList,
   RefundChargeParams,
   UpdateCustomerParams,
   WirePaymentMethodId

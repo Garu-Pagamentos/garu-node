@@ -2,6 +2,7 @@ import { HttpClient } from './http.js';
 import { Charges } from './resources/charges.js';
 import { Customers } from './resources/customers.js';
 import { Meta } from './resources/meta.js';
+import { Products } from './resources/products.js';
 import { webhooks } from './webhooks.js';
 
 export interface GaruOptions {
@@ -23,7 +24,7 @@ export interface GaruOptions {
 const DEFAULT_BASE_URL = 'https://garu.com.br';
 const DEFAULT_TIMEOUT_MS = 30_000;
 const DEFAULT_MAX_RETRIES = 2;
-const SDK_VERSION = '0.2.0';
+const SDK_VERSION = '0.3.0';
 
 /**
  * The Garu SDK client.
@@ -48,6 +49,7 @@ export class Garu {
   public readonly charges: Charges;
   public readonly customers: Customers;
   public readonly meta: Meta;
+  public readonly products: Products;
 
   /**
    * Webhook helpers. Available both as an instance member and as a static —
@@ -68,5 +70,6 @@ export class Garu {
     this.charges = new Charges(http);
     this.customers = new Customers(http);
     this.meta = new Meta(http);
+    this.products = new Products(http);
   }
 }
