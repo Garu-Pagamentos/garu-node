@@ -4,6 +4,214 @@
  */
 
 export interface paths {
+    "/api/products/{productId}/pixels": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List product pixels */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    productId: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PixelResponse"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        /** Create product pixel */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    productId: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["CreatePixelRequest"];
+                };
+            };
+            responses: {
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PixelResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/products/{productId}/pixels/{pixelId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get product pixel by ID */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    productId: number;
+                    pixelId: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PixelResponse"];
+                    };
+                };
+            };
+        };
+        /** Update product pixel */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    productId: number;
+                    pixelId: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["UpdatePixelRequest"];
+                };
+            };
+            responses: {
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PixelResponse"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        /** Delete product pixel */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    productId: number;
+                    pixelId: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/products/{productId}/event-settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get product event settings */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    productId: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["EventSettingsResponse"];
+                    };
+                };
+            };
+        };
+        /** Update product event settings */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    productId: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["EventSettingsRequest"];
+                };
+            };
+            responses: {
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["EventSettingsResponse"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/transactions": {
         parameters: {
             query?: never;
@@ -262,6 +470,231 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/products/uuid/{uuid}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Product by uuId */
+        get: {
+            parameters: {
+                query: {
+                    includeArchived: string;
+                };
+                header?: never;
+                path: {
+                    uuid: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": Record<string, never>;
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/products/seller": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get all Products to Seller */
+        get: {
+            parameters: {
+                query: {
+                    page: number;
+                    limit: number;
+                    search: string;
+                    tab: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/products/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Product by ID */
+        get: {
+            parameters: {
+                query: {
+                    includeArchived: string;
+                };
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProductResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        /** Deactivate a Product */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        /** Update a Product */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["CreateProductRequest"];
+                };
+            };
+            responses: {
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Product"];
+                    };
+                };
+                /** @description The Product has been successfully updated */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProductResponse"];
+                    };
+                };
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponseDto"];
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/api/products": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create a new Product */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["CreateProductRequest"];
+                };
+            };
+            responses: {
+                /** @description The Product has been successfully created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProductResponse"];
+                    };
+                };
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponseDto"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/customers": {
         parameters: {
             query?: never;
@@ -434,6 +867,43 @@ export interface paths {
                     };
                     content: {
                         "application/json": components["schemas"]["MetaResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/products/{productId}/tracking-config": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get tracking configuration for a product */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    productId: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["TrackingConfigResponse"];
                     };
                 };
             };
@@ -653,6 +1123,92 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        PixelResponse: {
+            /** @description Pixel ID */
+            id: number;
+            /** @description Pixel name */
+            name: string;
+            /** @description Facebook Pixel ID */
+            pixelId: string;
+            /** @description Whether the pixel has an access token configured */
+            hasAccessToken?: boolean;
+            /** @description Whether the pixel is active */
+            isActive: boolean;
+            /** @description Custom domain configuration */
+            domain?: components["schemas"]["PixelDomainInfo"] | null;
+            /**
+             * Format: date-time
+             * @description Creation date
+             */
+            createdAt: string;
+            /**
+             * Format: date-time
+             * @description Last update date
+             */
+            updatedAt: string;
+        };
+        CreatePixelRequest: {
+            /** @description Optional name for the pixel */
+            name?: string;
+            /** @description Facebook Pixel ID */
+            pixelId: string;
+            /** @description Access token for Conversion API */
+            accessToken?: string;
+            /** @description Domain ID for first-party pixel tracking */
+            domainId?: number;
+        };
+        UpdatePixelRequest: {
+            /** @description Name for the pixel */
+            name?: string;
+            /** @description Facebook Pixel ID */
+            pixelId?: string;
+            /** @description Access token for Conversion API */
+            accessToken?: string;
+            /** @description Whether the pixel is active */
+            isActive?: boolean;
+            /** @description Domain ID for first-party pixel tracking */
+            domainId?: number;
+        };
+        EventSettingsResponse: {
+            /** @description Event settings ID */
+            id: number;
+            /** @description Seller ID if this is a seller-level setting */
+            sellerId?: number;
+            /** @description Product ID if this is a product-level setting */
+            productId?: number;
+            /** @description Enable PageView event */
+            pageViewEnabled: boolean;
+            /** @description Enable InitiateCheckout event */
+            initiateCheckoutEnabled: boolean;
+            /** @description Enable AddPaymentInfo event */
+            addPaymentInfoEnabled: boolean;
+            /** @description Enable Lead event */
+            leadEnabled: boolean;
+            /** @description Enable Purchase event */
+            purchaseEnabled: boolean;
+            /**
+             * Format: date-time
+             * @description Creation date
+             */
+            createdAt: string;
+            /**
+             * Format: date-time
+             * @description Last update date
+             */
+            updatedAt: string;
+        };
+        EventSettingsRequest: {
+            /** @description Enable PageView event */
+            pageViewEnabled: boolean;
+            /** @description Enable InitiateCheckout event */
+            initiateCheckoutEnabled: boolean;
+            /** @description Enable AddPaymentInfo event */
+            addPaymentInfoEnabled: boolean;
+            /** @description Enable Lead event */
+            leadEnabled: boolean;
+            /** @description Enable Purchase event */
+            purchaseEnabled: boolean;
+        };
         CreateTransactionRequest: {
             /** @description Dados do cliente que está efetuando a compra */
             customer: components["schemas"]["CustomerDto"];
@@ -757,6 +1313,113 @@ export interface components {
              * @example Customer requested cancellation
              */
             reason?: string;
+        };
+        ProductResponse: {
+            id: number;
+            name: string;
+            value: number;
+            description: string;
+            image: string;
+            sellerId: number;
+            boleto: boolean;
+            creditCard: boolean;
+            pix: boolean;
+            installments: Record<string, never>[];
+            tags?: components["schemas"]["Tag"][];
+            pixelFB?: string;
+            hasFacebookPixel?: boolean;
+            uuid: string;
+            comission?: string;
+            valueWithComission?: number;
+            sellerName?: string;
+            affiliateLink?: string;
+            affiliateId?: number;
+            affiliationId?: number;
+            affiliationOrderAccept?: boolean;
+            leadBond?: boolean;
+            displayOnAll?: boolean;
+            isSubscription?: boolean;
+            subscriptionType?: string | null;
+            unitLabel?: string | null;
+            returnUrl?: string | null;
+            returnUrlButtonText?: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            portalConfig?: {
+                primaryColor: string;
+                logoUrl: string | null;
+                businessName: string | null;
+            };
+            pixelIds?: string[];
+            eventSettings?: {
+                pageViewEnabled: boolean;
+                initiateCheckoutEnabled: boolean;
+                addPaymentInfoEnabled: boolean;
+                leadEnabled: boolean;
+                purchaseEnabled: boolean;
+            };
+        };
+        CreateProductRequest: {
+            name: string;
+            value?: number;
+            description?: string;
+            image: string;
+            boleto?: boolean;
+            creditCard?: boolean;
+            pix?: boolean;
+            installments?: number;
+            tags: string[];
+            pixelFB: string;
+            affiliationOrderAccept?: boolean;
+            leadBond?: boolean;
+            displayOnAll?: boolean;
+            comission?: string;
+            isSubscription?: boolean;
+            subscriptionType?: string;
+            unitLabel?: string;
+            statementDescriptor?: string;
+            returnUrl?: string;
+            returnUrlButtonText?: string;
+        };
+        Product: {
+            id: number;
+            name: string;
+            description: string;
+            image: string;
+            value: number;
+            boleto: boolean;
+            creditCard: boolean;
+            pix: boolean;
+            installments: number;
+            affiliation: boolean;
+            affiliationOrderAccept: boolean;
+            leadBond: boolean;
+            leadBondDirectVisit: boolean;
+            displayOnAll: boolean;
+            commissionDefault: number;
+            seller: components["schemas"]["Seller"];
+            transactions: components["schemas"]["Transaction"][];
+            tags?: components["schemas"]["Tag"][];
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            pixelFB: string;
+            uuid: string;
+            isActive: boolean;
+            affiliations: components["schemas"]["Affiliations"][];
+            isSubscription: boolean;
+            subscriptionType: string | null;
+            unitLabel: string | null;
+            subscriptionPrices: components["schemas"]["SubscriptionPrice"][];
+            facebookPixels: components["schemas"]["FacebookPixel"][];
+            returnUrl: string | null;
+            returnUrlButtonText: string | null;
+            affiliateRecurringMode: string;
+            affiliateAutoApprove: boolean;
+            coProducers: components["schemas"]["CoProducer"][];
         };
         CreateCustomerRequest: {
             /** @description Customer name */
@@ -889,6 +1552,18 @@ export interface components {
             /** @example contato@garu.com.br */
             support_email: string;
         };
+        TrackingConfigResponse: {
+            /** @description Product ID */
+            productId: number;
+            /** @description Seller ID */
+            sellerId: number;
+            /** @description List of pixel configurations */
+            pixels: components["schemas"]["TrackingPixelConfig"][];
+            /** @description Event settings */
+            eventSettings: components["schemas"]["TrackingEventSettings"];
+            /** @description Default tracking domain */
+            defaultDomain: string;
+        };
         CreateWebhookEndpointRequest: {
             /**
              * Format: uri
@@ -920,6 +1595,24 @@ export interface components {
             /** @description Enable or disable this endpoint */
             enabled?: boolean;
         };
+        TrackingPixelConfig: {
+            /** @description Facebook Pixel ID */
+            pixelId: string;
+            /** @description Custom tracking domain (e.g., pixels.example.com) */
+            trackingDomain?: string;
+        };
+        TrackingEventSettings: {
+            /** @description Whether PageView event is enabled */
+            pageViewEnabled: boolean;
+            /** @description Whether InitiateCheckout event is enabled */
+            initiateCheckoutEnabled: boolean;
+            /** @description Whether AddPaymentInfo event is enabled */
+            addPaymentInfoEnabled: boolean;
+            /** @description Whether Lead event is enabled */
+            leadEnabled: boolean;
+            /** @description Whether Purchase event is enabled */
+            purchaseEnabled: boolean;
+        };
         MetaFeaturesDto: {
             /** @example true */
             subscriptions: boolean;
@@ -931,6 +1624,415 @@ export interface components {
             test_mode: boolean;
             /** @example true */
             webhooks: boolean;
+        };
+        Seller: {
+            id: number;
+            name: string;
+            document: string;
+            phone: string;
+            validatedEmail: boolean;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            anonymized: boolean;
+            logoUrl: string | null;
+            ownerUserId: number | null;
+            settlementDays: number;
+            publicId: string;
+            products: components["schemas"]["Product"][];
+            bankaccount: components["schemas"]["BankAccount"];
+            affiliations: components["schemas"]["Affiliations"][];
+            withdrawal: components["schemas"]["Withdrawals"][];
+            facebookPixels: components["schemas"]["FacebookPixel"][];
+            portalConfiguration: components["schemas"]["PortalConfiguration"];
+        };
+        Tag: {
+            id: number;
+            name: string;
+            products: components["schemas"]["Product"][];
+        };
+        Affiliations: {
+            id: number;
+            affiliate: components["schemas"]["Seller"];
+            product: components["schemas"]["Product"];
+            affiliateId: number;
+            productId: number;
+            /** @description Commission percentage for this affiliation (can override product default).
+             *     Stored as a percentage value (e.g., 10 = 10%). */
+            commission: number;
+            /** @description Whether the affiliation is currently active.
+             *     Set to false when canceled via cancelAffiliation(). */
+            active: boolean;
+            /** @description Whether the product owner (seller) has approved this affiliation.
+             *     Set to true via approveAffiliation() after reviewing the affiliate request. */
+            approved: boolean;
+            /** @description Whether the affiliate has accepted the affiliation terms.
+             *     Set during affiliation creation based on invite acceptance.
+             *     Note: Different from AffiliationInvite.accept which tracks invite acceptance. */
+            accepted: boolean;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            transactions: components["schemas"]["Transaction"][];
+            link: string;
+            /**
+             * Format: date-time
+             * @description Timestamp when the affiliation was canceled.
+             *     Null if affiliation is still active.
+             *     Set by cancelAffiliation() along with active=false.
+             */
+            canceledAt: string;
+        };
+        SubscriptionPrice: {
+            id: Record<string, never>;
+            productId: number;
+            product: components["schemas"]["Product"];
+            gatewayProvider: string;
+            gatewayPlanId: string;
+            name: string;
+            pricingModel: string;
+            unitAmount: number;
+            currency: string;
+            billingInterval: string;
+            billingIntervalCount: number;
+            trialPeriodDays: number;
+            description: string | null;
+            metadata: Record<string, never>;
+            isActive: boolean;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            subscriptions: components["schemas"]["Subscription"][];
+        };
+        FacebookPixel: {
+            id: number;
+            name: string;
+            seller: components["schemas"]["Seller"];
+            product: components["schemas"]["Product"] | null;
+            pixelId: string;
+            accessToken: string | null;
+            isActive: boolean;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            domainId: number | null;
+            domain: components["schemas"]["SellerDomain"] | null;
+        };
+        CoProducer: {
+            id: number;
+            productId: number;
+            product: components["schemas"]["Product"];
+            sellerId: number;
+            seller: components["schemas"]["Seller"];
+            shareType: Record<string, never>;
+            shareValue: number;
+            status: Record<string, never>;
+            invitedBySellerId: number;
+            invitedBySeller: components["schemas"]["Seller"];
+            /** Format: date-time */
+            acceptedAt: string | null;
+            /** Format: date-time */
+            removedAt: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        SellerDomain: {
+            id: number;
+            sellerId: number;
+            seller: components["schemas"]["Seller"];
+            domain: string;
+            subdomain: string;
+            verificationStatus: Record<string, never>;
+            /** Format: date-time */
+            verifiedAt: string | null;
+            /** Format: date-time */
+            lastCheckAt: string | null;
+            failureCount: number;
+            isActive: boolean;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            pixels: components["schemas"]["FacebookPixel"][];
+        };
+        Subscription: {
+            id: number;
+            uuid: string;
+            gatewayProvider: string;
+            gatewaySubscriptionId: string;
+            customerId: number;
+            customer: components["schemas"]["Customer"];
+            subscriptionPriceId: Record<string, never>;
+            subscriptionPrice: components["schemas"]["SubscriptionPrice"];
+            paymentMethodId: number | null;
+            paymentMethod: components["schemas"]["PaymentMethod"] | null;
+            sellerId: number;
+            seller: components["schemas"]["Seller"];
+            status: string;
+            /** Format: date-time */
+            currentPeriodStart: string | null;
+            /** Format: date-time */
+            currentPeriodEnd: string | null;
+            /** Format: date-time */
+            trialStart: string | null;
+            /** Format: date-time */
+            trialEnd: string | null;
+            /** Format: date-time */
+            cancelledAt: string | null;
+            /** Format: date-time */
+            endedAt: string | null;
+            amount: number;
+            currency: string;
+            cancelAtPeriodEnd: boolean;
+            cancellationReason: string | null;
+            metadata: Record<string, never>;
+            retryCount: number;
+            /** Format: date-time */
+            nextRetryDate: string | null;
+            lastBillingError: string | null;
+            missedWebhookCount: number;
+            /** Format: date-time */
+            pausedAt: string | null;
+            /** Format: date-time */
+            pauseResumeAt: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            events: components["schemas"]["SubscriptionEvent"][];
+            transactions: components["schemas"]["Transaction"][];
+        };
+        PaymentMethod: {
+            id: number;
+            customerId: number;
+            customer: components["schemas"]["Customer"];
+            gatewayProvider: string;
+            gatewayCardId: string;
+            cardBrand: string;
+            cardLast4: string;
+            cardExpMonth: number;
+            cardExpYear: number;
+            cardholderName: string;
+            isDefault: boolean;
+            isBackup: boolean;
+            status: string;
+            /** Format: date-time */
+            lastUsedAt: string | null;
+            failedAttempts: number;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            subscriptions: components["schemas"]["Subscription"][];
+        };
+        SubscriptionEvent: {
+            id: number;
+            subscriptionId: number;
+            subscription: components["schemas"]["Subscription"];
+            eventType: string;
+            gatewayProvider: string;
+            gatewayEventId: string | null;
+            eventData: Record<string, never>;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        BankAccount: {
+            id: number;
+            sellerId: number;
+            Seller: components["schemas"]["Seller"];
+            bank: string;
+            agency: string;
+            account: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        Withdrawals: {
+            id: number;
+            seller: components["schemas"]["Seller"];
+            sellerId: number;
+            value: number;
+            fee: number;
+            netValue: number;
+            /** @enum {string} */
+            status: "aguardando" | "aprovado" | "recusado" | "pago";
+            paymentMethod: string;
+            bankAccountId: number;
+            bankAccount: components["schemas"]["BankAccount"];
+            /** Format: date-time */
+            requestedAt: string;
+            /** Format: date-time */
+            reviewedAt: string;
+            reviewedBy: number;
+            reviewer: components["schemas"]["User"];
+            rejectionReason: string;
+            /** Format: date-time */
+            paidAt: string;
+            paymentReference: string;
+            ledgerGroupId: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        PortalConfiguration: {
+            id: number;
+            sellerId: number;
+            seller: components["schemas"]["Seller"];
+            businessName: string | null;
+            logoUrl: string | null;
+            primaryColor: string;
+            allowCancelSubscription: boolean;
+            allowUpdatePaymentMethod: boolean;
+            allowUpdateBillingInfo: boolean;
+            allowViewInvoices: boolean;
+            allowApplyCoupons: boolean;
+            requireCancelReason: boolean;
+            cancelAtPeriodEndOnly: boolean;
+            sendCancellationEmail: boolean;
+            sendPaymentMethodUpdatedEmail: boolean;
+            customWelcomeText: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        User: {
+            id: number;
+            email: string;
+            password: string;
+            passwordAlgorithm: Record<string, never>;
+            name: string;
+            phone: string | null;
+            avatarUrl: string | null;
+            validatedEmail: boolean;
+            tokenRecoveryEmail: string | null;
+            /** Format: date-time */
+            tokenRecoveryExpiresAt: string | null;
+            /** Format: date-time */
+            lastLoginAt: string | null;
+            twoFactorEnabled: boolean;
+            twoFactorPromptDismissed: boolean;
+            /** Format: date-time */
+            twoFactorEnabledAt: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            teamMembers: components["schemas"]["TeamMember"][];
+            sessions: components["schemas"]["UserSession"][];
+            mfaCodes: components["schemas"]["Mfa"][];
+            twoFactorMethods: components["schemas"]["TwoFactorMethod"][];
+            backupCodes: components["schemas"]["BackupCode"][];
+        };
+        TeamMember: {
+            id: number;
+            userId: number;
+            user: components["schemas"]["User"];
+            sellerId: number;
+            seller: components["schemas"]["Seller"];
+            roleId: number;
+            role: components["schemas"]["Role"];
+            isOwner: boolean;
+            active: boolean;
+            invitationId: number | null;
+            invitation: components["schemas"]["TeamInvitation"] | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            /** Format: date-time */
+            lastAccessedAt: string | null;
+        };
+        UserSession: {
+            id: number;
+            userId: number;
+            user: components["schemas"]["User"];
+            currentSellerId: number | null;
+            currentSeller: components["schemas"]["Seller"] | null;
+            sessionToken: string;
+            ipAddress: string | null;
+            userAgent: string | null;
+            deviceName: string | null;
+            location: string | null;
+            isCurrent: boolean;
+            /** Format: date-time */
+            lastActivityAt: string;
+            /** Format: date-time */
+            expiresAt: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        Mfa: {
+            id: number;
+            userId: number;
+            user: components["schemas"]["User"];
+            code: string;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        TwoFactorMethod: {
+            id: number;
+            userId: number;
+            user: components["schemas"]["User"];
+            method: string;
+            totpSecret: string | null;
+            phoneNumber: string | null;
+            isPrimary: boolean;
+            /** Format: date-time */
+            verifiedAt: string | null;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        BackupCode: {
+            id: number;
+            userId: number;
+            user: components["schemas"]["User"];
+            codeHash: string;
+            /** Format: date-time */
+            usedAt: string | null;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        Role: {
+            id: number;
+            name: string;
+            description: string | null;
+            isSystemRole: boolean;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        TeamInvitation: {
+            id: number;
+            sellerId: number;
+            seller: components["schemas"]["Seller"];
+            roleId: number;
+            role: components["schemas"]["Role"];
+            email: string;
+            token: string;
+            invitedBy: number | null;
+            inviter: components["schemas"]["TeamMember"] | null;
+            /** Format: date-time */
+            expiresAt: string;
+            /** Format: date-time */
+            acceptedAt: string | null;
+            /** Format: date-time */
+            declinedAt: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
         };
         TransactionDto: {
             myId?: string;
@@ -1116,453 +2218,6 @@ export interface components {
         CreditCardTransactionDto: {
             Card?: components["schemas"]["CardDto"];
         };
-        Product: {
-            id: number;
-            name: string;
-            description: string;
-            image: string;
-            value: number;
-            boleto: boolean;
-            creditCard: boolean;
-            pix: boolean;
-            installments: number;
-            affiliation: boolean;
-            affiliationOrderAccept: boolean;
-            leadBond: boolean;
-            leadBondDirectVisit: boolean;
-            displayOnAll: boolean;
-            commissionDefault: number;
-            seller: components["schemas"]["Seller"];
-            transactions: components["schemas"]["Transaction"][];
-            tags?: components["schemas"]["Tag"][];
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
-            pixelFB: string;
-            uuid: string;
-            isActive: boolean;
-            affiliations: components["schemas"]["Affiliations"][];
-            isSubscription: boolean;
-            subscriptionType: string | null;
-            unitLabel: string | null;
-            subscriptionPrices: components["schemas"]["SubscriptionPrice"][];
-            facebookPixels: components["schemas"]["FacebookPixel"][];
-            returnUrl: string | null;
-            returnUrlButtonText: string | null;
-            affiliateRecurringMode: string;
-            affiliateAutoApprove: boolean;
-            coProducers: components["schemas"]["CoProducer"][];
-        };
-        Affiliations: {
-            id: number;
-            affiliate: components["schemas"]["Seller"];
-            product: components["schemas"]["Product"];
-            affiliateId: number;
-            productId: number;
-            /** @description Commission percentage for this affiliation (can override product default).
-             *     Stored as a percentage value (e.g., 10 = 10%). */
-            commission: number;
-            /** @description Whether the affiliation is currently active.
-             *     Set to false when canceled via cancelAffiliation(). */
-            active: boolean;
-            /** @description Whether the product owner (seller) has approved this affiliation.
-             *     Set to true via approveAffiliation() after reviewing the affiliate request. */
-            approved: boolean;
-            /** @description Whether the affiliate has accepted the affiliation terms.
-             *     Set during affiliation creation based on invite acceptance.
-             *     Note: Different from AffiliationInvite.accept which tracks invite acceptance. */
-            accepted: boolean;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
-            transactions: components["schemas"]["Transaction"][];
-            link: string;
-            /**
-             * Format: date-time
-             * @description Timestamp when the affiliation was canceled.
-             *     Null if affiliation is still active.
-             *     Set by cancelAffiliation() along with active=false.
-             */
-            canceledAt: string;
-        };
-        Subscription: {
-            id: number;
-            uuid: string;
-            gatewayProvider: string;
-            gatewaySubscriptionId: string;
-            customerId: number;
-            customer: components["schemas"]["Customer"];
-            subscriptionPriceId: Record<string, never>;
-            subscriptionPrice: components["schemas"]["SubscriptionPrice"];
-            paymentMethodId: number | null;
-            paymentMethod: components["schemas"]["PaymentMethod"] | null;
-            sellerId: number;
-            seller: components["schemas"]["Seller"];
-            status: string;
-            /** Format: date-time */
-            currentPeriodStart: string | null;
-            /** Format: date-time */
-            currentPeriodEnd: string | null;
-            /** Format: date-time */
-            trialStart: string | null;
-            /** Format: date-time */
-            trialEnd: string | null;
-            /** Format: date-time */
-            cancelledAt: string | null;
-            /** Format: date-time */
-            endedAt: string | null;
-            amount: number;
-            currency: string;
-            cancelAtPeriodEnd: boolean;
-            cancellationReason: string | null;
-            metadata: Record<string, never>;
-            retryCount: number;
-            /** Format: date-time */
-            nextRetryDate: string | null;
-            lastBillingError: string | null;
-            missedWebhookCount: number;
-            /** Format: date-time */
-            pausedAt: string | null;
-            /** Format: date-time */
-            pauseResumeAt: string | null;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
-            events: components["schemas"]["SubscriptionEvent"][];
-            transactions: components["schemas"]["Transaction"][];
-        };
-        User: {
-            id: number;
-            email: string;
-            password: string;
-            passwordAlgorithm: Record<string, never>;
-            name: string;
-            phone: string | null;
-            avatarUrl: string | null;
-            validatedEmail: boolean;
-            tokenRecoveryEmail: string | null;
-            /** Format: date-time */
-            tokenRecoveryExpiresAt: string | null;
-            /** Format: date-time */
-            lastLoginAt: string | null;
-            twoFactorEnabled: boolean;
-            twoFactorPromptDismissed: boolean;
-            /** Format: date-time */
-            twoFactorEnabledAt: string | null;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
-            teamMembers: components["schemas"]["TeamMember"][];
-            sessions: components["schemas"]["UserSession"][];
-            mfaCodes: components["schemas"]["Mfa"][];
-            twoFactorMethods: components["schemas"]["TwoFactorMethod"][];
-            backupCodes: components["schemas"]["BackupCode"][];
-        };
-        TeamMember: {
-            id: number;
-            userId: number;
-            user: components["schemas"]["User"];
-            sellerId: number;
-            seller: components["schemas"]["Seller"];
-            roleId: number;
-            role: components["schemas"]["Role"];
-            isOwner: boolean;
-            active: boolean;
-            invitationId: number | null;
-            invitation: components["schemas"]["TeamInvitation"] | null;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
-            /** Format: date-time */
-            lastAccessedAt: string | null;
-        };
-        UserSession: {
-            id: number;
-            userId: number;
-            user: components["schemas"]["User"];
-            currentSellerId: number | null;
-            currentSeller: components["schemas"]["Seller"] | null;
-            sessionToken: string;
-            ipAddress: string | null;
-            userAgent: string | null;
-            deviceName: string | null;
-            location: string | null;
-            isCurrent: boolean;
-            /** Format: date-time */
-            lastActivityAt: string;
-            /** Format: date-time */
-            expiresAt: string;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
-        };
-        Mfa: {
-            id: number;
-            userId: number;
-            user: components["schemas"]["User"];
-            code: string;
-            /** Format: date-time */
-            createdAt: string;
-        };
-        TwoFactorMethod: {
-            id: number;
-            userId: number;
-            user: components["schemas"]["User"];
-            method: string;
-            totpSecret: string | null;
-            phoneNumber: string | null;
-            isPrimary: boolean;
-            /** Format: date-time */
-            verifiedAt: string | null;
-            /** Format: date-time */
-            createdAt: string;
-        };
-        BackupCode: {
-            id: number;
-            userId: number;
-            user: components["schemas"]["User"];
-            codeHash: string;
-            /** Format: date-time */
-            usedAt: string | null;
-            /** Format: date-time */
-            createdAt: string;
-        };
-        Seller: {
-            id: number;
-            name: string;
-            document: string;
-            phone: string;
-            validatedEmail: boolean;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
-            anonymized: boolean;
-            logoUrl: string | null;
-            ownerUserId: number | null;
-            settlementDays: number;
-            publicId: string;
-            products: components["schemas"]["Product"][];
-            bankaccount: components["schemas"]["BankAccount"];
-            affiliations: components["schemas"]["Affiliations"][];
-            withdrawal: components["schemas"]["Withdrawals"][];
-            facebookPixels: components["schemas"]["FacebookPixel"][];
-            portalConfiguration: components["schemas"]["PortalConfiguration"];
-        };
-        BankAccount: {
-            id: number;
-            sellerId: number;
-            Seller: components["schemas"]["Seller"];
-            bank: string;
-            agency: string;
-            account: string;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
-        };
-        Withdrawals: {
-            id: number;
-            seller: components["schemas"]["Seller"];
-            sellerId: number;
-            value: number;
-            fee: number;
-            netValue: number;
-            /** @enum {string} */
-            status: "aguardando" | "aprovado" | "recusado" | "pago";
-            paymentMethod: string;
-            bankAccountId: number;
-            bankAccount: components["schemas"]["BankAccount"];
-            /** Format: date-time */
-            requestedAt: string;
-            /** Format: date-time */
-            reviewedAt: string;
-            reviewedBy: number;
-            reviewer: components["schemas"]["User"];
-            rejectionReason: string;
-            /** Format: date-time */
-            paidAt: string;
-            paymentReference: string;
-            ledgerGroupId: string;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
-        };
-        FacebookPixel: {
-            id: number;
-            name: string;
-            seller: components["schemas"]["Seller"];
-            product: components["schemas"]["Product"] | null;
-            pixelId: string;
-            accessToken: string | null;
-            isActive: boolean;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
-            domainId: number | null;
-            domain: components["schemas"]["SellerDomain"] | null;
-        };
-        PortalConfiguration: {
-            id: number;
-            sellerId: number;
-            seller: components["schemas"]["Seller"];
-            businessName: string | null;
-            logoUrl: string | null;
-            primaryColor: string;
-            allowCancelSubscription: boolean;
-            allowUpdatePaymentMethod: boolean;
-            allowUpdateBillingInfo: boolean;
-            allowViewInvoices: boolean;
-            allowApplyCoupons: boolean;
-            requireCancelReason: boolean;
-            cancelAtPeriodEndOnly: boolean;
-            sendCancellationEmail: boolean;
-            sendPaymentMethodUpdatedEmail: boolean;
-            customWelcomeText: string | null;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
-        };
-        SellerDomain: {
-            id: number;
-            sellerId: number;
-            seller: components["schemas"]["Seller"];
-            domain: string;
-            subdomain: string;
-            verificationStatus: Record<string, never>;
-            /** Format: date-time */
-            verifiedAt: string | null;
-            /** Format: date-time */
-            lastCheckAt: string | null;
-            failureCount: number;
-            isActive: boolean;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
-            pixels: components["schemas"]["FacebookPixel"][];
-        };
-        Role: {
-            id: number;
-            name: string;
-            description: string | null;
-            isSystemRole: boolean;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
-        };
-        TeamInvitation: {
-            id: number;
-            sellerId: number;
-            seller: components["schemas"]["Seller"];
-            roleId: number;
-            role: components["schemas"]["Role"];
-            email: string;
-            token: string;
-            invitedBy: number | null;
-            inviter: components["schemas"]["TeamMember"] | null;
-            /** Format: date-time */
-            expiresAt: string;
-            /** Format: date-time */
-            acceptedAt: string | null;
-            /** Format: date-time */
-            declinedAt: string | null;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
-        };
-        SubscriptionPrice: {
-            id: Record<string, never>;
-            productId: number;
-            product: components["schemas"]["Product"];
-            gatewayProvider: string;
-            gatewayPlanId: string;
-            name: string;
-            pricingModel: string;
-            unitAmount: number;
-            currency: string;
-            billingInterval: string;
-            billingIntervalCount: number;
-            trialPeriodDays: number;
-            description: string | null;
-            metadata: Record<string, never>;
-            isActive: boolean;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
-            subscriptions: components["schemas"]["Subscription"][];
-        };
-        PaymentMethod: {
-            id: number;
-            customerId: number;
-            customer: components["schemas"]["Customer"];
-            gatewayProvider: string;
-            gatewayCardId: string;
-            cardBrand: string;
-            cardLast4: string;
-            cardExpMonth: number;
-            cardExpYear: number;
-            cardholderName: string;
-            isDefault: boolean;
-            isBackup: boolean;
-            status: string;
-            /** Format: date-time */
-            lastUsedAt: string | null;
-            failedAttempts: number;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
-            subscriptions: components["schemas"]["Subscription"][];
-        };
-        SubscriptionEvent: {
-            id: number;
-            subscriptionId: number;
-            subscription: components["schemas"]["Subscription"];
-            eventType: string;
-            gatewayProvider: string;
-            gatewayEventId: string | null;
-            eventData: Record<string, never>;
-            /** Format: date-time */
-            createdAt: string;
-        };
-        Tag: {
-            id: number;
-            name: string;
-            products: components["schemas"]["Product"][];
-        };
-        CoProducer: {
-            id: number;
-            productId: number;
-            product: components["schemas"]["Product"];
-            sellerId: number;
-            seller: components["schemas"]["Seller"];
-            shareType: Record<string, never>;
-            shareValue: number;
-            status: Record<string, never>;
-            invitedBySellerId: number;
-            invitedBySeller: components["schemas"]["Seller"];
-            /** Format: date-time */
-            acceptedAt: string | null;
-            /** Format: date-time */
-            removedAt: string | null;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
-        };
         CardInfoDto: {
             /**
              * @description Número do cartão sem espaços ou traços (13 a 19 dígitos)
@@ -1627,6 +2282,14 @@ export interface components {
             utmTerm?: string;
             /** @description UTM content */
             utmContent?: string;
+        };
+        PixelDomainInfo: {
+            /** @description Domain ID */
+            id: number;
+            /** @description Full subdomain (e.g., pixels.example.com) */
+            fullSubdomain: string;
+            /** @description Domain verification status */
+            verificationStatus: string;
         };
     };
     responses: never;

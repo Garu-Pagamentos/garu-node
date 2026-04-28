@@ -1,18 +1,20 @@
 import { describe, expect, it } from 'vitest';
 
-import spec from '../src/generated/openapi.json' with { type: 'json' };
+import spec from '../src/generated/openapi-sdk.json' with { type: 'json' };
 
 /**
  * Contract tests.
  *
- * The generated `src/generated/schema.d.ts` is only as accurate as the
- * `src/generated/openapi.json` snapshot it was produced from. These tests
- * assert that every endpoint the SDK depends on is present in the snapshot,
- * and that its request/response schemas haven't drifted in a way that would
- * break the ergonomic wrappers.
+ * Runs against `src/generated/openapi-sdk.json` — the filtered, committed
+ * snapshot that powers both these tests and `schema.d.ts`. The raw
+ * `openapi.json` from the backend is gitignored (and may include internal
+ * endpoints we don't want in the repo); the filtered file is the
+ * SDK-and-tests source of truth.
  *
  * To refresh against live prod:
- *   npm run generate
+ *   npm run generate         (fetch + filter + regenerate types)
+ *
+ * Then commit any diffs to `openapi-sdk.json` and `schema.d.ts`.
  *
  * If these tests fail after a `npm run generate`, the backend OpenAPI spec
  * has moved. Update the wrappers in `src/resources/` accordingly.
@@ -85,6 +87,25 @@ describe('OpenAPI contract', () => {
     const props = schema!.properties!;
     for (const key of ['name', 'email', 'document', 'phone']) {
       expect(props[key], `CustomerDto.${key}`).toBeDefined();
+    }
+  });
+
+  it('has GET /api/products/seller (used by products.list)', () => {
+    expect(typedSpec.paths['/api/products/seller']).toBeDefined();
+    expect(typedSpec.paths['/api/products/seller']?.get).toBeDefined();
+  });
+
+  it('has GET /api/products/uuid/{uuid} (used by products.get)', () => {
+    expect(typedSpec.paths['/api/products/uuid/{uuid}']).toBeDefined();
+    expect(typedSpec.paths['/api/products/uuid/{uuid}']?.get).toBeDefined();
+  });
+
+  it('ProductResponse keeps the agent-facing fields', () => {
+    const schema = typedSpec.components.schemas.ProductResponse;
+    expect(schema?.properties).toBeDefined();
+    const props = schema!.properties!;
+    for (const key of ['id', 'uuid', 'name', 'value', 'pix', 'boleto', 'creditCard']) {
+      expect(props[key], `ProductResponse.${key}`).toBeDefined();
     }
   });
 });

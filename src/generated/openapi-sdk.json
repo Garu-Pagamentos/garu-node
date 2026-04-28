@@ -1,0 +1,4872 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Garu API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/products/{productId}/pixels": {
+      "get": {
+        "parameters": [
+          {
+            "name": "productId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PixelResponse"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List product pixels",
+        "tags": [
+          "pixels"
+        ]
+      },
+      "post": {
+        "parameters": [
+          {
+            "name": "productId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePixelRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PixelResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create product pixel",
+        "tags": [
+          "pixels"
+        ]
+      }
+    },
+    "/api/products/{productId}/pixels/{pixelId}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "productId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "pixelId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PixelResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get product pixel by ID",
+        "tags": [
+          "pixels"
+        ]
+      },
+      "put": {
+        "parameters": [
+          {
+            "name": "productId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "pixelId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePixelRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PixelResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update product pixel",
+        "tags": [
+          "pixels"
+        ]
+      },
+      "delete": {
+        "parameters": [
+          {
+            "name": "productId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "pixelId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete product pixel",
+        "tags": [
+          "pixels"
+        ]
+      }
+    },
+    "/api/products/{productId}/event-settings": {
+      "get": {
+        "parameters": [
+          {
+            "name": "productId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventSettingsResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get product event settings",
+        "tags": [
+          "pixels"
+        ]
+      },
+      "put": {
+        "parameters": [
+          {
+            "name": "productId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EventSettingsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventSettingsResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update product event settings",
+        "tags": [
+          "pixels"
+        ]
+      }
+    },
+    "/api/transactions": {
+      "post": {
+        "parameters": [
+          {
+            "name": "X-Idempotency-Key",
+            "in": "header",
+            "description": "Optional. Pass a unique key per logical charge to safely retry this request without creating duplicate transactions. The same key returns the original transaction for 24h, scoped to the seller that owns the product.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTransactionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The Transaction has been successfully created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Transaction"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Create a new Transaction",
+        "tags": [
+          "transactions"
+        ]
+      },
+      "get": {
+        "parameters": [
+          {
+            "name": "page",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "status",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "paymentMethod",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of transactions"
+          }
+        },
+        "security": [
+          {
+            "garu-gateway": []
+          }
+        ],
+        "summary": "List transactions for the current seller",
+        "tags": [
+          "transactions"
+        ]
+      }
+    },
+    "/api/transactions/handle-webhook": {
+      "post": {
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WebHookRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "transactions"
+        ]
+      }
+    },
+    "/api/transactions/status/{galaxPayId}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "galaxPayId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get Transaction Status by GalaxPay ID (Public)",
+        "tags": [
+          "transactions"
+        ]
+      }
+    },
+    "/api/transactions/{id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Transaction"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "garu-gateway": []
+          }
+        ],
+        "summary": "Get Transaction by ID",
+        "tags": [
+          "transactions"
+        ]
+      },
+      "delete": {
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "garu-gateway": []
+          }
+        ],
+        "summary": "Cancel Charge",
+        "tags": [
+          "transactions"
+        ]
+      }
+    },
+    "/api/transactions/{id}/refund": {
+      "post": {
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefundTransactionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The Transaction has been successfully refunded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Transaction"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Transaction"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "garu-gateway": []
+          }
+        ],
+        "summary": "Refund a Transaction",
+        "tags": [
+          "transactions"
+        ]
+      }
+    },
+    "/api/products/uuid/{uuid}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "uuid",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "includeArchived",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get Product by uuId",
+        "tags": [
+          "products"
+        ]
+      }
+    },
+    "/api/products/seller": {
+      "get": {
+        "parameters": [
+          {
+            "name": "page",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "search",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tab",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get all Products to Seller",
+        "tags": [
+          "products"
+        ]
+      }
+    },
+    "/api/products/{id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "includeArchived",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get Product by ID",
+        "tags": [
+          "products"
+        ]
+      },
+      "patch": {
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateProductRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Product"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "The Product has been successfully updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update a Product",
+        "tags": [
+          "products"
+        ]
+      },
+      "delete": {
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Deactivate a Product",
+        "tags": [
+          "products"
+        ]
+      }
+    },
+    "/api/products": {
+      "post": {
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateProductRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The Product has been successfully created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a new Product",
+        "tags": [
+          "products"
+        ]
+      }
+    },
+    "/api/customers": {
+      "post": {
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCustomerRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Customer created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Customer"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "garu-gateway": []
+          }
+        ],
+        "summary": "Create a new customer",
+        "tags": [
+          "customers"
+        ]
+      },
+      "get": {
+        "parameters": [
+          {
+            "name": "page",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "search",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of customers"
+          }
+        },
+        "security": [
+          {
+            "garu-gateway": []
+          }
+        ],
+        "summary": "List customers for the current seller",
+        "tags": [
+          "customers"
+        ]
+      }
+    },
+    "/api/customers/{id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Customer details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Customer"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "garu-gateway": []
+          }
+        ],
+        "summary": "Get a customer by ID",
+        "tags": [
+          "customers"
+        ]
+      },
+      "put": {
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCustomerRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Customer updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Customer"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "garu-gateway": []
+          }
+        ],
+        "summary": "Update a customer",
+        "tags": [
+          "customers"
+        ]
+      },
+      "delete": {
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Customer unlinked from seller"
+          }
+        },
+        "security": [
+          {
+            "garu-gateway": []
+          }
+        ],
+        "summary": "Remove customer from seller",
+        "tags": [
+          "customers"
+        ]
+      }
+    },
+    "/api/meta": {
+      "get": {
+        "description": "Returns version, supported payment methods, webhook event catalog, and feature flags. Unauthenticated. Used by the Garu CLI `doctor` command and MCP server to introspect the API.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetaResponse"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get API capability metadata",
+        "tags": [
+          "meta"
+        ]
+      }
+    },
+    "/api/products/{productId}/tracking-config": {
+      "get": {
+        "parameters": [
+          {
+            "name": "productId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrackingConfigResponse"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get tracking configuration for a product",
+        "tags": [
+          "Tracking"
+        ]
+      }
+    },
+    "/api/webhook-endpoints": {
+      "post": {
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateWebhookEndpointRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a new webhook endpoint",
+        "tags": [
+          "webhook-endpoints"
+        ]
+      },
+      "get": {
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List all webhook endpoints",
+        "tags": [
+          "webhook-endpoints"
+        ]
+      }
+    },
+    "/api/webhook-endpoints/{id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get webhook endpoint details",
+        "tags": [
+          "webhook-endpoints"
+        ]
+      },
+      "patch": {
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateWebhookEndpointRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update webhook endpoint",
+        "tags": [
+          "webhook-endpoints"
+        ]
+      },
+      "delete": {
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete webhook endpoint",
+        "tags": [
+          "webhook-endpoints"
+        ]
+      }
+    },
+    "/api/webhook-endpoints/{id}/rotate-secret": {
+      "post": {
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Regenerate webhook endpoint secret",
+        "tags": [
+          "webhook-endpoints"
+        ]
+      }
+    },
+    "/api/webhook-endpoints/{id}/test": {
+      "post": {
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Send a test webhook event",
+        "tags": [
+          "webhook-endpoints"
+        ]
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "garu-gateway": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http",
+        "description": "Autenticação via JWT. Token obtido através do endpoint de login (/api/auth/login). Usado principalmente pelo painel administrativo."
+      },
+      "api-key": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Autenticação via chave de API (API Key). Insira sua chave no formato: Bearer sk_live_xxx (produção) ou Bearer sk_test_xxx (teste). Obtenha sua chave no Dashboard da Garu em Configurações > Desenvolvedores."
+      }
+    },
+    "schemas": {
+      "PixelResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "Pixel ID"
+          },
+          "name": {
+            "type": "string",
+            "description": "Pixel name"
+          },
+          "pixelId": {
+            "type": "string",
+            "description": "Facebook Pixel ID"
+          },
+          "hasAccessToken": {
+            "type": "boolean",
+            "description": "Whether the pixel has an access token configured"
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Whether the pixel is active"
+          },
+          "domain": {
+            "nullable": true,
+            "description": "Custom domain configuration",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PixelDomainInfo"
+              }
+            ]
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Creation date"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Last update date"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "pixelId",
+          "isActive",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "CreatePixelRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Optional name for the pixel"
+          },
+          "pixelId": {
+            "type": "string",
+            "description": "Facebook Pixel ID"
+          },
+          "accessToken": {
+            "type": "string",
+            "description": "Access token for Conversion API"
+          },
+          "domainId": {
+            "type": "number",
+            "description": "Domain ID for first-party pixel tracking"
+          }
+        },
+        "required": [
+          "pixelId"
+        ]
+      },
+      "UpdatePixelRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name for the pixel"
+          },
+          "pixelId": {
+            "type": "string",
+            "description": "Facebook Pixel ID"
+          },
+          "accessToken": {
+            "type": "string",
+            "description": "Access token for Conversion API"
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Whether the pixel is active"
+          },
+          "domainId": {
+            "type": "number",
+            "description": "Domain ID for first-party pixel tracking"
+          }
+        }
+      },
+      "EventSettingsResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "Event settings ID"
+          },
+          "sellerId": {
+            "type": "number",
+            "description": "Seller ID if this is a seller-level setting"
+          },
+          "productId": {
+            "type": "number",
+            "description": "Product ID if this is a product-level setting"
+          },
+          "pageViewEnabled": {
+            "type": "boolean",
+            "description": "Enable PageView event"
+          },
+          "initiateCheckoutEnabled": {
+            "type": "boolean",
+            "description": "Enable InitiateCheckout event"
+          },
+          "addPaymentInfoEnabled": {
+            "type": "boolean",
+            "description": "Enable AddPaymentInfo event"
+          },
+          "leadEnabled": {
+            "type": "boolean",
+            "description": "Enable Lead event"
+          },
+          "purchaseEnabled": {
+            "type": "boolean",
+            "description": "Enable Purchase event"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Creation date"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Last update date"
+          }
+        },
+        "required": [
+          "id",
+          "pageViewEnabled",
+          "initiateCheckoutEnabled",
+          "addPaymentInfoEnabled",
+          "leadEnabled",
+          "purchaseEnabled",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "EventSettingsRequest": {
+        "type": "object",
+        "properties": {
+          "pageViewEnabled": {
+            "type": "boolean",
+            "description": "Enable PageView event"
+          },
+          "initiateCheckoutEnabled": {
+            "type": "boolean",
+            "description": "Enable InitiateCheckout event"
+          },
+          "addPaymentInfoEnabled": {
+            "type": "boolean",
+            "description": "Enable AddPaymentInfo event"
+          },
+          "leadEnabled": {
+            "type": "boolean",
+            "description": "Enable Lead event"
+          },
+          "purchaseEnabled": {
+            "type": "boolean",
+            "description": "Enable Purchase event"
+          }
+        },
+        "required": [
+          "pageViewEnabled",
+          "initiateCheckoutEnabled",
+          "addPaymentInfoEnabled",
+          "leadEnabled",
+          "purchaseEnabled"
+        ]
+      },
+      "CreateTransactionRequest": {
+        "type": "object",
+        "properties": {
+          "customer": {
+            "description": "Dados do cliente que está efetuando a compra",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CustomerDto"
+              }
+            ]
+          },
+          "link": {
+            "type": "string",
+            "nullable": true,
+            "description": "Link original de checkout (caso a cobrança venha de um link público)",
+            "example": null
+          },
+          "affiliateId": {
+            "type": "number",
+            "nullable": true,
+            "description": "ID do afiliado associado a esta venda",
+            "example": null
+          },
+          "additionalInfo": {
+            "type": "string",
+            "description": "Informações adicionais livres (metadata) anexadas à transação",
+            "example": "pedido #4472"
+          },
+          "productId": {
+            "type": "string",
+            "description": "UUID do produto que está sendo cobrado",
+            "example": "b3f2c1e8-6e4a-4b9f-9d1c-2a1f6c3d4e5f"
+          },
+          "priceId": {
+            "type": "string",
+            "nullable": true,
+            "description": "ID do preço de assinatura (apenas para transações de subscription; formato price_*)",
+            "example": "price_01HXYZABC"
+          },
+          "paymentMethodId": {
+            "enum": [
+              "creditcard",
+              "boleto",
+              "pix"
+            ],
+            "type": "string",
+            "description": "Método de pagamento: 1=Cartão, 2=Boleto, 3=PIX",
+            "example": "pix"
+          },
+          "CardInfo": {
+            "description": "Dados do cartão. Obrigatório apenas quando paymentMethodId = creditcard. ATENÇÃO: este endpoint recebe PAN + CVV em texto claro — use apenas do lado servidor em ambiente PCI-compliant.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CardInfoDto"
+              }
+            ]
+          },
+          "trackingContext": {
+            "description": "Contexto de rastreamento (UTM, referer, fbclid, etc.)",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TrackingContextDto"
+              }
+            ]
+          },
+          "checkoutSessionToken": {
+            "type": "string",
+            "description": "Token opcional de uma Checkout Session previamente criada via API",
+            "example": "cs_01HXYZABCDEF1234567890"
+          }
+        },
+        "required": [
+          "customer",
+          "productId",
+          "paymentMethodId"
+        ]
+      },
+      "Transaction": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "galaxPayId": {
+            "type": "number"
+          },
+          "product": {
+            "$ref": "#/components/schemas/Product"
+          },
+          "customer": {
+            "$ref": "#/components/schemas/Customer"
+          },
+          "affiliation": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Affiliations"
+              }
+            ]
+          },
+          "value": {
+            "type": "number"
+          },
+          "valueSeller": {
+            "type": "number"
+          },
+          "valueAffiliate": {
+            "type": "number",
+            "nullable": true
+          },
+          "date": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "paymentMethod": {
+            "type": "string"
+          },
+          "installments": {
+            "type": "number"
+          },
+          "fator": {
+            "type": "number",
+            "nullable": true
+          },
+          "code": {
+            "type": "string",
+            "nullable": true
+          },
+          "deadline": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "subscriptionId": {
+            "type": "number",
+            "nullable": true
+          },
+          "subscription": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Subscription"
+              }
+            ]
+          },
+          "isRecurring": {
+            "type": "boolean"
+          },
+          "billingReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "billingCycle": {
+            "type": "number",
+            "nullable": true
+          },
+          "refundedAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "refundAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "refundReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "refundedByUserId": {
+            "type": "number",
+            "nullable": true
+          },
+          "refundedByUser": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/User"
+              }
+            ]
+          },
+          "feePercent": {
+            "type": "number",
+            "nullable": true
+          },
+          "feeFixed": {
+            "type": "number",
+            "nullable": true
+          },
+          "feeTotalAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "netAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "valueCoProducers": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "galaxPayId",
+          "product",
+          "customer",
+          "affiliation",
+          "value",
+          "valueSeller",
+          "valueAffiliate",
+          "date",
+          "paymentMethod",
+          "installments",
+          "fator",
+          "code",
+          "deadline",
+          "status",
+          "subscriptionId",
+          "subscription",
+          "isRecurring",
+          "billingReason",
+          "billingCycle",
+          "refundedAt",
+          "refundAmount",
+          "refundReason",
+          "refundedByUserId",
+          "refundedByUser",
+          "feePercent",
+          "feeFixed",
+          "feeTotalAmount",
+          "netAmount",
+          "valueCoProducers"
+        ]
+      },
+      "ErrorResponseDto": {
+        "type": "object",
+        "properties": {
+          "statusCode": {
+            "type": "number"
+          },
+          "message": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "statusCode",
+          "message",
+          "path",
+          "timestamp"
+        ]
+      },
+      "WebHookRequest": {
+        "type": "object",
+        "properties": {
+          "event": {
+            "type": "string"
+          },
+          "webhookId": {
+            "type": "number"
+          },
+          "confirmHash": {
+            "type": "string"
+          },
+          "Transaction": {
+            "$ref": "#/components/schemas/TransactionDto"
+          },
+          "Charge": {
+            "$ref": "#/components/schemas/ChargeDto"
+          },
+          "Subscription": {
+            "$ref": "#/components/schemas/SubscriptionDto"
+          }
+        },
+        "required": [
+          "event",
+          "webhookId",
+          "confirmHash",
+          "Transaction"
+        ]
+      },
+      "RefundTransactionRequest": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "type": "number",
+            "minimum": 0.01,
+            "description": "Refund amount in BRL (optional, full refund if not provided)",
+            "example": 50
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 500,
+            "description": "Reason for the refund",
+            "example": "Customer requested cancellation"
+          }
+        }
+      },
+      "ProductResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "value": {
+            "type": "number"
+          },
+          "description": {
+            "type": "string"
+          },
+          "image": {
+            "type": "string"
+          },
+          "sellerId": {
+            "type": "number"
+          },
+          "boleto": {
+            "type": "boolean"
+          },
+          "creditCard": {
+            "type": "boolean"
+          },
+          "pix": {
+            "type": "boolean"
+          },
+          "installments": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Tag"
+            }
+          },
+          "pixelFB": {
+            "type": "string"
+          },
+          "hasFacebookPixel": {
+            "type": "boolean"
+          },
+          "uuid": {
+            "type": "string"
+          },
+          "comission": {
+            "type": "string"
+          },
+          "valueWithComission": {
+            "type": "number"
+          },
+          "sellerName": {
+            "type": "string"
+          },
+          "affiliateLink": {
+            "type": "string"
+          },
+          "affiliateId": {
+            "type": "number"
+          },
+          "affiliationId": {
+            "type": "number"
+          },
+          "affiliationOrderAccept": {
+            "type": "boolean"
+          },
+          "leadBond": {
+            "type": "boolean"
+          },
+          "displayOnAll": {
+            "type": "boolean"
+          },
+          "isSubscription": {
+            "type": "boolean"
+          },
+          "subscriptionType": {
+            "type": "string",
+            "nullable": true
+          },
+          "unitLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "returnUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "returnUrlButtonText": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "portalConfig": {
+            "type": "object",
+            "properties": {
+              "primaryColor": {
+                "type": "string"
+              },
+              "logoUrl": {
+                "type": "string",
+                "nullable": true
+              },
+              "businessName": {
+                "type": "string",
+                "nullable": true
+              }
+            },
+            "required": [
+              "primaryColor",
+              "logoUrl",
+              "businessName"
+            ]
+          },
+          "pixelIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "eventSettings": {
+            "type": "object",
+            "properties": {
+              "pageViewEnabled": {
+                "type": "boolean"
+              },
+              "initiateCheckoutEnabled": {
+                "type": "boolean"
+              },
+              "addPaymentInfoEnabled": {
+                "type": "boolean"
+              },
+              "leadEnabled": {
+                "type": "boolean"
+              },
+              "purchaseEnabled": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "pageViewEnabled",
+              "initiateCheckoutEnabled",
+              "addPaymentInfoEnabled",
+              "leadEnabled",
+              "purchaseEnabled"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "value",
+          "description",
+          "image",
+          "sellerId",
+          "boleto",
+          "creditCard",
+          "pix",
+          "installments",
+          "uuid",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "CreateProductRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "value": {
+            "type": "number",
+            "minimum": 0
+          },
+          "description": {
+            "type": "string"
+          },
+          "image": {
+            "type": "string"
+          },
+          "boleto": {
+            "type": "boolean"
+          },
+          "creditCard": {
+            "type": "boolean"
+          },
+          "pix": {
+            "type": "boolean"
+          },
+          "installments": {
+            "type": "number",
+            "minimum": 1
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "pixelFB": {
+            "type": "string"
+          },
+          "affiliationOrderAccept": {
+            "type": "boolean"
+          },
+          "leadBond": {
+            "type": "boolean"
+          },
+          "displayOnAll": {
+            "type": "boolean"
+          },
+          "comission": {
+            "type": "string"
+          },
+          "isSubscription": {
+            "type": "boolean"
+          },
+          "subscriptionType": {
+            "type": "string"
+          },
+          "unitLabel": {
+            "type": "string"
+          },
+          "statementDescriptor": {
+            "type": "string"
+          },
+          "returnUrl": {
+            "type": "string"
+          },
+          "returnUrlButtonText": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "image",
+          "tags",
+          "pixelFB"
+        ]
+      },
+      "Product": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "image": {
+            "type": "string"
+          },
+          "value": {
+            "type": "number"
+          },
+          "boleto": {
+            "type": "boolean"
+          },
+          "creditCard": {
+            "type": "boolean"
+          },
+          "pix": {
+            "type": "boolean"
+          },
+          "installments": {
+            "type": "number"
+          },
+          "affiliation": {
+            "type": "boolean"
+          },
+          "affiliationOrderAccept": {
+            "type": "boolean"
+          },
+          "leadBond": {
+            "type": "boolean"
+          },
+          "leadBondDirectVisit": {
+            "type": "boolean"
+          },
+          "displayOnAll": {
+            "type": "boolean"
+          },
+          "commissionDefault": {
+            "type": "number"
+          },
+          "seller": {
+            "$ref": "#/components/schemas/Seller"
+          },
+          "transactions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Transaction"
+            }
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Tag"
+            }
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "pixelFB": {
+            "type": "string"
+          },
+          "uuid": {
+            "type": "string"
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "affiliations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Affiliations"
+            }
+          },
+          "isSubscription": {
+            "type": "boolean"
+          },
+          "subscriptionType": {
+            "type": "string",
+            "nullable": true
+          },
+          "unitLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "subscriptionPrices": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SubscriptionPrice"
+            }
+          },
+          "facebookPixels": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FacebookPixel"
+            }
+          },
+          "returnUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "returnUrlButtonText": {
+            "type": "string",
+            "nullable": true
+          },
+          "affiliateRecurringMode": {
+            "type": "string"
+          },
+          "affiliateAutoApprove": {
+            "type": "boolean"
+          },
+          "coProducers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CoProducer"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "image",
+          "value",
+          "boleto",
+          "creditCard",
+          "pix",
+          "installments",
+          "affiliation",
+          "affiliationOrderAccept",
+          "leadBond",
+          "leadBondDirectVisit",
+          "displayOnAll",
+          "commissionDefault",
+          "seller",
+          "transactions",
+          "createdAt",
+          "updatedAt",
+          "pixelFB",
+          "uuid",
+          "isActive",
+          "affiliations",
+          "isSubscription",
+          "subscriptionType",
+          "unitLabel",
+          "subscriptionPrices",
+          "facebookPixels",
+          "returnUrl",
+          "returnUrlButtonText",
+          "affiliateRecurringMode",
+          "affiliateAutoApprove",
+          "coProducers"
+        ]
+      },
+      "CreateCustomerRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Customer name"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Customer email"
+          },
+          "document": {
+            "type": "string",
+            "pattern": "/^\\d{11}$|^\\d{14}$/",
+            "description": "CPF (11 digits) or CNPJ (14 digits)"
+          },
+          "phone": {
+            "type": "string",
+            "pattern": "/^\\d{10,11}$/",
+            "description": "Phone number (10-11 digits)"
+          },
+          "personType": {
+            "enum": [
+              "fisica",
+              "juridica"
+            ],
+            "type": "string",
+            "description": "Person type: fisica or juridica"
+          },
+          "zipCode": {
+            "type": "string",
+            "pattern": "/^\\d{8}$/",
+            "description": "ZIP code (8 digits)"
+          },
+          "street": {
+            "type": "string",
+            "maxLength": 255
+          },
+          "number": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "complement": {
+            "type": "string",
+            "maxLength": 255
+          },
+          "neighborhood": {
+            "type": "string",
+            "maxLength": 255
+          },
+          "city": {
+            "type": "string",
+            "maxLength": 255
+          },
+          "state": {
+            "type": "string",
+            "pattern": "/^[A-Z]{2}$/",
+            "description": "2-letter state code (e.g. SP)"
+          }
+        },
+        "required": [
+          "name",
+          "email",
+          "document",
+          "phone",
+          "personType"
+        ]
+      },
+      "Customer": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "galaxPayId": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "document": {
+            "type": "string"
+          },
+          "personType": {
+            "enum": [
+              "fisica",
+              "juridica"
+            ],
+            "type": "string"
+          },
+          "zipCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "street": {
+            "type": "string",
+            "nullable": true
+          },
+          "number": {
+            "type": "string",
+            "nullable": true
+          },
+          "complement": {
+            "type": "string",
+            "nullable": true
+          },
+          "neighborhood": {
+            "type": "string",
+            "nullable": true
+          },
+          "city": {
+            "type": "string",
+            "nullable": true
+          },
+          "state": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "transactions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Transaction"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "galaxPayId",
+          "name",
+          "email",
+          "phone",
+          "document",
+          "personType",
+          "zipCode",
+          "street",
+          "number",
+          "complement",
+          "neighborhood",
+          "city",
+          "state",
+          "createdAt",
+          "updatedAt",
+          "transactions"
+        ]
+      },
+      "UpdateCustomerRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Customer name"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Customer email"
+          },
+          "phone": {
+            "type": "string",
+            "pattern": "/^\\d{10,11}$/",
+            "description": "Phone number (10-11 digits)"
+          },
+          "document": {
+            "type": "string",
+            "pattern": "/^\\d{11}$|^\\d{14}$/",
+            "description": "CPF (11 digits) or CNPJ (14 digits)"
+          },
+          "personType": {
+            "enum": [
+              "fisica",
+              "juridica"
+            ],
+            "type": "string"
+          },
+          "zipCode": {
+            "type": "string",
+            "pattern": "/^\\d{8}$/",
+            "description": "ZIP code (8 digits)"
+          },
+          "street": {
+            "type": "string",
+            "maxLength": 255
+          },
+          "number": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "complement": {
+            "type": "string",
+            "maxLength": 255
+          },
+          "neighborhood": {
+            "type": "string",
+            "maxLength": 255
+          },
+          "city": {
+            "type": "string",
+            "maxLength": 255
+          },
+          "state": {
+            "type": "string",
+            "pattern": "/^[A-Z]{2}$/",
+            "description": "2-letter state code (e.g. SP)"
+          }
+        }
+      },
+      "MetaResponse": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Garu"
+          },
+          "version": {
+            "type": "string",
+            "description": "Semantic version of the backend (from package.json).",
+            "example": "1.3.2"
+          },
+          "environment": {
+            "type": "string",
+            "example": "production",
+            "enum": [
+              "production",
+              "staging",
+              "development"
+            ]
+          },
+          "api_version": {
+            "type": "string",
+            "description": "Public API version surfaced by the SDKs and MCP server.",
+            "example": "v1"
+          },
+          "payment_methods": {
+            "description": "Payment methods accepted by the API.",
+            "example": [
+              "pix",
+              "credit_card",
+              "boleto"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "currencies": {
+            "example": [
+              "BRL"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "billing_intervals": {
+            "description": "Supported recurring billing intervals for subscriptions.",
+            "example": [
+              "day",
+              "week",
+              "month",
+              "year"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "webhook_events": {
+            "description": "Full catalog of webhook event types that may be delivered to seller endpoints.",
+            "example": [
+              "transaction.payment.succeeded",
+              "subscription.created",
+              "checkout.session.completed"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "features": {
+            "$ref": "#/components/schemas/MetaFeaturesDto"
+          },
+          "docs_url": {
+            "type": "string",
+            "example": "https://docs.garu.com.br"
+          },
+          "dashboard_url": {
+            "type": "string",
+            "example": "https://garu.com.br/inicio"
+          },
+          "support_email": {
+            "type": "string",
+            "example": "contato@garu.com.br"
+          }
+        },
+        "required": [
+          "name",
+          "version",
+          "environment",
+          "api_version",
+          "payment_methods",
+          "currencies",
+          "billing_intervals",
+          "webhook_events",
+          "features",
+          "docs_url",
+          "dashboard_url",
+          "support_email"
+        ]
+      },
+      "TrackingConfigResponse": {
+        "type": "object",
+        "properties": {
+          "productId": {
+            "type": "number",
+            "description": "Product ID"
+          },
+          "sellerId": {
+            "type": "number",
+            "description": "Seller ID"
+          },
+          "pixels": {
+            "description": "List of pixel configurations",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TrackingPixelConfig"
+            }
+          },
+          "eventSettings": {
+            "description": "Event settings",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TrackingEventSettings"
+              }
+            ]
+          },
+          "defaultDomain": {
+            "type": "string",
+            "description": "Default tracking domain"
+          }
+        },
+        "required": [
+          "productId",
+          "sellerId",
+          "pixels",
+          "eventSettings",
+          "defaultDomain"
+        ]
+      },
+      "CreateWebhookEndpointRequest": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "maxLength": 2048,
+            "format": "uri",
+            "description": "Webhook endpoint URL (HTTPS only)",
+            "example": "https://example.com/webhook"
+          },
+          "events": {
+            "minItems": 1,
+            "description": "Event types to subscribe to",
+            "example": [
+              "transaction.payment.succeeded",
+              "subscription.created"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 500,
+            "description": "Optional description for this endpoint"
+          }
+        },
+        "required": [
+          "url",
+          "events"
+        ]
+      },
+      "UpdateWebhookEndpointRequest": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "maxLength": 2048,
+            "format": "uri",
+            "description": "Webhook endpoint URL (HTTPS only)"
+          },
+          "events": {
+            "minItems": 1,
+            "description": "Event types to subscribe to",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 500,
+            "description": "Optional description for this endpoint"
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Enable or disable this endpoint"
+          }
+        }
+      },
+      "TrackingPixelConfig": {
+        "type": "object",
+        "properties": {
+          "pixelId": {
+            "type": "string",
+            "description": "Facebook Pixel ID"
+          },
+          "trackingDomain": {
+            "type": "string",
+            "description": "Custom tracking domain (e.g., pixels.example.com)"
+          }
+        },
+        "required": [
+          "pixelId"
+        ]
+      },
+      "TrackingEventSettings": {
+        "type": "object",
+        "properties": {
+          "pageViewEnabled": {
+            "type": "boolean",
+            "description": "Whether PageView event is enabled"
+          },
+          "initiateCheckoutEnabled": {
+            "type": "boolean",
+            "description": "Whether InitiateCheckout event is enabled"
+          },
+          "addPaymentInfoEnabled": {
+            "type": "boolean",
+            "description": "Whether AddPaymentInfo event is enabled"
+          },
+          "leadEnabled": {
+            "type": "boolean",
+            "description": "Whether Lead event is enabled"
+          },
+          "purchaseEnabled": {
+            "type": "boolean",
+            "description": "Whether Purchase event is enabled"
+          }
+        },
+        "required": [
+          "pageViewEnabled",
+          "initiateCheckoutEnabled",
+          "addPaymentInfoEnabled",
+          "leadEnabled",
+          "purchaseEnabled"
+        ]
+      },
+      "MetaFeaturesDto": {
+        "type": "object",
+        "properties": {
+          "subscriptions": {
+            "type": "boolean",
+            "example": true
+          },
+          "checkout_sessions": {
+            "type": "boolean",
+            "example": true
+          },
+          "idempotency_keys": {
+            "type": "boolean",
+            "example": true
+          },
+          "test_mode": {
+            "type": "boolean",
+            "example": true
+          },
+          "webhooks": {
+            "type": "boolean",
+            "example": true
+          }
+        },
+        "required": [
+          "subscriptions",
+          "checkout_sessions",
+          "idempotency_keys",
+          "test_mode",
+          "webhooks"
+        ]
+      },
+      "Seller": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "document": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "validatedEmail": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "anonymized": {
+            "type": "boolean"
+          },
+          "logoUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerUserId": {
+            "type": "number",
+            "nullable": true
+          },
+          "settlementDays": {
+            "type": "number"
+          },
+          "publicId": {
+            "type": "string"
+          },
+          "products": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Product"
+            }
+          },
+          "bankaccount": {
+            "$ref": "#/components/schemas/BankAccount"
+          },
+          "affiliations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Affiliations"
+            }
+          },
+          "withdrawal": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Withdrawals"
+            }
+          },
+          "facebookPixels": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FacebookPixel"
+            }
+          },
+          "portalConfiguration": {
+            "$ref": "#/components/schemas/PortalConfiguration"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "document",
+          "phone",
+          "validatedEmail",
+          "createdAt",
+          "updatedAt",
+          "anonymized",
+          "logoUrl",
+          "ownerUserId",
+          "settlementDays",
+          "publicId",
+          "products",
+          "bankaccount",
+          "affiliations",
+          "withdrawal",
+          "facebookPixels",
+          "portalConfiguration"
+        ]
+      },
+      "Tag": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "products": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Product"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "products"
+        ]
+      },
+      "Affiliations": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "affiliate": {
+            "$ref": "#/components/schemas/Seller"
+          },
+          "product": {
+            "$ref": "#/components/schemas/Product"
+          },
+          "affiliateId": {
+            "type": "number"
+          },
+          "productId": {
+            "type": "number"
+          },
+          "commission": {
+            "type": "number",
+            "description": "Commission percentage for this affiliation (can override product default).\nStored as a percentage value (e.g., 10 = 10%)."
+          },
+          "active": {
+            "type": "boolean",
+            "description": "Whether the affiliation is currently active.\nSet to false when canceled via cancelAffiliation()."
+          },
+          "approved": {
+            "type": "boolean",
+            "description": "Whether the product owner (seller) has approved this affiliation.\nSet to true via approveAffiliation() after reviewing the affiliate request."
+          },
+          "accepted": {
+            "type": "boolean",
+            "description": "Whether the affiliate has accepted the affiliation terms.\nSet during affiliation creation based on invite acceptance.\nNote: Different from AffiliationInvite.accept which tracks invite acceptance."
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "transactions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Transaction"
+            }
+          },
+          "link": {
+            "type": "string"
+          },
+          "canceledAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Timestamp when the affiliation was canceled.\nNull if affiliation is still active.\nSet by cancelAffiliation() along with active=false."
+          }
+        },
+        "required": [
+          "id",
+          "affiliate",
+          "product",
+          "affiliateId",
+          "productId",
+          "commission",
+          "active",
+          "approved",
+          "accepted",
+          "createdAt",
+          "updatedAt",
+          "transactions",
+          "link",
+          "canceledAt"
+        ]
+      },
+      "SubscriptionPrice": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "object"
+          },
+          "productId": {
+            "type": "number"
+          },
+          "product": {
+            "$ref": "#/components/schemas/Product"
+          },
+          "gatewayProvider": {
+            "type": "string"
+          },
+          "gatewayPlanId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "pricingModel": {
+            "type": "string"
+          },
+          "unitAmount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "billingInterval": {
+            "type": "string"
+          },
+          "billingIntervalCount": {
+            "type": "number"
+          },
+          "trialPeriodDays": {
+            "type": "number"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "metadata": {
+            "type": "object",
+            "nullable": true
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "subscriptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Subscription"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "productId",
+          "product",
+          "gatewayProvider",
+          "gatewayPlanId",
+          "name",
+          "pricingModel",
+          "unitAmount",
+          "currency",
+          "billingInterval",
+          "billingIntervalCount",
+          "trialPeriodDays",
+          "description",
+          "metadata",
+          "isActive",
+          "createdAt",
+          "updatedAt",
+          "subscriptions"
+        ]
+      },
+      "FacebookPixel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "seller": {
+            "$ref": "#/components/schemas/Seller"
+          },
+          "product": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Product"
+              }
+            ]
+          },
+          "pixelId": {
+            "type": "string"
+          },
+          "accessToken": {
+            "type": "string",
+            "nullable": true
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "domainId": {
+            "type": "number",
+            "nullable": true
+          },
+          "domain": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SellerDomain"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "seller",
+          "product",
+          "pixelId",
+          "accessToken",
+          "isActive",
+          "createdAt",
+          "updatedAt",
+          "domainId",
+          "domain"
+        ]
+      },
+      "CoProducer": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "productId": {
+            "type": "number"
+          },
+          "product": {
+            "$ref": "#/components/schemas/Product"
+          },
+          "sellerId": {
+            "type": "number"
+          },
+          "seller": {
+            "$ref": "#/components/schemas/Seller"
+          },
+          "shareType": {
+            "type": "object"
+          },
+          "shareValue": {
+            "type": "number"
+          },
+          "status": {
+            "type": "object"
+          },
+          "invitedBySellerId": {
+            "type": "number"
+          },
+          "invitedBySeller": {
+            "$ref": "#/components/schemas/Seller"
+          },
+          "acceptedAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "removedAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "productId",
+          "product",
+          "sellerId",
+          "seller",
+          "shareType",
+          "shareValue",
+          "status",
+          "invitedBySellerId",
+          "invitedBySeller",
+          "acceptedAt",
+          "removedAt",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "SellerDomain": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "sellerId": {
+            "type": "number"
+          },
+          "seller": {
+            "$ref": "#/components/schemas/Seller"
+          },
+          "domain": {
+            "type": "string"
+          },
+          "subdomain": {
+            "type": "string"
+          },
+          "verificationStatus": {
+            "type": "object"
+          },
+          "verifiedAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "lastCheckAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "failureCount": {
+            "type": "number"
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "pixels": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FacebookPixel"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "sellerId",
+          "seller",
+          "domain",
+          "subdomain",
+          "verificationStatus",
+          "verifiedAt",
+          "lastCheckAt",
+          "failureCount",
+          "isActive",
+          "createdAt",
+          "updatedAt",
+          "pixels"
+        ]
+      },
+      "Subscription": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "uuid": {
+            "type": "string"
+          },
+          "gatewayProvider": {
+            "type": "string"
+          },
+          "gatewaySubscriptionId": {
+            "type": "string"
+          },
+          "customerId": {
+            "type": "number"
+          },
+          "customer": {
+            "$ref": "#/components/schemas/Customer"
+          },
+          "subscriptionPriceId": {
+            "type": "object"
+          },
+          "subscriptionPrice": {
+            "$ref": "#/components/schemas/SubscriptionPrice"
+          },
+          "paymentMethodId": {
+            "type": "number",
+            "nullable": true
+          },
+          "paymentMethod": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PaymentMethod"
+              }
+            ]
+          },
+          "sellerId": {
+            "type": "number"
+          },
+          "seller": {
+            "$ref": "#/components/schemas/Seller"
+          },
+          "status": {
+            "type": "string"
+          },
+          "currentPeriodStart": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "currentPeriodEnd": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "trialStart": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "trialEnd": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "cancelledAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "endedAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "amount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "cancelAtPeriodEnd": {
+            "type": "boolean"
+          },
+          "cancellationReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "metadata": {
+            "type": "object",
+            "nullable": true
+          },
+          "retryCount": {
+            "type": "number"
+          },
+          "nextRetryDate": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "lastBillingError": {
+            "type": "string",
+            "nullable": true
+          },
+          "missedWebhookCount": {
+            "type": "number"
+          },
+          "pausedAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "pauseResumeAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SubscriptionEvent"
+            }
+          },
+          "transactions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Transaction"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "uuid",
+          "gatewayProvider",
+          "gatewaySubscriptionId",
+          "customerId",
+          "customer",
+          "subscriptionPriceId",
+          "subscriptionPrice",
+          "paymentMethodId",
+          "paymentMethod",
+          "sellerId",
+          "seller",
+          "status",
+          "currentPeriodStart",
+          "currentPeriodEnd",
+          "trialStart",
+          "trialEnd",
+          "cancelledAt",
+          "endedAt",
+          "amount",
+          "currency",
+          "cancelAtPeriodEnd",
+          "cancellationReason",
+          "metadata",
+          "retryCount",
+          "nextRetryDate",
+          "lastBillingError",
+          "missedWebhookCount",
+          "pausedAt",
+          "pauseResumeAt",
+          "createdAt",
+          "updatedAt",
+          "events",
+          "transactions"
+        ]
+      },
+      "PaymentMethod": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "customerId": {
+            "type": "number"
+          },
+          "customer": {
+            "$ref": "#/components/schemas/Customer"
+          },
+          "gatewayProvider": {
+            "type": "string"
+          },
+          "gatewayCardId": {
+            "type": "string"
+          },
+          "cardBrand": {
+            "type": "string"
+          },
+          "cardLast4": {
+            "type": "string"
+          },
+          "cardExpMonth": {
+            "type": "number"
+          },
+          "cardExpYear": {
+            "type": "number"
+          },
+          "cardholderName": {
+            "type": "string"
+          },
+          "isDefault": {
+            "type": "boolean"
+          },
+          "isBackup": {
+            "type": "boolean"
+          },
+          "status": {
+            "type": "string"
+          },
+          "lastUsedAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "failedAttempts": {
+            "type": "number"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "subscriptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Subscription"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "customerId",
+          "customer",
+          "gatewayProvider",
+          "gatewayCardId",
+          "cardBrand",
+          "cardLast4",
+          "cardExpMonth",
+          "cardExpYear",
+          "cardholderName",
+          "isDefault",
+          "isBackup",
+          "status",
+          "lastUsedAt",
+          "failedAttempts",
+          "createdAt",
+          "updatedAt",
+          "subscriptions"
+        ]
+      },
+      "SubscriptionEvent": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "subscriptionId": {
+            "type": "number"
+          },
+          "subscription": {
+            "$ref": "#/components/schemas/Subscription"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "gatewayProvider": {
+            "type": "string"
+          },
+          "gatewayEventId": {
+            "type": "string",
+            "nullable": true
+          },
+          "eventData": {
+            "type": "object",
+            "nullable": true
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "subscriptionId",
+          "subscription",
+          "eventType",
+          "gatewayProvider",
+          "gatewayEventId",
+          "eventData",
+          "createdAt"
+        ]
+      },
+      "BankAccount": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "sellerId": {
+            "type": "number"
+          },
+          "Seller": {
+            "$ref": "#/components/schemas/Seller"
+          },
+          "bank": {
+            "type": "string"
+          },
+          "agency": {
+            "type": "string"
+          },
+          "account": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "sellerId",
+          "Seller",
+          "bank",
+          "agency",
+          "account",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "Withdrawals": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "seller": {
+            "$ref": "#/components/schemas/Seller"
+          },
+          "sellerId": {
+            "type": "number"
+          },
+          "value": {
+            "type": "number"
+          },
+          "fee": {
+            "type": "number"
+          },
+          "netValue": {
+            "type": "number"
+          },
+          "status": {
+            "enum": [
+              "aguardando",
+              "aprovado",
+              "recusado",
+              "pago"
+            ],
+            "type": "string"
+          },
+          "paymentMethod": {
+            "type": "string"
+          },
+          "bankAccountId": {
+            "type": "number"
+          },
+          "bankAccount": {
+            "$ref": "#/components/schemas/BankAccount"
+          },
+          "requestedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "reviewedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "reviewedBy": {
+            "type": "number"
+          },
+          "reviewer": {
+            "$ref": "#/components/schemas/User"
+          },
+          "rejectionReason": {
+            "type": "string"
+          },
+          "paidAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "paymentReference": {
+            "type": "string"
+          },
+          "ledgerGroupId": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "seller",
+          "sellerId",
+          "value",
+          "fee",
+          "netValue",
+          "status",
+          "paymentMethod",
+          "bankAccountId",
+          "bankAccount",
+          "requestedAt",
+          "reviewedAt",
+          "reviewedBy",
+          "reviewer",
+          "rejectionReason",
+          "paidAt",
+          "paymentReference",
+          "ledgerGroupId",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "PortalConfiguration": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "sellerId": {
+            "type": "number"
+          },
+          "seller": {
+            "$ref": "#/components/schemas/Seller"
+          },
+          "businessName": {
+            "type": "string",
+            "nullable": true
+          },
+          "logoUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "primaryColor": {
+            "type": "string"
+          },
+          "allowCancelSubscription": {
+            "type": "boolean"
+          },
+          "allowUpdatePaymentMethod": {
+            "type": "boolean"
+          },
+          "allowUpdateBillingInfo": {
+            "type": "boolean"
+          },
+          "allowViewInvoices": {
+            "type": "boolean"
+          },
+          "allowApplyCoupons": {
+            "type": "boolean"
+          },
+          "requireCancelReason": {
+            "type": "boolean"
+          },
+          "cancelAtPeriodEndOnly": {
+            "type": "boolean"
+          },
+          "sendCancellationEmail": {
+            "type": "boolean"
+          },
+          "sendPaymentMethodUpdatedEmail": {
+            "type": "boolean"
+          },
+          "customWelcomeText": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "sellerId",
+          "seller",
+          "businessName",
+          "logoUrl",
+          "primaryColor",
+          "allowCancelSubscription",
+          "allowUpdatePaymentMethod",
+          "allowUpdateBillingInfo",
+          "allowViewInvoices",
+          "allowApplyCoupons",
+          "requireCancelReason",
+          "cancelAtPeriodEndOnly",
+          "sendCancellationEmail",
+          "sendPaymentMethodUpdatedEmail",
+          "customWelcomeText",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          },
+          "passwordAlgorithm": {
+            "type": "object"
+          },
+          "name": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string",
+            "nullable": true
+          },
+          "avatarUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "validatedEmail": {
+            "type": "boolean"
+          },
+          "tokenRecoveryEmail": {
+            "type": "string",
+            "nullable": true
+          },
+          "tokenRecoveryExpiresAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "lastLoginAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "twoFactorEnabled": {
+            "type": "boolean"
+          },
+          "twoFactorPromptDismissed": {
+            "type": "boolean"
+          },
+          "twoFactorEnabledAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "teamMembers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TeamMember"
+            }
+          },
+          "sessions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserSession"
+            }
+          },
+          "mfaCodes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Mfa"
+            }
+          },
+          "twoFactorMethods": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TwoFactorMethod"
+            }
+          },
+          "backupCodes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BackupCode"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "password",
+          "passwordAlgorithm",
+          "name",
+          "phone",
+          "avatarUrl",
+          "validatedEmail",
+          "tokenRecoveryEmail",
+          "tokenRecoveryExpiresAt",
+          "lastLoginAt",
+          "twoFactorEnabled",
+          "twoFactorPromptDismissed",
+          "twoFactorEnabledAt",
+          "createdAt",
+          "updatedAt",
+          "teamMembers",
+          "sessions",
+          "mfaCodes",
+          "twoFactorMethods",
+          "backupCodes"
+        ]
+      },
+      "TeamMember": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "userId": {
+            "type": "number"
+          },
+          "user": {
+            "$ref": "#/components/schemas/User"
+          },
+          "sellerId": {
+            "type": "number"
+          },
+          "seller": {
+            "$ref": "#/components/schemas/Seller"
+          },
+          "roleId": {
+            "type": "number"
+          },
+          "role": {
+            "$ref": "#/components/schemas/Role"
+          },
+          "isOwner": {
+            "type": "boolean"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "invitationId": {
+            "type": "number",
+            "nullable": true
+          },
+          "invitation": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TeamInvitation"
+              }
+            ]
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "lastAccessedAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "userId",
+          "user",
+          "sellerId",
+          "seller",
+          "roleId",
+          "role",
+          "isOwner",
+          "active",
+          "invitationId",
+          "invitation",
+          "createdAt",
+          "updatedAt",
+          "lastAccessedAt"
+        ]
+      },
+      "UserSession": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "userId": {
+            "type": "number"
+          },
+          "user": {
+            "$ref": "#/components/schemas/User"
+          },
+          "currentSellerId": {
+            "type": "number",
+            "nullable": true
+          },
+          "currentSeller": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Seller"
+              }
+            ]
+          },
+          "sessionToken": {
+            "type": "string"
+          },
+          "ipAddress": {
+            "type": "string",
+            "nullable": true
+          },
+          "userAgent": {
+            "type": "string",
+            "nullable": true
+          },
+          "deviceName": {
+            "type": "string",
+            "nullable": true
+          },
+          "location": {
+            "type": "string",
+            "nullable": true
+          },
+          "isCurrent": {
+            "type": "boolean"
+          },
+          "lastActivityAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "expiresAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "userId",
+          "user",
+          "currentSellerId",
+          "currentSeller",
+          "sessionToken",
+          "ipAddress",
+          "userAgent",
+          "deviceName",
+          "location",
+          "isCurrent",
+          "lastActivityAt",
+          "expiresAt",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "Mfa": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "userId": {
+            "type": "number"
+          },
+          "user": {
+            "$ref": "#/components/schemas/User"
+          },
+          "code": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "userId",
+          "user",
+          "code",
+          "createdAt"
+        ]
+      },
+      "TwoFactorMethod": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "userId": {
+            "type": "number"
+          },
+          "user": {
+            "$ref": "#/components/schemas/User"
+          },
+          "method": {
+            "type": "string"
+          },
+          "totpSecret": {
+            "type": "string",
+            "nullable": true
+          },
+          "phoneNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "isPrimary": {
+            "type": "boolean"
+          },
+          "verifiedAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "userId",
+          "user",
+          "method",
+          "totpSecret",
+          "phoneNumber",
+          "isPrimary",
+          "verifiedAt",
+          "createdAt"
+        ]
+      },
+      "BackupCode": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "userId": {
+            "type": "number"
+          },
+          "user": {
+            "$ref": "#/components/schemas/User"
+          },
+          "codeHash": {
+            "type": "string"
+          },
+          "usedAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "userId",
+          "user",
+          "codeHash",
+          "usedAt",
+          "createdAt"
+        ]
+      },
+      "Role": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "isSystemRole": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "isSystemRole",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "TeamInvitation": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "sellerId": {
+            "type": "number"
+          },
+          "seller": {
+            "$ref": "#/components/schemas/Seller"
+          },
+          "roleId": {
+            "type": "number"
+          },
+          "role": {
+            "$ref": "#/components/schemas/Role"
+          },
+          "email": {
+            "type": "string"
+          },
+          "token": {
+            "type": "string"
+          },
+          "invitedBy": {
+            "type": "number",
+            "nullable": true
+          },
+          "inviter": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TeamMember"
+              }
+            ]
+          },
+          "expiresAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "acceptedAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "declinedAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "sellerId",
+          "seller",
+          "roleId",
+          "role",
+          "email",
+          "token",
+          "invitedBy",
+          "inviter",
+          "expiresAt",
+          "acceptedAt",
+          "declinedAt",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "TransactionDto": {
+        "type": "object",
+        "properties": {
+          "myId": {
+            "type": "string"
+          },
+          "galaxPayId": {
+            "type": "number"
+          },
+          "chargeMyId": {
+            "type": "string"
+          },
+          "chargeGalaxPayId": {
+            "type": "number"
+          },
+          "subscriptionGalaxPayId": {
+            "type": "number"
+          },
+          "subscriptionMyId": {
+            "type": "string"
+          },
+          "value": {
+            "type": "number"
+          },
+          "payday": {
+            "type": "string"
+          },
+          "payedOutsideGalaxPay": {
+            "type": "boolean"
+          },
+          "fee": {
+            "type": "number",
+            "description": "Actual gateway fee charged by GalaxPay, in centavos (integer). PIX only."
+          },
+          "additionalInfo": {
+            "type": "string"
+          },
+          "installment": {
+            "type": "number"
+          },
+          "paydayDate": {
+            "type": "string"
+          },
+          "AbecsReasonDenied": {
+            "$ref": "#/components/schemas/AbecsReasonDeniedDto"
+          },
+          "datetimeLastSentToOperator": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "reasonDenied": {
+            "type": "string"
+          },
+          "tid": {
+            "type": "string"
+          },
+          "authorizationCode": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "statusDescription": {
+            "type": "string"
+          },
+          "statusDate": {
+            "type": "string"
+          },
+          "cardOperatorId": {
+            "type": "string"
+          },
+          "ConciliationOccurrences": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "Boleto": {
+            "$ref": "#/components/schemas/BoletoDto"
+          },
+          "Pix": {
+            "$ref": "#/components/schemas/PixDto"
+          },
+          "CreditCard": {
+            "$ref": "#/components/schemas/CreditCardTransactionDto"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "ChargeDto": {
+        "type": "object",
+        "properties": {
+          "galaxPayId": {
+            "type": "number"
+          },
+          "myId": {
+            "type": "string"
+          },
+          "mainPaymentMethodId": {
+            "type": "string"
+          },
+          "value": {
+            "type": "number"
+          },
+          "additionalInfo": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "paymentLink": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          },
+          "payedOutsideGalaxPay": {
+            "type": "boolean"
+          },
+          "Customer": {
+            "$ref": "#/components/schemas/CustomerDto"
+          },
+          "ExtraFields": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "PaymentMethodCreditCard": {
+            "$ref": "#/components/schemas/PaymentMethodCreditCardDto"
+          },
+          "PaymentMethodBoleto": {
+            "$ref": "#/components/schemas/PaymentMethodBoletoDto"
+          },
+          "PaymentMethodPix": {
+            "$ref": "#/components/schemas/PaymentMethodPixDto"
+          }
+        },
+        "required": [
+          "galaxPayId"
+        ]
+      },
+      "SubscriptionDto": {
+        "type": "object",
+        "properties": {
+          "myId": {
+            "type": "string"
+          },
+          "galaxPayId": {
+            "type": "number"
+          },
+          "planMyId": {
+            "type": "string"
+          },
+          "planGalaxPayId": {
+            "type": "number"
+          },
+          "value": {
+            "type": "number"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "periodicity": {
+            "type": "string"
+          },
+          "firstPayDayDate": {
+            "type": "string"
+          },
+          "paymentLink": {
+            "type": "string"
+          },
+          "additionalInfo": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "mainPaymentMethodId": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          },
+          "Customer": {
+            "$ref": "#/components/schemas/CustomerDto"
+          },
+          "ExtraFields": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "PaymentMethodCreditCard": {
+            "$ref": "#/components/schemas/PaymentMethodCreditCardDto"
+          }
+        }
+      },
+      "CustomerDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 255,
+            "description": "Nome completo do cliente",
+            "example": "Maria Silva"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Email do cliente",
+            "example": "maria@exemplo.com.br"
+          },
+          "document": {
+            "type": "string",
+            "pattern": "/^\\d{11}$|^\\d{14}$/",
+            "description": "CPF (11 dígitos) ou CNPJ (14 dígitos) sem pontuação",
+            "example": "12345678909"
+          },
+          "phone": {
+            "type": "string",
+            "pattern": "/^\\d{10,11}$/",
+            "description": "Telefone com DDD, 10 ou 11 dígitos, sem formatação",
+            "example": "11987654321"
+          },
+          "zipCode": {
+            "type": "string",
+            "pattern": "/^\\d{8}$/",
+            "description": "CEP com 8 dígitos, sem hífen",
+            "example": "01310100"
+          },
+          "street": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255,
+            "description": "Logradouro (rua/avenida)",
+            "example": "Av. Paulista"
+          },
+          "number": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 20,
+            "description": "Número do endereço",
+            "example": "1578"
+          },
+          "complement": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 255,
+            "description": "Complemento do endereço",
+            "example": "Apto 101"
+          },
+          "neighborhood": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "description": "Bairro",
+            "example": "Bela Vista"
+          },
+          "city": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "description": "Cidade",
+            "example": "São Paulo"
+          },
+          "state": {
+            "type": "string",
+            "pattern": "/^[A-Z]{2}$/",
+            "description": "Sigla do estado (UF) com 2 letras maiúsculas",
+            "example": "SP"
+          }
+        },
+        "required": [
+          "name",
+          "email",
+          "document",
+          "phone"
+        ]
+      },
+      "PaymentMethodCreditCardDto": {
+        "type": "object",
+        "properties": {
+          "Card": {
+            "$ref": "#/components/schemas/CardDto"
+          },
+          "cardOperatorId": {
+            "type": "string"
+          },
+          "preAuthorize": {
+            "type": "boolean"
+          },
+          "qtdInstallments": {
+            "type": "number"
+          }
+        }
+      },
+      "CardDto": {
+        "type": "object",
+        "properties": {
+          "myId": {
+            "type": "string"
+          },
+          "galaxPayId": {
+            "type": "number"
+          },
+          "number": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "isBackup": {
+            "type": "boolean"
+          },
+          "Brand": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "maxInstallment": {
+                "type": "number",
+                "nullable": true
+              },
+              "operatorIds": {
+                "type": "string",
+                "nullable": true
+              }
+            },
+            "required": []
+          }
+        }
+      },
+      "PaymentMethodBoletoDto": {
+        "type": "object",
+        "properties": {
+          "fine": {
+            "type": "number"
+          },
+          "interest": {
+            "type": "number"
+          },
+          "instructions": {
+            "type": "string"
+          }
+        }
+      },
+      "PaymentMethodPixDto": {
+        "type": "object",
+        "properties": {
+          "fine": {
+            "type": "number"
+          },
+          "interest": {
+            "type": "number"
+          },
+          "instructions": {
+            "type": "string"
+          },
+          "Deadline": {
+            "$ref": "#/components/schemas/DeadlineDto"
+          }
+        }
+      },
+      "DeadlineDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "value": {
+            "type": "number"
+          }
+        }
+      },
+      "AbecsReasonDeniedDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "BoletoDto": {
+        "type": "object",
+        "properties": {
+          "pdf": {
+            "type": "string"
+          },
+          "bankLine": {
+            "type": "string"
+          },
+          "bankNumber": {
+            "type": "string"
+          },
+          "barCode": {
+            "type": "string"
+          },
+          "bankEmissor": {
+            "type": "string"
+          },
+          "bankAgency": {
+            "type": "string"
+          },
+          "bankAccount": {
+            "type": "string"
+          }
+        }
+      },
+      "PixDto": {
+        "type": "object",
+        "properties": {
+          "qrCode": {
+            "type": "string"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "image": {
+            "type": "string"
+          },
+          "page": {
+            "type": "string"
+          },
+          "endToEndId": {
+            "type": "string"
+          }
+        }
+      },
+      "CreditCardTransactionDto": {
+        "type": "object",
+        "properties": {
+          "Card": {
+            "$ref": "#/components/schemas/CardDto"
+          }
+        }
+      },
+      "CardInfoDto": {
+        "type": "object",
+        "properties": {
+          "cardNumber": {
+            "type": "string",
+            "pattern": "/^\\d{13,19}$/",
+            "description": "Número do cartão sem espaços ou traços (13 a 19 dígitos)",
+            "example": "4111111111111111"
+          },
+          "cvv": {
+            "type": "string",
+            "pattern": "/^\\d{3,4}$/",
+            "description": "Código de segurança (3 ou 4 dígitos)",
+            "example": "123"
+          },
+          "expirationDate": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}$",
+            "description": "Validade do cartão no formato YYYY-MM",
+            "example": "2030-12"
+          },
+          "holderName": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 255,
+            "description": "Nome do titular exatamente como impresso no cartão",
+            "example": "MARIA SILVA"
+          },
+          "installments": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 12,
+            "description": "Número de parcelas (1 a 12)",
+            "example": 1
+          }
+        },
+        "required": [
+          "cardNumber",
+          "cvv",
+          "expirationDate",
+          "holderName",
+          "installments"
+        ]
+      },
+      "TrackingContextDto": {
+        "type": "object",
+        "properties": {
+          "eventId": {
+            "type": "string",
+            "maxLength": 100,
+            "description": "Event ID for deduplication"
+          },
+          "fbp": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "Facebook browser ID (_fbp cookie)"
+          },
+          "fbc": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "Facebook click ID (_fbc cookie)"
+          },
+          "fbclid": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "Facebook click ID from URL (fbclid)"
+          },
+          "gclid": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "Google click ID (gclid)"
+          },
+          "externalId": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "External ID for cross-platform identity"
+          },
+          "userAgent": {
+            "type": "string",
+            "maxLength": 500,
+            "description": "User agent string"
+          },
+          "browser": {
+            "type": "string",
+            "maxLength": 100,
+            "description": "Browser name"
+          },
+          "browserVersion": {
+            "type": "string",
+            "maxLength": 50,
+            "description": "Browser version"
+          },
+          "deviceBrand": {
+            "type": "string",
+            "maxLength": 100,
+            "description": "Device brand"
+          },
+          "deviceModel": {
+            "type": "string",
+            "maxLength": 100,
+            "description": "Device model"
+          },
+          "os": {
+            "type": "string",
+            "maxLength": 50,
+            "description": "Operating system"
+          },
+          "osVersion": {
+            "type": "string",
+            "maxLength": 50,
+            "description": "Operating system version"
+          },
+          "utmSource": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "UTM source"
+          },
+          "utmMedium": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "UTM medium"
+          },
+          "utmCampaign": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "UTM campaign"
+          },
+          "utmTerm": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "UTM term"
+          },
+          "utmContent": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "UTM content"
+          }
+        }
+      },
+      "PixelDomainInfo": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "Domain ID"
+          },
+          "fullSubdomain": {
+            "type": "string",
+            "description": "Full subdomain (e.g., pixels.example.com)"
+          },
+          "verificationStatus": {
+            "type": "string",
+            "description": "Domain verification status"
+          }
+        },
+        "required": [
+          "id",
+          "fullSubdomain",
+          "verificationStatus"
+        ]
+      }
+    }
+  }
+}

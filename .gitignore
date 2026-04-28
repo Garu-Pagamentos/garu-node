@@ -6,9 +6,9 @@ coverage
 .env
 .env.*
 
-# Generated specs (fetched on-demand by `npm run generate`)
+# Raw backend spec — fetched on-demand by `npm run generate:fetch`,
+# may include internal endpoints. The filtered openapi-sdk.json is committed.
 src/generated/openapi.json
-src/generated/openapi-sdk.json
 
 # Claude
 CLAUDE.md
