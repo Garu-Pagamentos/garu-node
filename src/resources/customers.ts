@@ -4,6 +4,7 @@ import type {
   CustomerList,
   CustomerRecord,
   ListCustomersParams,
+  SetBillingEmailOverrideParams,
   UpdateCustomerParams
 } from '../types.js';
 
@@ -18,7 +19,7 @@ export class Customers {
   constructor(private readonly http: HttpClient) {}
 
   /**
-   * Create a customer and link it to the current seller.
+   * Register a customer for the current seller.
    *
    * @example
    * const customer = await garu.customers.create({
@@ -83,6 +84,34 @@ export class Customers {
   async update(id: number, params: UpdateCustomerParams): Promise<CustomerRecord> {
     return this.http.call<CustomerRecord>((signal) =>
       (this.http.client.PUT as Function)(`/api/customers/${id}`, {
+        body: params,
+        signal
+      }).then((r: { data?: CustomerRecord; error?: unknown; response: Response }) => r)
+    );
+  }
+
+  /**
+   * Set or clear the per-seller billing email override.
+   *
+   * The override is sticky: it takes precedence over the per-seller last-used
+   * email and the global `customer.email` for outbound seller→customer emails,
+   * and is **never** auto-overwritten by subsequent payments or registrations.
+   *
+   * @example
+   * // Set
+   * await garu.customers.setBillingEmailOverride(42, {
+   *   billingEmailOverride: 'cobrancas@empresa.com.br'
+   * });
+   *
+   * // Clear and fall back to the last-used email
+   * await garu.customers.setBillingEmailOverride(42, { billingEmailOverride: null });
+   */
+  async setBillingEmailOverride(
+    id: number,
+    params: SetBillingEmailOverrideParams
+  ): Promise<CustomerRecord> {
+    return this.http.call<CustomerRecord>((signal) =>
+      (this.http.client.PATCH as Function)(`/api/customers/${id}/billing-email-override`, {
         body: params,
         signal
       }).then((r: { data?: CustomerRecord; error?: unknown; response: Response }) => r)

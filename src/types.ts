@@ -152,7 +152,22 @@ export interface CustomerRecord {
   state?: string | null;
   createdAt: string;
   updatedAt: string;
+  /**
+   * Resolved billing email used for outbound seller→customer emails:
+   * `billingEmailOverride ?? per-seller email ?? customer.email`.
+   */
+  billingEmail?: string;
+  /** True when a sticky `billingEmailOverride` is set for this seller. */
+  hasBillingEmailOverride?: boolean;
   [key: string]: unknown;
+}
+
+export interface SetBillingEmailOverrideParams {
+  /**
+   * Customer-controlled billing email. Pass `null` to clear and fall back to
+   * the per-seller last-used email or the global `customer.email`.
+   */
+  billingEmailOverride: string | null;
 }
 
 export type CustomerList = PaginatedList<CustomerRecord>;
