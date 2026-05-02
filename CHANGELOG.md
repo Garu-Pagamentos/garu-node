@@ -3,6 +3,41 @@
 All notable changes to `@garuhq/node` are documented in this file. Format:
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [SemVer](https://semver.org/).
 
+## [0.5.0] — 2026-05-01
+
+### Added
+
+- `scheduledCharges` resource on the `Garu` client. Schedule a charge to
+  bill a customer on a future date; Garu drives the customer reminder
+  on the due date and dunning to the seller team after.
+  - `scheduledCharges.create({ customerId, amount, type, dueDate, methods, ... })`
+    — `POST /api/scheduled-charges`. PIX and Boleto are supported now;
+    `type` accepts only `one_time` in this version.
+  - `scheduledCharges.list({ status?, customerId?, type?, dueFrom?, dueTo?, search?, ... })`
+    — `GET /api/scheduled-charges`. `status` accepts a single value or
+    an array; arrays are sent as repeated query params.
+  - `scheduledCharges.get(id)` — `GET /api/scheduled-charges/{id}`.
+    Returns a bundle: `{ charge, events, transactions }`.
+  - `scheduledCharges.postpone(id, { newDueDate, reason? })` — allowed
+    from `scheduled` / `due_today` / `overdue` / `paused`. Clears any
+    pending dunning so the new dueDate triggers a fresh reminder.
+  - `scheduledCharges.pause(id, { reason? })` — allowed from
+    `scheduled` / `due_today` / `overdue`.
+  - `scheduledCharges.resume(id)` — only valid from `paused`.
+  - `scheduledCharges.markPaid(id, { paymentDate, externalReference? })`
+    — record an off-Garu payment (transfer, cash). Allowed from
+    `due_today` / `overdue`.
+- `customers.list({ status: 'overdue' })` — new filter that returns
+  customers with at least one overdue scheduled charge.
+- Types exported from the package root: `CreateScheduledChargeParams`,
+  `ListScheduledChargesParams`, `MarkPaidScheduledChargeParams`,
+  `PauseScheduledChargeParams`, `PostponeScheduledChargeParams`,
+  `ScheduledChargeActor`, `ScheduledChargeDetail`,
+  `ScheduledChargeEvent`, `ScheduledChargeEventType`,
+  `ScheduledChargeLinkedTransaction`, `ScheduledChargeList`,
+  `ScheduledChargeRecord`, `ScheduledChargeStatus`,
+  `ScheduledChargeType`, `ScheduledPaymentMethod`.
+
 ## [0.3.0] — 2026-04-28
 
 ### Added

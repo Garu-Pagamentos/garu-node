@@ -210,6 +210,146 @@ export interface ListCustomersParams {
   page?: number;
   limit?: number;
   search?: string;
+  /** Filter by aggregated status. `overdue` returns customers with at least one overdue scheduled charge. */
+  status?: 'overdue';
+}
+
+export type ScheduledChargeStatus =
+  | 'scheduled'
+  | 'due_today'
+  | 'overdue'
+  | 'paid'
+  | 'paused'
+  | 'canceled'
+  | 'trial'
+  | 'pending_tokenization'
+  | 'recurrence_canceled';
+
+export type ScheduledChargeType = 'one_time' | 'recurring';
+
+export type ScheduledPaymentMethod = 'pix' | 'boleto';
+
+export type ScheduledChargeEventType =
+  | 'created'
+  | 'postponed'
+  | 'paused'
+  | 'resumed'
+  | 'recurrence_canceled'
+  | 'manually_marked_paid'
+  | 'paid'
+  | 'overdue_reminder_sent'
+  | 'd_day_reminder_sent';
+
+export type ScheduledChargeActor =
+  | { type: 'user'; id: number }
+  | { type: 'api_key'; id: number }
+  | { type: 'system' };
+
+export interface ScheduledChargeRecord {
+  id: string;
+  sellerId: number;
+  customerId: number;
+  productId: number | null;
+  /** Decimal BRL (e.g. `297.50`), never centavos. */
+  amount: number;
+  description: string | null;
+  type: ScheduledChargeType;
+  /** YYYY-MM-DD in São Paulo time. */
+  dueDate: string;
+  methods: ScheduledPaymentMethod[];
+  status: ScheduledChargeStatus;
+  externalReference: string | null;
+  metadata: Record<string, unknown> | null;
+  createdAt: string;
+  updatedAt: string;
+  /** Eager-loaded customer (id/name/email/document only). */
+  customer?: { id: number; name: string; email: string; document: string } | null;
+  /** Eager-loaded product (id/uuid/name only). */
+  product?: { id: number; uuid: string; name: string } | null;
+  [key: string]: unknown;
+}
+
+export interface ScheduledChargeEvent {
+  id: number;
+  scheduledChargeId: string;
+  eventType: ScheduledChargeEventType;
+  actor: ScheduledChargeActor;
+  payload: Record<string, unknown> | null;
+  createdAt: string;
+}
+
+export interface ScheduledChargeLinkedTransaction {
+  id: number;
+  /** Centavos (BRL × 100), matching `garu.charges.*` value semantics. */
+  value: number;
+  paymentMethod: string;
+  status: string;
+  date: string;
+  refundedAt: string | null;
+  [key: string]: unknown;
+}
+
+export interface ScheduledChargeDetail {
+  charge: ScheduledChargeRecord;
+  events: ScheduledChargeEvent[];
+  transactions: ScheduledChargeLinkedTransaction[];
+}
+
+export type ScheduledChargeList = PaginatedList<ScheduledChargeRecord>;
+
+export interface CreateScheduledChargeParams {
+  customerId: number;
+  productId?: number;
+  /** Decimal BRL (e.g. `297.50`). */
+  amount: number;
+  description?: string;
+  /**
+   * Schedule type. Only `one_time` is accepted by the current API; the
+   * literal narrows to that until recurring schedules ship.
+   */
+  type: 'one_time';
+  /** YYYY-MM-DD in São Paulo time. Must be today or future. */
+  dueDate: string;
+  /** PIX and Boleto are supported now; card requires tokenization (future). */
+  methods: ScheduledPaymentMethod[];
+  externalReference?: string;
+  metadata?: Record<string, unknown>;
+  /**
+   * Optional idempotency key for safe retries. The SDK auto-generates a
+   * UUIDv4 when omitted and forwards it as `X-Idempotency-Key`.
+   */
+  idempotencyKey?: string;
+}
+
+export interface ListScheduledChargesParams {
+  page?: number;
+  limit?: number;
+  customerId?: number;
+  status?: ScheduledChargeStatus | ScheduledChargeStatus[];
+  type?: ScheduledChargeType;
+  /** YYYY-MM-DD lower bound for `dueDate`. */
+  dueFrom?: string;
+  /** YYYY-MM-DD upper bound for `dueDate`. */
+  dueTo?: string;
+  /** Free-text match against customer name / email / document. */
+  search?: string;
+}
+
+export interface PostponeScheduledChargeParams {
+  /** YYYY-MM-DD in São Paulo time. Must be today or future. */
+  newDueDate: string;
+  reason?: string;
+}
+
+export interface PauseScheduledChargeParams {
+  reason?: string;
+}
+
+export interface MarkPaidScheduledChargeParams {
+  /** YYYY-MM-DD in São Paulo time. Must be today or past. */
+  paymentDate: string;
+  /** Bank reference, internal ID, or any stable string for reconciliation. */
+  externalReference?: string;
 }
 
 export interface Product {

@@ -17,6 +17,7 @@ const OUTPUT = resolve(__dirname, '../src/generated/openapi-sdk.json');
 const SDK_PATHS = [
   '/api/transactions',
   '/api/customers',
+  '/api/scheduled-charges',
   '/api/products',
   '/api/meta',
   '/api/webhook-endpoints',

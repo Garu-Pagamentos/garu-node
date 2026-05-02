@@ -3,6 +3,7 @@ import { Charges } from './resources/charges.js';
 import { Customers } from './resources/customers.js';
 import { Meta } from './resources/meta.js';
 import { Products } from './resources/products.js';
+import { ScheduledCharges } from './resources/scheduled-charges.js';
 import { webhooks } from './webhooks.js';
 
 export interface GaruOptions {
@@ -50,6 +51,7 @@ export class Garu {
   public readonly customers: Customers;
   public readonly meta: Meta;
   public readonly products: Products;
+  public readonly scheduledCharges: ScheduledCharges;
 
   /**
    * Webhook helpers. Available both as an instance member and as a static —
@@ -71,5 +73,6 @@ export class Garu {
     this.customers = new Customers(http);
     this.meta = new Meta(http);
     this.products = new Products(http);
+    this.scheduledCharges = new ScheduledCharges(http);
   }
 }

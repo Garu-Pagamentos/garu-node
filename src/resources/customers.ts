@@ -50,6 +50,7 @@ export class Customers {
     if (params.page !== undefined) query.page = String(params.page);
     if (params.limit !== undefined) query.limit = String(params.limit);
     if (params.search) query.search = params.search;
+    if (params.status) query.status = params.status;
 
     const qs = new URLSearchParams(query).toString();
     const url = `/api/customers${qs ? `?${qs}` : ''}`;
