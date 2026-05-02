@@ -5,293 +5,6 @@
     "version": "1.0.0"
   },
   "paths": {
-    "/api/products/{productId}/pixels": {
-      "get": {
-        "parameters": [
-          {
-            "name": "productId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/PixelResponse"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "List product pixels",
-        "tags": [
-          "pixels"
-        ]
-      },
-      "post": {
-        "parameters": [
-          {
-            "name": "productId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreatePixelRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PixelResponse"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Create product pixel",
-        "tags": [
-          "pixels"
-        ]
-      }
-    },
-    "/api/products/{productId}/pixels/{pixelId}": {
-      "get": {
-        "parameters": [
-          {
-            "name": "productId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "pixelId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PixelResponse"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Get product pixel by ID",
-        "tags": [
-          "pixels"
-        ]
-      },
-      "put": {
-        "parameters": [
-          {
-            "name": "productId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "pixelId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdatePixelRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PixelResponse"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Update product pixel",
-        "tags": [
-          "pixels"
-        ]
-      },
-      "delete": {
-        "parameters": [
-          {
-            "name": "productId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "pixelId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Delete product pixel",
-        "tags": [
-          "pixels"
-        ]
-      }
-    },
-    "/api/products/{productId}/event-settings": {
-      "get": {
-        "parameters": [
-          {
-            "name": "productId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/EventSettingsResponse"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Get product event settings",
-        "tags": [
-          "pixels"
-        ]
-      },
-      "put": {
-        "parameters": [
-          {
-            "name": "productId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/EventSettingsRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/EventSettingsResponse"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Update product event settings",
-        "tags": [
-          "pixels"
-        ]
-      }
-    },
     "/api/transactions": {
       "post": {
         "parameters": [
@@ -877,6 +590,7 @@
     },
     "/api/customers": {
       "post": {
+        "description": "Creates a customer record linked to the calling seller. The seller-side profile (CustomerSellerProfile) is upserted with the latest name/email/phone.",
         "parameters": [],
         "requestBody": {
           "required": true,
@@ -890,7 +604,7 @@
         },
         "responses": {
           "201": {
-            "description": "Customer created",
+            "description": "Customer registered.",
             "content": {
               "application/json": {
                 "schema": {
@@ -905,7 +619,7 @@
             "garu-gateway": []
           }
         ],
-        "summary": "Create a new customer",
+        "summary": "Register a customer for the calling seller",
         "tags": [
           "customers"
         ]
@@ -930,6 +644,14 @@
           },
           {
             "name": "search",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
             "required": true,
             "in": "query",
             "schema": {
@@ -1057,6 +779,401 @@
         ]
       }
     },
+    "/api/customers/{id}/billing-email-override": {
+      "patch": {
+        "description": "Sticky per-seller billing email. Takes precedence over the last-used email for outbound seller-to-customer emails. Pass `null` to clear and fall back to the last-used email.",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetBillingEmailOverrideRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Override updated"
+          }
+        },
+        "security": [
+          {
+            "garu-gateway": []
+          }
+        ],
+        "summary": "Set or clear the per-seller billing email override",
+        "tags": [
+          "customers"
+        ]
+      }
+    },
+    "/api/scheduled-charges": {
+      "get": {
+        "parameters": [
+          {
+            "name": "customerId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "type",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "one_time",
+                "recurring"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "dueFrom",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "2026-05-01",
+              "type": "string"
+            }
+          },
+          {
+            "name": "dueTo",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "2026-05-31",
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of scheduled charges"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          },
+          {
+            "garu-gateway": []
+          }
+        ],
+        "summary": "List scheduled charges for the calling seller",
+        "tags": [
+          "scheduled-charges"
+        ]
+      },
+      "post": {
+        "description": "Creates a one-time scheduled charge for an existing customer. Recurring charges land in M3.",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateScheduledChargeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Scheduled charge created"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          },
+          {
+            "garu-gateway": []
+          }
+        ],
+        "summary": "Create a scheduled charge",
+        "tags": [
+          "scheduled-charges"
+        ]
+      }
+    },
+    "/api/scheduled-charges/{id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Scheduled charge detail bundle"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          },
+          {
+            "garu-gateway": []
+          }
+        ],
+        "summary": "Get a scheduled charge by ID, including event timeline and linked transactions",
+        "tags": [
+          "scheduled-charges"
+        ]
+      }
+    },
+    "/api/scheduled-charges/{id}/postpone": {
+      "post": {
+        "description": "Allowed from scheduled / due_today / overdue / paused. Clears the dunning chain so the new dueDate gets a fresh D-day notice.",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostponeScheduledChargeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Postponed"
+          },
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScheduledCharge"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          },
+          {
+            "garu-gateway": []
+          }
+        ],
+        "summary": "Postpone a scheduled charge to a new due date",
+        "tags": [
+          "scheduled-charges"
+        ]
+      }
+    },
+    "/api/scheduled-charges/{id}/pause": {
+      "post": {
+        "description": "Allowed from scheduled / due_today / overdue. Resume returns it to scheduled.",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PauseScheduledChargeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Paused"
+          },
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScheduledCharge"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          },
+          {
+            "garu-gateway": []
+          }
+        ],
+        "summary": "Pause a scheduled charge",
+        "tags": [
+          "scheduled-charges"
+        ]
+      }
+    },
+    "/api/scheduled-charges/{id}/resume": {
+      "post": {
+        "description": "Only valid from `paused` status.",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resumed"
+          },
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScheduledCharge"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          },
+          {
+            "garu-gateway": []
+          }
+        ],
+        "summary": "Resume a paused scheduled charge",
+        "tags": [
+          "scheduled-charges"
+        ]
+      }
+    },
+    "/api/scheduled-charges/{id}/mark-paid": {
+      "post": {
+        "description": "Use when the customer paid off-Garu (bank transfer, etc.). Allowed from due_today / overdue.",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MarkPaidScheduledChargeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Marked as paid"
+          },
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScheduledCharge"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          },
+          {
+            "garu-gateway": []
+          }
+        ],
+        "summary": "Manually mark a scheduled charge as paid",
+        "tags": [
+          "scheduled-charges"
+        ]
+      }
+    },
     "/api/meta": {
       "get": {
         "description": "Returns version, supported payment methods, webhook event catalog, and feature flags. Unauthenticated. Used by the Garu CLI `doctor` command and MCP server to introspect the API.",
@@ -1076,36 +1193,6 @@
         "summary": "Get API capability metadata",
         "tags": [
           "meta"
-        ]
-      }
-    },
-    "/api/products/{productId}/tracking-config": {
-      "get": {
-        "parameters": [
-          {
-            "name": "productId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TrackingConfigResponse"
-                }
-              }
-            }
-          }
-        },
-        "summary": "Get tracking configuration for a product",
-        "tags": [
-          "Tracking"
         ]
       }
     },
@@ -1325,196 +1412,6 @@
       }
     },
     "schemas": {
-      "PixelResponse": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "number",
-            "description": "Pixel ID"
-          },
-          "name": {
-            "type": "string",
-            "description": "Pixel name"
-          },
-          "pixelId": {
-            "type": "string",
-            "description": "Facebook Pixel ID"
-          },
-          "hasAccessToken": {
-            "type": "boolean",
-            "description": "Whether the pixel has an access token configured"
-          },
-          "isActive": {
-            "type": "boolean",
-            "description": "Whether the pixel is active"
-          },
-          "domain": {
-            "nullable": true,
-            "description": "Custom domain configuration",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/PixelDomainInfo"
-              }
-            ]
-          },
-          "createdAt": {
-            "format": "date-time",
-            "type": "string",
-            "description": "Creation date"
-          },
-          "updatedAt": {
-            "format": "date-time",
-            "type": "string",
-            "description": "Last update date"
-          }
-        },
-        "required": [
-          "id",
-          "name",
-          "pixelId",
-          "isActive",
-          "createdAt",
-          "updatedAt"
-        ]
-      },
-      "CreatePixelRequest": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "description": "Optional name for the pixel"
-          },
-          "pixelId": {
-            "type": "string",
-            "description": "Facebook Pixel ID"
-          },
-          "accessToken": {
-            "type": "string",
-            "description": "Access token for Conversion API"
-          },
-          "domainId": {
-            "type": "number",
-            "description": "Domain ID for first-party pixel tracking"
-          }
-        },
-        "required": [
-          "pixelId"
-        ]
-      },
-      "UpdatePixelRequest": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "description": "Name for the pixel"
-          },
-          "pixelId": {
-            "type": "string",
-            "description": "Facebook Pixel ID"
-          },
-          "accessToken": {
-            "type": "string",
-            "description": "Access token for Conversion API"
-          },
-          "isActive": {
-            "type": "boolean",
-            "description": "Whether the pixel is active"
-          },
-          "domainId": {
-            "type": "number",
-            "description": "Domain ID for first-party pixel tracking"
-          }
-        }
-      },
-      "EventSettingsResponse": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "number",
-            "description": "Event settings ID"
-          },
-          "sellerId": {
-            "type": "number",
-            "description": "Seller ID if this is a seller-level setting"
-          },
-          "productId": {
-            "type": "number",
-            "description": "Product ID if this is a product-level setting"
-          },
-          "pageViewEnabled": {
-            "type": "boolean",
-            "description": "Enable PageView event"
-          },
-          "initiateCheckoutEnabled": {
-            "type": "boolean",
-            "description": "Enable InitiateCheckout event"
-          },
-          "addPaymentInfoEnabled": {
-            "type": "boolean",
-            "description": "Enable AddPaymentInfo event"
-          },
-          "leadEnabled": {
-            "type": "boolean",
-            "description": "Enable Lead event"
-          },
-          "purchaseEnabled": {
-            "type": "boolean",
-            "description": "Enable Purchase event"
-          },
-          "createdAt": {
-            "format": "date-time",
-            "type": "string",
-            "description": "Creation date"
-          },
-          "updatedAt": {
-            "format": "date-time",
-            "type": "string",
-            "description": "Last update date"
-          }
-        },
-        "required": [
-          "id",
-          "pageViewEnabled",
-          "initiateCheckoutEnabled",
-          "addPaymentInfoEnabled",
-          "leadEnabled",
-          "purchaseEnabled",
-          "createdAt",
-          "updatedAt"
-        ]
-      },
-      "EventSettingsRequest": {
-        "type": "object",
-        "properties": {
-          "pageViewEnabled": {
-            "type": "boolean",
-            "description": "Enable PageView event"
-          },
-          "initiateCheckoutEnabled": {
-            "type": "boolean",
-            "description": "Enable InitiateCheckout event"
-          },
-          "addPaymentInfoEnabled": {
-            "type": "boolean",
-            "description": "Enable AddPaymentInfo event"
-          },
-          "leadEnabled": {
-            "type": "boolean",
-            "description": "Enable Lead event"
-          },
-          "purchaseEnabled": {
-            "type": "boolean",
-            "description": "Enable Purchase event"
-          }
-        },
-        "required": [
-          "pageViewEnabled",
-          "initiateCheckoutEnabled",
-          "addPaymentInfoEnabled",
-          "leadEnabled",
-          "purchaseEnabled"
-        ]
-      },
       "CreateTransactionRequest": {
         "type": "object",
         "properties": {
@@ -1650,6 +1547,11 @@
           "status": {
             "type": "string"
           },
+          "scheduledChargeId": {
+            "type": "string",
+            "nullable": true,
+            "description": "Optional link back to a `scheduled_charge` row. Set when this\ntransaction was minted to fulfil a scheduled-charge dispatch (M2+).\nDrives the Celcoin webhook ingestion path that flips the schedule's\nstatus to `paid`."
+          },
           "subscriptionId": {
             "type": "number",
             "nullable": true
@@ -1735,6 +1637,7 @@
           "code",
           "deadline",
           "status",
+          "scheduledChargeId",
           "subscriptionId",
           "subscription",
           "isRecurring",
@@ -2460,6 +2363,253 @@
           }
         }
       },
+      "SetBillingEmailOverrideRequest": {
+        "type": "object",
+        "properties": {
+          "billingEmailOverride": {
+            "type": "string",
+            "nullable": true,
+            "description": "Billing email override for this customer for the calling seller. Set null to clear.",
+            "format": "email"
+          }
+        }
+      },
+      "CreateScheduledChargeRequest": {
+        "type": "object",
+        "properties": {
+          "customerId": {
+            "type": "number",
+            "minimum": 1,
+            "description": "Customer ID (must already be linked to the calling seller)"
+          },
+          "productId": {
+            "type": "number",
+            "minimum": 1,
+            "description": "Optional product to associate with this charge"
+          },
+          "amount": {
+            "type": "number",
+            "minimum": 1,
+            "description": "Amount in BRL (decimal, e.g. 297.50)",
+            "example": 297.5
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 500,
+            "description": "Free-form description shown on the customer email and payment page"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "one_time"
+            ],
+            "description": "Schedule type. Only `one_time` is supported in this version."
+          },
+          "dueDate": {
+            "type": "string",
+            "pattern": "/^\\d{4}-\\d{2}-\\d{2}$/",
+            "description": "Due date in YYYY-MM-DD (São Paulo TZ). Must be today or future.",
+            "example": "2026-05-15"
+          },
+          "methods": {
+            "type": "array",
+            "enum": [
+              "pix",
+              "boleto"
+            ],
+            "uniqueItems": true,
+            "minItems": 1,
+            "description": "Payment methods to offer. M2 only supports pix and boleto; card requires M3.",
+            "items": {
+              "type": "string",
+              "enum": [
+                "pix",
+                "boleto"
+              ]
+            }
+          },
+          "externalReference": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "Seller-controlled identifier for this schedule (deduping, reconciliation)."
+          },
+          "metadata": {
+            "type": "object",
+            "description": "Free-form metadata. Persisted as JSONB; not interpreted by Garu."
+          }
+        },
+        "required": [
+          "customerId",
+          "amount",
+          "type",
+          "dueDate",
+          "methods"
+        ]
+      },
+      "PostponeScheduledChargeRequest": {
+        "type": "object",
+        "properties": {
+          "newDueDate": {
+            "type": "string",
+            "pattern": "/^\\d{4}-\\d{2}-\\d{2}$/",
+            "description": "New due date (YYYY-MM-DD). Must be today or future.",
+            "example": "2026-06-01"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 500,
+            "description": "Optional reason recorded on the schedule timeline."
+          }
+        },
+        "required": [
+          "newDueDate"
+        ]
+      },
+      "ScheduledCharge": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "object"
+          },
+          "sellerId": {
+            "type": "number"
+          },
+          "seller": {
+            "$ref": "#/components/schemas/Seller"
+          },
+          "customerId": {
+            "type": "number"
+          },
+          "customer": {
+            "$ref": "#/components/schemas/Customer"
+          },
+          "productId": {
+            "type": "number",
+            "nullable": true
+          },
+          "product": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Product"
+              }
+            ]
+          },
+          "amount": {
+            "type": "number"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "type": {
+            "type": "object"
+          },
+          "dueDate": {
+            "type": "string"
+          },
+          "methods": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "recurrence": {
+            "type": "object",
+            "nullable": true
+          },
+          "status": {
+            "type": "object"
+          },
+          "subscriptionId": {
+            "type": "number",
+            "nullable": true,
+            "description": "Forward-compat (M3): Subscription.id when type='recurring'."
+          },
+          "trialEndsAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true,
+            "description": "Forward-compat (M3): trial visibility flag."
+          },
+          "pendingTokenization": {
+            "type": "boolean",
+            "description": "Forward-compat (M3): card-only recurring waiting for first tokenization."
+          },
+          "externalReference": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdBy": {
+            "type": "object"
+          },
+          "metadata": {
+            "type": "object",
+            "nullable": true
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "sellerId",
+          "seller",
+          "customerId",
+          "customer",
+          "productId",
+          "product",
+          "amount",
+          "description",
+          "type",
+          "dueDate",
+          "methods",
+          "recurrence",
+          "status",
+          "subscriptionId",
+          "trialEndsAt",
+          "pendingTokenization",
+          "externalReference",
+          "createdBy",
+          "metadata",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "PauseScheduledChargeRequest": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "maxLength": 500,
+            "description": "Optional reason recorded on the schedule timeline."
+          }
+        }
+      },
+      "MarkPaidScheduledChargeRequest": {
+        "type": "object",
+        "properties": {
+          "paymentDate": {
+            "type": "string",
+            "pattern": "/^\\d{4}-\\d{2}-\\d{2}$/",
+            "description": "Date the customer paid (YYYY-MM-DD). Recorded on the schedule timeline.",
+            "example": "2026-05-15"
+          },
+          "externalReference": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "Seller-side reference for the off-Garu payment (e.g. bank-transfer ID)."
+          }
+        },
+        "required": [
+          "paymentDate"
+        ]
+      },
       "MetaResponse": {
         "type": "object",
         "properties": {
@@ -2563,45 +2713,6 @@
           "support_email"
         ]
       },
-      "TrackingConfigResponse": {
-        "type": "object",
-        "properties": {
-          "productId": {
-            "type": "number",
-            "description": "Product ID"
-          },
-          "sellerId": {
-            "type": "number",
-            "description": "Seller ID"
-          },
-          "pixels": {
-            "description": "List of pixel configurations",
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/TrackingPixelConfig"
-            }
-          },
-          "eventSettings": {
-            "description": "Event settings",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/TrackingEventSettings"
-              }
-            ]
-          },
-          "defaultDomain": {
-            "type": "string",
-            "description": "Default tracking domain"
-          }
-        },
-        "required": [
-          "productId",
-          "sellerId",
-          "pixels",
-          "eventSettings",
-          "defaultDomain"
-        ]
-      },
       "CreateWebhookEndpointRequest": {
         "type": "object",
         "properties": {
@@ -2662,54 +2773,6 @@
             "description": "Enable or disable this endpoint"
           }
         }
-      },
-      "TrackingPixelConfig": {
-        "type": "object",
-        "properties": {
-          "pixelId": {
-            "type": "string",
-            "description": "Facebook Pixel ID"
-          },
-          "trackingDomain": {
-            "type": "string",
-            "description": "Custom tracking domain (e.g., pixels.example.com)"
-          }
-        },
-        "required": [
-          "pixelId"
-        ]
-      },
-      "TrackingEventSettings": {
-        "type": "object",
-        "properties": {
-          "pageViewEnabled": {
-            "type": "boolean",
-            "description": "Whether PageView event is enabled"
-          },
-          "initiateCheckoutEnabled": {
-            "type": "boolean",
-            "description": "Whether InitiateCheckout event is enabled"
-          },
-          "addPaymentInfoEnabled": {
-            "type": "boolean",
-            "description": "Whether AddPaymentInfo event is enabled"
-          },
-          "leadEnabled": {
-            "type": "boolean",
-            "description": "Whether Lead event is enabled"
-          },
-          "purchaseEnabled": {
-            "type": "boolean",
-            "description": "Whether Purchase event is enabled"
-          }
-        },
-        "required": [
-          "pageViewEnabled",
-          "initiateCheckoutEnabled",
-          "addPaymentInfoEnabled",
-          "leadEnabled",
-          "purchaseEnabled"
-        ]
       },
       "MetaFeaturesDto": {
         "type": "object",
@@ -2838,26 +2901,45 @@
           "portalConfiguration"
         ]
       },
-      "Tag": {
+      "BankAccount": {
         "type": "object",
         "properties": {
           "id": {
             "type": "number"
           },
-          "name": {
+          "sellerId": {
+            "type": "number"
+          },
+          "Seller": {
+            "$ref": "#/components/schemas/Seller"
+          },
+          "bank": {
             "type": "string"
           },
-          "products": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Product"
-            }
+          "agency": {
+            "type": "string"
+          },
+          "account": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
           }
         },
         "required": [
           "id",
-          "name",
-          "products"
+          "sellerId",
+          "Seller",
+          "bank",
+          "agency",
+          "account",
+          "createdAt",
+          "updatedAt"
         ]
       },
       "Affiliations": {
@@ -2932,641 +3014,6 @@
           "transactions",
           "link",
           "canceledAt"
-        ]
-      },
-      "SubscriptionPrice": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "object"
-          },
-          "productId": {
-            "type": "number"
-          },
-          "product": {
-            "$ref": "#/components/schemas/Product"
-          },
-          "gatewayProvider": {
-            "type": "string"
-          },
-          "gatewayPlanId": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "pricingModel": {
-            "type": "string"
-          },
-          "unitAmount": {
-            "type": "number"
-          },
-          "currency": {
-            "type": "string"
-          },
-          "billingInterval": {
-            "type": "string"
-          },
-          "billingIntervalCount": {
-            "type": "number"
-          },
-          "trialPeriodDays": {
-            "type": "number"
-          },
-          "description": {
-            "type": "string",
-            "nullable": true
-          },
-          "metadata": {
-            "type": "object",
-            "nullable": true
-          },
-          "isActive": {
-            "type": "boolean"
-          },
-          "createdAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "updatedAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "subscriptions": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Subscription"
-            }
-          }
-        },
-        "required": [
-          "id",
-          "productId",
-          "product",
-          "gatewayProvider",
-          "gatewayPlanId",
-          "name",
-          "pricingModel",
-          "unitAmount",
-          "currency",
-          "billingInterval",
-          "billingIntervalCount",
-          "trialPeriodDays",
-          "description",
-          "metadata",
-          "isActive",
-          "createdAt",
-          "updatedAt",
-          "subscriptions"
-        ]
-      },
-      "FacebookPixel": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "number"
-          },
-          "name": {
-            "type": "string"
-          },
-          "seller": {
-            "$ref": "#/components/schemas/Seller"
-          },
-          "product": {
-            "nullable": true,
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/Product"
-              }
-            ]
-          },
-          "pixelId": {
-            "type": "string"
-          },
-          "accessToken": {
-            "type": "string",
-            "nullable": true
-          },
-          "isActive": {
-            "type": "boolean"
-          },
-          "createdAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "updatedAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "domainId": {
-            "type": "number",
-            "nullable": true
-          },
-          "domain": {
-            "nullable": true,
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/SellerDomain"
-              }
-            ]
-          }
-        },
-        "required": [
-          "id",
-          "name",
-          "seller",
-          "product",
-          "pixelId",
-          "accessToken",
-          "isActive",
-          "createdAt",
-          "updatedAt",
-          "domainId",
-          "domain"
-        ]
-      },
-      "CoProducer": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "number"
-          },
-          "productId": {
-            "type": "number"
-          },
-          "product": {
-            "$ref": "#/components/schemas/Product"
-          },
-          "sellerId": {
-            "type": "number"
-          },
-          "seller": {
-            "$ref": "#/components/schemas/Seller"
-          },
-          "shareType": {
-            "type": "object"
-          },
-          "shareValue": {
-            "type": "number"
-          },
-          "status": {
-            "type": "object"
-          },
-          "invitedBySellerId": {
-            "type": "number"
-          },
-          "invitedBySeller": {
-            "$ref": "#/components/schemas/Seller"
-          },
-          "acceptedAt": {
-            "format": "date-time",
-            "type": "string",
-            "nullable": true
-          },
-          "removedAt": {
-            "format": "date-time",
-            "type": "string",
-            "nullable": true
-          },
-          "createdAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "updatedAt": {
-            "format": "date-time",
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "productId",
-          "product",
-          "sellerId",
-          "seller",
-          "shareType",
-          "shareValue",
-          "status",
-          "invitedBySellerId",
-          "invitedBySeller",
-          "acceptedAt",
-          "removedAt",
-          "createdAt",
-          "updatedAt"
-        ]
-      },
-      "SellerDomain": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "number"
-          },
-          "sellerId": {
-            "type": "number"
-          },
-          "seller": {
-            "$ref": "#/components/schemas/Seller"
-          },
-          "domain": {
-            "type": "string"
-          },
-          "subdomain": {
-            "type": "string"
-          },
-          "verificationStatus": {
-            "type": "object"
-          },
-          "verifiedAt": {
-            "format": "date-time",
-            "type": "string",
-            "nullable": true
-          },
-          "lastCheckAt": {
-            "format": "date-time",
-            "type": "string",
-            "nullable": true
-          },
-          "failureCount": {
-            "type": "number"
-          },
-          "isActive": {
-            "type": "boolean"
-          },
-          "createdAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "updatedAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "pixels": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/FacebookPixel"
-            }
-          }
-        },
-        "required": [
-          "id",
-          "sellerId",
-          "seller",
-          "domain",
-          "subdomain",
-          "verificationStatus",
-          "verifiedAt",
-          "lastCheckAt",
-          "failureCount",
-          "isActive",
-          "createdAt",
-          "updatedAt",
-          "pixels"
-        ]
-      },
-      "Subscription": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "number"
-          },
-          "uuid": {
-            "type": "string"
-          },
-          "gatewayProvider": {
-            "type": "string"
-          },
-          "gatewaySubscriptionId": {
-            "type": "string"
-          },
-          "customerId": {
-            "type": "number"
-          },
-          "customer": {
-            "$ref": "#/components/schemas/Customer"
-          },
-          "subscriptionPriceId": {
-            "type": "object"
-          },
-          "subscriptionPrice": {
-            "$ref": "#/components/schemas/SubscriptionPrice"
-          },
-          "paymentMethodId": {
-            "type": "number",
-            "nullable": true
-          },
-          "paymentMethod": {
-            "nullable": true,
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/PaymentMethod"
-              }
-            ]
-          },
-          "sellerId": {
-            "type": "number"
-          },
-          "seller": {
-            "$ref": "#/components/schemas/Seller"
-          },
-          "status": {
-            "type": "string"
-          },
-          "currentPeriodStart": {
-            "format": "date-time",
-            "type": "string",
-            "nullable": true
-          },
-          "currentPeriodEnd": {
-            "format": "date-time",
-            "type": "string",
-            "nullable": true
-          },
-          "trialStart": {
-            "format": "date-time",
-            "type": "string",
-            "nullable": true
-          },
-          "trialEnd": {
-            "format": "date-time",
-            "type": "string",
-            "nullable": true
-          },
-          "cancelledAt": {
-            "format": "date-time",
-            "type": "string",
-            "nullable": true
-          },
-          "endedAt": {
-            "format": "date-time",
-            "type": "string",
-            "nullable": true
-          },
-          "amount": {
-            "type": "number"
-          },
-          "currency": {
-            "type": "string"
-          },
-          "cancelAtPeriodEnd": {
-            "type": "boolean"
-          },
-          "cancellationReason": {
-            "type": "string",
-            "nullable": true
-          },
-          "metadata": {
-            "type": "object",
-            "nullable": true
-          },
-          "retryCount": {
-            "type": "number"
-          },
-          "nextRetryDate": {
-            "format": "date-time",
-            "type": "string",
-            "nullable": true
-          },
-          "lastBillingError": {
-            "type": "string",
-            "nullable": true
-          },
-          "missedWebhookCount": {
-            "type": "number"
-          },
-          "pausedAt": {
-            "format": "date-time",
-            "type": "string",
-            "nullable": true
-          },
-          "pauseResumeAt": {
-            "format": "date-time",
-            "type": "string",
-            "nullable": true
-          },
-          "createdAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "updatedAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "events": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/SubscriptionEvent"
-            }
-          },
-          "transactions": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Transaction"
-            }
-          }
-        },
-        "required": [
-          "id",
-          "uuid",
-          "gatewayProvider",
-          "gatewaySubscriptionId",
-          "customerId",
-          "customer",
-          "subscriptionPriceId",
-          "subscriptionPrice",
-          "paymentMethodId",
-          "paymentMethod",
-          "sellerId",
-          "seller",
-          "status",
-          "currentPeriodStart",
-          "currentPeriodEnd",
-          "trialStart",
-          "trialEnd",
-          "cancelledAt",
-          "endedAt",
-          "amount",
-          "currency",
-          "cancelAtPeriodEnd",
-          "cancellationReason",
-          "metadata",
-          "retryCount",
-          "nextRetryDate",
-          "lastBillingError",
-          "missedWebhookCount",
-          "pausedAt",
-          "pauseResumeAt",
-          "createdAt",
-          "updatedAt",
-          "events",
-          "transactions"
-        ]
-      },
-      "PaymentMethod": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "number"
-          },
-          "customerId": {
-            "type": "number"
-          },
-          "customer": {
-            "$ref": "#/components/schemas/Customer"
-          },
-          "gatewayProvider": {
-            "type": "string"
-          },
-          "gatewayCardId": {
-            "type": "string"
-          },
-          "cardBrand": {
-            "type": "string"
-          },
-          "cardLast4": {
-            "type": "string"
-          },
-          "cardExpMonth": {
-            "type": "number"
-          },
-          "cardExpYear": {
-            "type": "number"
-          },
-          "cardholderName": {
-            "type": "string"
-          },
-          "isDefault": {
-            "type": "boolean"
-          },
-          "isBackup": {
-            "type": "boolean"
-          },
-          "status": {
-            "type": "string"
-          },
-          "lastUsedAt": {
-            "format": "date-time",
-            "type": "string",
-            "nullable": true
-          },
-          "failedAttempts": {
-            "type": "number"
-          },
-          "createdAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "updatedAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "subscriptions": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Subscription"
-            }
-          }
-        },
-        "required": [
-          "id",
-          "customerId",
-          "customer",
-          "gatewayProvider",
-          "gatewayCardId",
-          "cardBrand",
-          "cardLast4",
-          "cardExpMonth",
-          "cardExpYear",
-          "cardholderName",
-          "isDefault",
-          "isBackup",
-          "status",
-          "lastUsedAt",
-          "failedAttempts",
-          "createdAt",
-          "updatedAt",
-          "subscriptions"
-        ]
-      },
-      "SubscriptionEvent": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "number"
-          },
-          "subscriptionId": {
-            "type": "number"
-          },
-          "subscription": {
-            "$ref": "#/components/schemas/Subscription"
-          },
-          "eventType": {
-            "type": "string"
-          },
-          "gatewayProvider": {
-            "type": "string"
-          },
-          "gatewayEventId": {
-            "type": "string",
-            "nullable": true
-          },
-          "eventData": {
-            "type": "object",
-            "nullable": true
-          },
-          "createdAt": {
-            "format": "date-time",
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "subscriptionId",
-          "subscription",
-          "eventType",
-          "gatewayProvider",
-          "gatewayEventId",
-          "eventData",
-          "createdAt"
-        ]
-      },
-      "BankAccount": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "number"
-          },
-          "sellerId": {
-            "type": "number"
-          },
-          "Seller": {
-            "$ref": "#/components/schemas/Seller"
-          },
-          "bank": {
-            "type": "string"
-          },
-          "agency": {
-            "type": "string"
-          },
-          "account": {
-            "type": "string"
-          },
-          "createdAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "updatedAt": {
-            "format": "date-time",
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "sellerId",
-          "Seller",
-          "bank",
-          "agency",
-          "account",
-          "createdAt",
-          "updatedAt"
         ]
       },
       "Withdrawals": {
@@ -3667,6 +3114,71 @@
           "updatedAt"
         ]
       },
+      "FacebookPixel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "seller": {
+            "$ref": "#/components/schemas/Seller"
+          },
+          "product": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Product"
+              }
+            ]
+          },
+          "pixelId": {
+            "type": "string"
+          },
+          "accessToken": {
+            "type": "string",
+            "nullable": true
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "domainId": {
+            "type": "number",
+            "nullable": true
+          },
+          "domain": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SellerDomain"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "seller",
+          "product",
+          "pixelId",
+          "accessToken",
+          "isActive",
+          "createdAt",
+          "updatedAt",
+          "domainId",
+          "domain"
+        ]
+      },
       "PortalConfiguration": {
         "type": "object",
         "properties": {
@@ -3749,6 +3261,74 @@
           "customWelcomeText",
           "createdAt",
           "updatedAt"
+        ]
+      },
+      "SellerDomain": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "sellerId": {
+            "type": "number"
+          },
+          "seller": {
+            "$ref": "#/components/schemas/Seller"
+          },
+          "domain": {
+            "type": "string"
+          },
+          "subdomain": {
+            "type": "string"
+          },
+          "verificationStatus": {
+            "type": "object"
+          },
+          "verifiedAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "lastCheckAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "failureCount": {
+            "type": "number"
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "pixels": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FacebookPixel"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "sellerId",
+          "seller",
+          "domain",
+          "subdomain",
+          "verificationStatus",
+          "verifiedAt",
+          "lastCheckAt",
+          "failureCount",
+          "isActive",
+          "createdAt",
+          "updatedAt",
+          "pixels"
         ]
       },
       "User": {
@@ -4240,6 +3820,489 @@
           "declinedAt",
           "createdAt",
           "updatedAt"
+        ]
+      },
+      "Tag": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "products": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Product"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "products"
+        ]
+      },
+      "SubscriptionPrice": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "object"
+          },
+          "productId": {
+            "type": "number"
+          },
+          "product": {
+            "$ref": "#/components/schemas/Product"
+          },
+          "gatewayProvider": {
+            "type": "string"
+          },
+          "gatewayPlanId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "pricingModel": {
+            "type": "string"
+          },
+          "unitAmount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "billingInterval": {
+            "type": "string"
+          },
+          "billingIntervalCount": {
+            "type": "number"
+          },
+          "trialPeriodDays": {
+            "type": "number"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "metadata": {
+            "type": "object",
+            "nullable": true
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "subscriptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Subscription"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "productId",
+          "product",
+          "gatewayProvider",
+          "gatewayPlanId",
+          "name",
+          "pricingModel",
+          "unitAmount",
+          "currency",
+          "billingInterval",
+          "billingIntervalCount",
+          "trialPeriodDays",
+          "description",
+          "metadata",
+          "isActive",
+          "createdAt",
+          "updatedAt",
+          "subscriptions"
+        ]
+      },
+      "CoProducer": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "productId": {
+            "type": "number"
+          },
+          "product": {
+            "$ref": "#/components/schemas/Product"
+          },
+          "sellerId": {
+            "type": "number"
+          },
+          "seller": {
+            "$ref": "#/components/schemas/Seller"
+          },
+          "shareType": {
+            "type": "object"
+          },
+          "shareValue": {
+            "type": "number"
+          },
+          "status": {
+            "type": "object"
+          },
+          "invitedBySellerId": {
+            "type": "number"
+          },
+          "invitedBySeller": {
+            "$ref": "#/components/schemas/Seller"
+          },
+          "acceptedAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "removedAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "productId",
+          "product",
+          "sellerId",
+          "seller",
+          "shareType",
+          "shareValue",
+          "status",
+          "invitedBySellerId",
+          "invitedBySeller",
+          "acceptedAt",
+          "removedAt",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "Subscription": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "uuid": {
+            "type": "string"
+          },
+          "gatewayProvider": {
+            "type": "string"
+          },
+          "gatewaySubscriptionId": {
+            "type": "string"
+          },
+          "customerId": {
+            "type": "number"
+          },
+          "customer": {
+            "$ref": "#/components/schemas/Customer"
+          },
+          "subscriptionPriceId": {
+            "type": "object"
+          },
+          "subscriptionPrice": {
+            "$ref": "#/components/schemas/SubscriptionPrice"
+          },
+          "paymentMethodId": {
+            "type": "number",
+            "nullable": true
+          },
+          "paymentMethod": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PaymentMethod"
+              }
+            ]
+          },
+          "sellerId": {
+            "type": "number"
+          },
+          "seller": {
+            "$ref": "#/components/schemas/Seller"
+          },
+          "status": {
+            "type": "string"
+          },
+          "currentPeriodStart": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "currentPeriodEnd": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "trialStart": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "trialEnd": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "cancelledAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "endedAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "amount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "cancelAtPeriodEnd": {
+            "type": "boolean"
+          },
+          "cancellationReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "metadata": {
+            "type": "object",
+            "nullable": true
+          },
+          "retryCount": {
+            "type": "number"
+          },
+          "nextRetryDate": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "lastBillingError": {
+            "type": "string",
+            "nullable": true
+          },
+          "missedWebhookCount": {
+            "type": "number"
+          },
+          "pausedAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "pauseResumeAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SubscriptionEvent"
+            }
+          },
+          "transactions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Transaction"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "uuid",
+          "gatewayProvider",
+          "gatewaySubscriptionId",
+          "customerId",
+          "customer",
+          "subscriptionPriceId",
+          "subscriptionPrice",
+          "paymentMethodId",
+          "paymentMethod",
+          "sellerId",
+          "seller",
+          "status",
+          "currentPeriodStart",
+          "currentPeriodEnd",
+          "trialStart",
+          "trialEnd",
+          "cancelledAt",
+          "endedAt",
+          "amount",
+          "currency",
+          "cancelAtPeriodEnd",
+          "cancellationReason",
+          "metadata",
+          "retryCount",
+          "nextRetryDate",
+          "lastBillingError",
+          "missedWebhookCount",
+          "pausedAt",
+          "pauseResumeAt",
+          "createdAt",
+          "updatedAt",
+          "events",
+          "transactions"
+        ]
+      },
+      "PaymentMethod": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "customerId": {
+            "type": "number"
+          },
+          "customer": {
+            "$ref": "#/components/schemas/Customer"
+          },
+          "gatewayProvider": {
+            "type": "string"
+          },
+          "gatewayCardId": {
+            "type": "string"
+          },
+          "cardBrand": {
+            "type": "string"
+          },
+          "cardLast4": {
+            "type": "string"
+          },
+          "cardExpMonth": {
+            "type": "number"
+          },
+          "cardExpYear": {
+            "type": "number"
+          },
+          "cardholderName": {
+            "type": "string"
+          },
+          "isDefault": {
+            "type": "boolean"
+          },
+          "isBackup": {
+            "type": "boolean"
+          },
+          "status": {
+            "type": "string"
+          },
+          "lastUsedAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "failedAttempts": {
+            "type": "number"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "subscriptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Subscription"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "customerId",
+          "customer",
+          "gatewayProvider",
+          "gatewayCardId",
+          "cardBrand",
+          "cardLast4",
+          "cardExpMonth",
+          "cardExpYear",
+          "cardholderName",
+          "isDefault",
+          "isBackup",
+          "status",
+          "lastUsedAt",
+          "failedAttempts",
+          "createdAt",
+          "updatedAt",
+          "subscriptions"
+        ]
+      },
+      "SubscriptionEvent": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "subscriptionId": {
+            "type": "number"
+          },
+          "subscription": {
+            "$ref": "#/components/schemas/Subscription"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "gatewayProvider": {
+            "type": "string"
+          },
+          "gatewayEventId": {
+            "type": "string",
+            "nullable": true
+          },
+          "eventData": {
+            "type": "object",
+            "nullable": true
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "subscriptionId",
+          "subscription",
+          "eventType",
+          "gatewayProvider",
+          "gatewayEventId",
+          "eventData",
+          "createdAt"
         ]
       },
       "TransactionDto": {
@@ -4844,28 +4907,6 @@
             "description": "UTM content"
           }
         }
-      },
-      "PixelDomainInfo": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "number",
-            "description": "Domain ID"
-          },
-          "fullSubdomain": {
-            "type": "string",
-            "description": "Full subdomain (e.g., pixels.example.com)"
-          },
-          "verificationStatus": {
-            "type": "string",
-            "description": "Domain verification status"
-          }
-        },
-        "required": [
-          "id",
-          "fullSubdomain",
-          "verificationStatus"
-        ]
       }
     }
   }

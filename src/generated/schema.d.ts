@@ -4,214 +4,6 @@
  */
 
 export interface paths {
-    "/api/products/{productId}/pixels": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List product pixels */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    productId: number;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["PixelResponse"][];
-                    };
-                };
-            };
-        };
-        put?: never;
-        /** Create product pixel */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    productId: number;
-                };
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["CreatePixelRequest"];
-                };
-            };
-            responses: {
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["PixelResponse"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/products/{productId}/pixels/{pixelId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get product pixel by ID */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    productId: number;
-                    pixelId: number;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["PixelResponse"];
-                    };
-                };
-            };
-        };
-        /** Update product pixel */
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    productId: number;
-                    pixelId: number;
-                };
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["UpdatePixelRequest"];
-                };
-            };
-            responses: {
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["PixelResponse"];
-                    };
-                };
-            };
-        };
-        post?: never;
-        /** Delete product pixel */
-        delete: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    productId: number;
-                    pixelId: number;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-            };
-        };
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/products/{productId}/event-settings": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get product event settings */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    productId: number;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["EventSettingsResponse"];
-                    };
-                };
-            };
-        };
-        /** Update product event settings */
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    productId: number;
-                };
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["EventSettingsRequest"];
-                };
-            };
-            responses: {
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["EventSettingsResponse"];
-                    };
-                };
-            };
-        };
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/transactions": {
         parameters: {
             query?: never;
@@ -709,6 +501,7 @@ export interface paths {
                     page: number;
                     limit: number;
                     search: string;
+                    status: string;
                 };
                 header?: never;
                 path?: never;
@@ -726,7 +519,10 @@ export interface paths {
             };
         };
         put?: never;
-        /** Create a new customer */
+        /**
+         * Register a customer for the calling seller
+         * @description Creates a customer record linked to the calling seller. The seller-side profile (CustomerSellerProfile) is upserted with the latest name/email/phone.
+         */
         post: {
             parameters: {
                 query?: never;
@@ -740,7 +536,7 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description Customer created */
+                /** @description Customer registered. */
                 201: {
                     headers: {
                         [name: string]: unknown;
@@ -841,6 +637,353 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/customers/{id}/billing-email-override": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Set or clear the per-seller billing email override
+         * @description Sticky per-seller billing email. Takes precedence over the last-used email for outbound seller-to-customer emails. Pass `null` to clear and fall back to the last-used email.
+         */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["SetBillingEmailOverrideRequest"];
+                };
+            };
+            responses: {
+                /** @description Override updated */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/api/scheduled-charges": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List scheduled charges for the calling seller */
+        get: {
+            parameters: {
+                query?: {
+                    customerId?: number;
+                    type?: "one_time" | "recurring";
+                    dueFrom?: string;
+                    dueTo?: string;
+                    search?: string;
+                    limit?: number;
+                    page?: number;
+                    status?: string[];
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Paginated list of scheduled charges */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        /**
+         * Create a scheduled charge
+         * @description Creates a one-time scheduled charge for an existing customer. Recurring charges land in M3.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["CreateScheduledChargeRequest"];
+                };
+            };
+            responses: {
+                /** @description Scheduled charge created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/scheduled-charges/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a scheduled charge by ID, including event timeline and linked transactions */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Scheduled charge detail bundle */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/scheduled-charges/{id}/postpone": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Postpone a scheduled charge to a new due date
+         * @description Allowed from scheduled / due_today / overdue / paused. Clears the dunning chain so the new dueDate gets a fresh D-day notice.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["PostponeScheduledChargeRequest"];
+                };
+            };
+            responses: {
+                /** @description Postponed */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ScheduledCharge"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/scheduled-charges/{id}/pause": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Pause a scheduled charge
+         * @description Allowed from scheduled / due_today / overdue. Resume returns it to scheduled.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["PauseScheduledChargeRequest"];
+                };
+            };
+            responses: {
+                /** @description Paused */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ScheduledCharge"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/scheduled-charges/{id}/resume": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Resume a paused scheduled charge
+         * @description Only valid from `paused` status.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Resumed */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ScheduledCharge"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/scheduled-charges/{id}/mark-paid": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Manually mark a scheduled charge as paid
+         * @description Use when the customer paid off-Garu (bank transfer, etc.). Allowed from due_today / overdue.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["MarkPaidScheduledChargeRequest"];
+                };
+            };
+            responses: {
+                /** @description Marked as paid */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ScheduledCharge"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/meta": {
         parameters: {
             query?: never;
@@ -867,43 +1010,6 @@ export interface paths {
                     };
                     content: {
                         "application/json": components["schemas"]["MetaResponse"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/products/{productId}/tracking-config": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get tracking configuration for a product */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    productId: number;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["TrackingConfigResponse"];
                     };
                 };
             };
@@ -1123,92 +1229,6 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        PixelResponse: {
-            /** @description Pixel ID */
-            id: number;
-            /** @description Pixel name */
-            name: string;
-            /** @description Facebook Pixel ID */
-            pixelId: string;
-            /** @description Whether the pixel has an access token configured */
-            hasAccessToken?: boolean;
-            /** @description Whether the pixel is active */
-            isActive: boolean;
-            /** @description Custom domain configuration */
-            domain?: components["schemas"]["PixelDomainInfo"] | null;
-            /**
-             * Format: date-time
-             * @description Creation date
-             */
-            createdAt: string;
-            /**
-             * Format: date-time
-             * @description Last update date
-             */
-            updatedAt: string;
-        };
-        CreatePixelRequest: {
-            /** @description Optional name for the pixel */
-            name?: string;
-            /** @description Facebook Pixel ID */
-            pixelId: string;
-            /** @description Access token for Conversion API */
-            accessToken?: string;
-            /** @description Domain ID for first-party pixel tracking */
-            domainId?: number;
-        };
-        UpdatePixelRequest: {
-            /** @description Name for the pixel */
-            name?: string;
-            /** @description Facebook Pixel ID */
-            pixelId?: string;
-            /** @description Access token for Conversion API */
-            accessToken?: string;
-            /** @description Whether the pixel is active */
-            isActive?: boolean;
-            /** @description Domain ID for first-party pixel tracking */
-            domainId?: number;
-        };
-        EventSettingsResponse: {
-            /** @description Event settings ID */
-            id: number;
-            /** @description Seller ID if this is a seller-level setting */
-            sellerId?: number;
-            /** @description Product ID if this is a product-level setting */
-            productId?: number;
-            /** @description Enable PageView event */
-            pageViewEnabled: boolean;
-            /** @description Enable InitiateCheckout event */
-            initiateCheckoutEnabled: boolean;
-            /** @description Enable AddPaymentInfo event */
-            addPaymentInfoEnabled: boolean;
-            /** @description Enable Lead event */
-            leadEnabled: boolean;
-            /** @description Enable Purchase event */
-            purchaseEnabled: boolean;
-            /**
-             * Format: date-time
-             * @description Creation date
-             */
-            createdAt: string;
-            /**
-             * Format: date-time
-             * @description Last update date
-             */
-            updatedAt: string;
-        };
-        EventSettingsRequest: {
-            /** @description Enable PageView event */
-            pageViewEnabled: boolean;
-            /** @description Enable InitiateCheckout event */
-            initiateCheckoutEnabled: boolean;
-            /** @description Enable AddPaymentInfo event */
-            addPaymentInfoEnabled: boolean;
-            /** @description Enable Lead event */
-            leadEnabled: boolean;
-            /** @description Enable Purchase event */
-            purchaseEnabled: boolean;
-        };
         CreateTransactionRequest: {
             /** @description Dados do cliente que está efetuando a compra */
             customer: components["schemas"]["CustomerDto"];
@@ -1271,6 +1291,11 @@ export interface components {
             /** Format: date-time */
             deadline: string;
             status: string;
+            /** @description Optional link back to a `scheduled_charge` row. Set when this
+             *     transaction was minted to fulfil a scheduled-charge dispatch (M2+).
+             *     Drives the Celcoin webhook ingestion path that flips the schedule's
+             *     status to `paid`. */
+            scheduledChargeId: string | null;
             subscriptionId: number | null;
             subscription: components["schemas"]["Subscription"] | null;
             isRecurring: boolean;
@@ -1494,6 +1519,99 @@ export interface components {
             /** @description 2-letter state code (e.g. SP) */
             state?: string;
         };
+        SetBillingEmailOverrideRequest: {
+            /**
+             * Format: email
+             * @description Billing email override for this customer for the calling seller. Set null to clear.
+             */
+            billingEmailOverride?: string | null;
+        };
+        CreateScheduledChargeRequest: {
+            /** @description Customer ID (must already be linked to the calling seller) */
+            customerId: number;
+            /** @description Optional product to associate with this charge */
+            productId?: number;
+            /**
+             * @description Amount in BRL (decimal, e.g. 297.50)
+             * @example 297.5
+             */
+            amount: number;
+            /** @description Free-form description shown on the customer email and payment page */
+            description?: string;
+            /**
+             * @description Schedule type. Only `one_time` is supported in this version.
+             * @enum {string}
+             */
+            type: "one_time";
+            /**
+             * @description Due date in YYYY-MM-DD (São Paulo TZ). Must be today or future.
+             * @example 2026-05-15
+             */
+            dueDate: string;
+            /**
+             * @description Payment methods to offer. M2 only supports pix and boleto; card requires M3.
+             * @enum {array}
+             */
+            methods: "pix" | "boleto";
+            /** @description Seller-controlled identifier for this schedule (deduping, reconciliation). */
+            externalReference?: string;
+            /** @description Free-form metadata. Persisted as JSONB; not interpreted by Garu. */
+            metadata?: Record<string, never>;
+        };
+        PostponeScheduledChargeRequest: {
+            /**
+             * @description New due date (YYYY-MM-DD). Must be today or future.
+             * @example 2026-06-01
+             */
+            newDueDate: string;
+            /** @description Optional reason recorded on the schedule timeline. */
+            reason?: string;
+        };
+        ScheduledCharge: {
+            id: Record<string, never>;
+            sellerId: number;
+            seller: components["schemas"]["Seller"];
+            customerId: number;
+            customer: components["schemas"]["Customer"];
+            productId: number | null;
+            product: components["schemas"]["Product"] | null;
+            amount: number;
+            description: string | null;
+            type: Record<string, never>;
+            dueDate: string;
+            methods: Record<string, never>[];
+            recurrence: Record<string, never>;
+            status: Record<string, never>;
+            /** @description Forward-compat (M3): Subscription.id when type='recurring'. */
+            subscriptionId: number | null;
+            /**
+             * Format: date-time
+             * @description Forward-compat (M3): trial visibility flag.
+             */
+            trialEndsAt: string | null;
+            /** @description Forward-compat (M3): card-only recurring waiting for first tokenization. */
+            pendingTokenization: boolean;
+            externalReference: string | null;
+            createdBy: Record<string, never>;
+            metadata: Record<string, never>;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        PauseScheduledChargeRequest: {
+            /** @description Optional reason recorded on the schedule timeline. */
+            reason?: string;
+        };
+        MarkPaidScheduledChargeRequest: {
+            /**
+             * @description Date the customer paid (YYYY-MM-DD). Recorded on the schedule timeline.
+             * @example 2026-05-15
+             */
+            paymentDate: string;
+            /** @description Seller-side reference for the off-Garu payment (e.g. bank-transfer ID). */
+            externalReference?: string;
+        };
         MetaResponse: {
             /** @example Garu */
             name: string;
@@ -1552,18 +1670,6 @@ export interface components {
             /** @example contato@garu.com.br */
             support_email: string;
         };
-        TrackingConfigResponse: {
-            /** @description Product ID */
-            productId: number;
-            /** @description Seller ID */
-            sellerId: number;
-            /** @description List of pixel configurations */
-            pixels: components["schemas"]["TrackingPixelConfig"][];
-            /** @description Event settings */
-            eventSettings: components["schemas"]["TrackingEventSettings"];
-            /** @description Default tracking domain */
-            defaultDomain: string;
-        };
         CreateWebhookEndpointRequest: {
             /**
              * Format: uri
@@ -1594,24 +1700,6 @@ export interface components {
             description?: string;
             /** @description Enable or disable this endpoint */
             enabled?: boolean;
-        };
-        TrackingPixelConfig: {
-            /** @description Facebook Pixel ID */
-            pixelId: string;
-            /** @description Custom tracking domain (e.g., pixels.example.com) */
-            trackingDomain?: string;
-        };
-        TrackingEventSettings: {
-            /** @description Whether PageView event is enabled */
-            pageViewEnabled: boolean;
-            /** @description Whether InitiateCheckout event is enabled */
-            initiateCheckoutEnabled: boolean;
-            /** @description Whether AddPaymentInfo event is enabled */
-            addPaymentInfoEnabled: boolean;
-            /** @description Whether Lead event is enabled */
-            leadEnabled: boolean;
-            /** @description Whether Purchase event is enabled */
-            purchaseEnabled: boolean;
         };
         MetaFeaturesDto: {
             /** @example true */
@@ -1647,10 +1735,17 @@ export interface components {
             facebookPixels: components["schemas"]["FacebookPixel"][];
             portalConfiguration: components["schemas"]["PortalConfiguration"];
         };
-        Tag: {
+        BankAccount: {
             id: number;
-            name: string;
-            products: components["schemas"]["Product"][];
+            sellerId: number;
+            Seller: components["schemas"]["Seller"];
+            bank: string;
+            agency: string;
+            account: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
         };
         Affiliations: {
             id: number;
@@ -1685,175 +1780,6 @@ export interface components {
              */
             canceledAt: string;
         };
-        SubscriptionPrice: {
-            id: Record<string, never>;
-            productId: number;
-            product: components["schemas"]["Product"];
-            gatewayProvider: string;
-            gatewayPlanId: string;
-            name: string;
-            pricingModel: string;
-            unitAmount: number;
-            currency: string;
-            billingInterval: string;
-            billingIntervalCount: number;
-            trialPeriodDays: number;
-            description: string | null;
-            metadata: Record<string, never>;
-            isActive: boolean;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
-            subscriptions: components["schemas"]["Subscription"][];
-        };
-        FacebookPixel: {
-            id: number;
-            name: string;
-            seller: components["schemas"]["Seller"];
-            product: components["schemas"]["Product"] | null;
-            pixelId: string;
-            accessToken: string | null;
-            isActive: boolean;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
-            domainId: number | null;
-            domain: components["schemas"]["SellerDomain"] | null;
-        };
-        CoProducer: {
-            id: number;
-            productId: number;
-            product: components["schemas"]["Product"];
-            sellerId: number;
-            seller: components["schemas"]["Seller"];
-            shareType: Record<string, never>;
-            shareValue: number;
-            status: Record<string, never>;
-            invitedBySellerId: number;
-            invitedBySeller: components["schemas"]["Seller"];
-            /** Format: date-time */
-            acceptedAt: string | null;
-            /** Format: date-time */
-            removedAt: string | null;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
-        };
-        SellerDomain: {
-            id: number;
-            sellerId: number;
-            seller: components["schemas"]["Seller"];
-            domain: string;
-            subdomain: string;
-            verificationStatus: Record<string, never>;
-            /** Format: date-time */
-            verifiedAt: string | null;
-            /** Format: date-time */
-            lastCheckAt: string | null;
-            failureCount: number;
-            isActive: boolean;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
-            pixels: components["schemas"]["FacebookPixel"][];
-        };
-        Subscription: {
-            id: number;
-            uuid: string;
-            gatewayProvider: string;
-            gatewaySubscriptionId: string;
-            customerId: number;
-            customer: components["schemas"]["Customer"];
-            subscriptionPriceId: Record<string, never>;
-            subscriptionPrice: components["schemas"]["SubscriptionPrice"];
-            paymentMethodId: number | null;
-            paymentMethod: components["schemas"]["PaymentMethod"] | null;
-            sellerId: number;
-            seller: components["schemas"]["Seller"];
-            status: string;
-            /** Format: date-time */
-            currentPeriodStart: string | null;
-            /** Format: date-time */
-            currentPeriodEnd: string | null;
-            /** Format: date-time */
-            trialStart: string | null;
-            /** Format: date-time */
-            trialEnd: string | null;
-            /** Format: date-time */
-            cancelledAt: string | null;
-            /** Format: date-time */
-            endedAt: string | null;
-            amount: number;
-            currency: string;
-            cancelAtPeriodEnd: boolean;
-            cancellationReason: string | null;
-            metadata: Record<string, never>;
-            retryCount: number;
-            /** Format: date-time */
-            nextRetryDate: string | null;
-            lastBillingError: string | null;
-            missedWebhookCount: number;
-            /** Format: date-time */
-            pausedAt: string | null;
-            /** Format: date-time */
-            pauseResumeAt: string | null;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
-            events: components["schemas"]["SubscriptionEvent"][];
-            transactions: components["schemas"]["Transaction"][];
-        };
-        PaymentMethod: {
-            id: number;
-            customerId: number;
-            customer: components["schemas"]["Customer"];
-            gatewayProvider: string;
-            gatewayCardId: string;
-            cardBrand: string;
-            cardLast4: string;
-            cardExpMonth: number;
-            cardExpYear: number;
-            cardholderName: string;
-            isDefault: boolean;
-            isBackup: boolean;
-            status: string;
-            /** Format: date-time */
-            lastUsedAt: string | null;
-            failedAttempts: number;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
-            subscriptions: components["schemas"]["Subscription"][];
-        };
-        SubscriptionEvent: {
-            id: number;
-            subscriptionId: number;
-            subscription: components["schemas"]["Subscription"];
-            eventType: string;
-            gatewayProvider: string;
-            gatewayEventId: string | null;
-            eventData: Record<string, never>;
-            /** Format: date-time */
-            createdAt: string;
-        };
-        BankAccount: {
-            id: number;
-            sellerId: number;
-            Seller: components["schemas"]["Seller"];
-            bank: string;
-            agency: string;
-            account: string;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
-        };
         Withdrawals: {
             id: number;
             seller: components["schemas"]["Seller"];
@@ -1882,6 +1808,21 @@ export interface components {
             /** Format: date-time */
             updatedAt: string;
         };
+        FacebookPixel: {
+            id: number;
+            name: string;
+            seller: components["schemas"]["Seller"];
+            product: components["schemas"]["Product"] | null;
+            pixelId: string;
+            accessToken: string | null;
+            isActive: boolean;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            domainId: number | null;
+            domain: components["schemas"]["SellerDomain"] | null;
+        };
         PortalConfiguration: {
             id: number;
             sellerId: number;
@@ -1903,6 +1844,25 @@ export interface components {
             createdAt: string;
             /** Format: date-time */
             updatedAt: string;
+        };
+        SellerDomain: {
+            id: number;
+            sellerId: number;
+            seller: components["schemas"]["Seller"];
+            domain: string;
+            subdomain: string;
+            verificationStatus: Record<string, never>;
+            /** Format: date-time */
+            verifiedAt: string | null;
+            /** Format: date-time */
+            lastCheckAt: string | null;
+            failureCount: number;
+            isActive: boolean;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            pixels: components["schemas"]["FacebookPixel"][];
         };
         User: {
             id: number;
@@ -2033,6 +1993,134 @@ export interface components {
             createdAt: string;
             /** Format: date-time */
             updatedAt: string;
+        };
+        Tag: {
+            id: number;
+            name: string;
+            products: components["schemas"]["Product"][];
+        };
+        SubscriptionPrice: {
+            id: Record<string, never>;
+            productId: number;
+            product: components["schemas"]["Product"];
+            gatewayProvider: string;
+            gatewayPlanId: string;
+            name: string;
+            pricingModel: string;
+            unitAmount: number;
+            currency: string;
+            billingInterval: string;
+            billingIntervalCount: number;
+            trialPeriodDays: number;
+            description: string | null;
+            metadata: Record<string, never>;
+            isActive: boolean;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            subscriptions: components["schemas"]["Subscription"][];
+        };
+        CoProducer: {
+            id: number;
+            productId: number;
+            product: components["schemas"]["Product"];
+            sellerId: number;
+            seller: components["schemas"]["Seller"];
+            shareType: Record<string, never>;
+            shareValue: number;
+            status: Record<string, never>;
+            invitedBySellerId: number;
+            invitedBySeller: components["schemas"]["Seller"];
+            /** Format: date-time */
+            acceptedAt: string | null;
+            /** Format: date-time */
+            removedAt: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        Subscription: {
+            id: number;
+            uuid: string;
+            gatewayProvider: string;
+            gatewaySubscriptionId: string;
+            customerId: number;
+            customer: components["schemas"]["Customer"];
+            subscriptionPriceId: Record<string, never>;
+            subscriptionPrice: components["schemas"]["SubscriptionPrice"];
+            paymentMethodId: number | null;
+            paymentMethod: components["schemas"]["PaymentMethod"] | null;
+            sellerId: number;
+            seller: components["schemas"]["Seller"];
+            status: string;
+            /** Format: date-time */
+            currentPeriodStart: string | null;
+            /** Format: date-time */
+            currentPeriodEnd: string | null;
+            /** Format: date-time */
+            trialStart: string | null;
+            /** Format: date-time */
+            trialEnd: string | null;
+            /** Format: date-time */
+            cancelledAt: string | null;
+            /** Format: date-time */
+            endedAt: string | null;
+            amount: number;
+            currency: string;
+            cancelAtPeriodEnd: boolean;
+            cancellationReason: string | null;
+            metadata: Record<string, never>;
+            retryCount: number;
+            /** Format: date-time */
+            nextRetryDate: string | null;
+            lastBillingError: string | null;
+            missedWebhookCount: number;
+            /** Format: date-time */
+            pausedAt: string | null;
+            /** Format: date-time */
+            pauseResumeAt: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            events: components["schemas"]["SubscriptionEvent"][];
+            transactions: components["schemas"]["Transaction"][];
+        };
+        PaymentMethod: {
+            id: number;
+            customerId: number;
+            customer: components["schemas"]["Customer"];
+            gatewayProvider: string;
+            gatewayCardId: string;
+            cardBrand: string;
+            cardLast4: string;
+            cardExpMonth: number;
+            cardExpYear: number;
+            cardholderName: string;
+            isDefault: boolean;
+            isBackup: boolean;
+            status: string;
+            /** Format: date-time */
+            lastUsedAt: string | null;
+            failedAttempts: number;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            subscriptions: components["schemas"]["Subscription"][];
+        };
+        SubscriptionEvent: {
+            id: number;
+            subscriptionId: number;
+            subscription: components["schemas"]["Subscription"];
+            eventType: string;
+            gatewayProvider: string;
+            gatewayEventId: string | null;
+            eventData: Record<string, never>;
+            /** Format: date-time */
+            createdAt: string;
         };
         TransactionDto: {
             myId?: string;
@@ -2282,14 +2370,6 @@ export interface components {
             utmTerm?: string;
             /** @description UTM content */
             utmContent?: string;
-        };
-        PixelDomainInfo: {
-            /** @description Domain ID */
-            id: number;
-            /** @description Full subdomain (e.g., pixels.example.com) */
-            fullSubdomain: string;
-            /** @description Domain verification status */
-            verificationStatus: string;
         };
     };
     responses: never;
