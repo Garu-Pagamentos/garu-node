@@ -14,6 +14,9 @@ export {
   type GaruErrorCode
 } from './errors.js';
 export type {
+  CancelAtPeriodEndScheduledChargeParams,
+  CancelRecurrenceScheduledChargeParams,
+  ChangePaymentMethodScheduledChargeParams,
   Charge,
   ChargeList,
   ChargeStatus,
@@ -37,6 +40,8 @@ export type {
   PostponeScheduledChargeParams,
   Product,
   ProductList,
+  RecurrenceConfig,
+  RecurrenceInterval,
   RefundChargeParams,
   ScheduledChargeActor,
   ScheduledChargeDetail,
