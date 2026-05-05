@@ -165,6 +165,90 @@ const customer = await garu.customers.create({
 const { data, meta } = await garu.customers.list({ search: 'maria', limit: 10 });
 ```
 
+## Products
+
+Discover products and customize the per-product portal experience (B2B2C, v0.8.0).
+
+| Method                              | Description                                                       |
+| ----------------------------------- | ----------------------------------------------------------------- |
+| `list(params?)`                     | Paginated list of products for the seller.                        |
+| `get(uuid)`                         | Fetch a single product by UUID — same id used by charges.         |
+| `portalConfig.get(productId)`       | Read per-product portal customization. Returns `null` if unset.   |
+| `portalConfig.set(productId, p)`    | Upsert with merge — only fields present are written.              |
+| `portalConfig.patch(productId, p)`  | Same merge semantics as `set` — alias for HTTP-PATCH callers.     |
+| `portalConfig.clear(productId)`     | Remove the customization; product falls back to seller config.    |
+
+```ts
+// SaaS de coaching: per-coach branding under one Seller account
+await garu.products.portalConfig.set(57, {
+  businessName: 'Coach Maria — Corrida & Trilha',
+  primaryColor: '#257264',
+  logoUrl: 'https://cdn.exemplo.com/coaches/maria.png',
+});
+
+// Pass `null` on a field to inherit from the seller-level config
+await garu.products.portalConfig.patch(57, { primaryColor: null });
+```
+
+## Scheduled charges
+
+Bill an existing customer on a future date — one-time or recurring with card tokenization. The Garu drives email reminders, dunning, retries, and the lifecycle state machine.
+
+| Method                                        | Description                                                                |
+| --------------------------------------------- | -------------------------------------------------------------------------- |
+| `create(params)`                              | Create one-time or recurring schedule. Auto-attaches `X-Idempotency-Key`.  |
+| `list(params?)`                               | Paginated list with status / type / dueFrom / dueTo / customerId filters.  |
+| `get(id)`                                     | Detail bundle: charge + event timeline + linked transactions.              |
+| `markPaid(id, params)`                        | Mark cycle paid (off-Garu reconciliation).                                 |
+| `postpone(id, params)`                        | Move the next cycle's due date forward.                                    |
+| `pause(id, params?)` / `resume(id)`           | Suspend / re-enable a series.                                              |
+| `cancelRecurrence(id, params?)`               | Hard-stop future cycles (recurring only).                                  |
+| `cancelAtPeriodEnd(id, { enabled })`          | Stripe-style soft-cancel; reversible.                                      |
+| `changePaymentMethod(id, params)`             | Swap the saved card.                                                       |
+| `clearPaymentMethod(id)`                      | Remove the saved card; future cycles email-with-link.                      |
+| `listAttempts(id, params?)`                   | Per-attempt billing log — every silent-charge / retry / mark-paid (v0.8.2).|
+
+```ts
+// Recurring with 7-day trial
+const series = await garu.scheduledCharges.create({
+  customerId: 42,
+  productId: 17,
+  amount: 49.9,
+  type: 'recurring',
+  dueDate: '2026-06-01',
+  methods: ['card', 'pix'],
+  recurrence: { interval: 'monthly' },
+  trialDays: 7,
+});
+
+// Audit why cycle 3 failed (v0.8.2)
+const { data } = await garu.scheduledCharges.listAttempts(series.id, {
+  cycleNumber: 3,
+});
+const declines = data.filter((a) => a.status === 'declined');
+// → each declines[i].failureCode is one of GaruFailureCode (insufficient_funds,
+//   card_expired, card_declined, ...)
+```
+
+## Failure codes (v0.8.0)
+
+Every `transaction.payment.failed`, `scheduled_charge.cycle_failed`, and `listAttempts()` row carries:
+
+- `failureCode` — canonical `GaruFailureCode` enum (10 values, gateway-independent)
+- `failureReason` — human-readable PT-BR
+- `gatewayFailureCode` — raw code from Celcoin (ABECS for forensics)
+
+```ts
+import type { GaruFailureCode } from '@garuhq/node';
+
+const PERMANENT: GaruFailureCode[] = ['card_expired', 'card_canceled', 'fraud_suspected'];
+function shouldAskForNewCard(code: GaruFailureCode): boolean {
+  return PERMANENT.includes(code);
+}
+```
+
+Full table at [docs.garu.com.br/api-reference/webhooks/codigos-de-falha](https://docs.garu.com.br/api-reference/webhooks/codigos-de-falha).
+
 ## Meta
 
 Discover available payment methods and webhook events. No authentication required.
