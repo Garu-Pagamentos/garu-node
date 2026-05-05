@@ -464,3 +464,115 @@ export interface MetaResponse {
 export function toWirePaymentMethod(pm: PaymentMethod): WirePaymentMethodId {
   return pm === 'credit_card' ? 'creditcard' : pm;
 }
+
+// ============================================================
+// v0.8.0 — failure codes + per-product portal config + new webhook events
+// ============================================================
+
+/**
+ * Canonical Garu failure code on `transaction.payment.failed` and
+ * `scheduled_charge.cycle_failed` events. Stable across acquirer changes —
+ * branch on this rather than the raw Celcoin code.
+ */
+export type GaruFailureCode =
+  | 'insufficient_funds'
+  | 'card_declined'
+  | 'card_expired'
+  | 'card_canceled'
+  | 'processing_error'
+  | 'issuer_unavailable'
+  | 'fraud_suspected'
+  | 'invalid_cvv'
+  | 'do_not_honor_repeated'
+  | 'unknown';
+
+/**
+ * Shape of the failure trio added to `transaction.payment.failed` and
+ * `scheduled_charge.cycle_failed` payloads. Sellers should always receive
+ * a non-null `failureCode` — `unknown` is the sentinel when the gateway
+ * didn't surface enough detail to map.
+ */
+export interface FailurePayload {
+  failureCode: GaruFailureCode;
+  failureReason: string | null;
+  /** Raw acquirer code (Celcoin's ABECS code today). For forensics only. */
+  gatewayFailureCode: string | null;
+}
+
+/**
+ * `payment_method.expiring_soon` — fires at 30/14/7 days before card
+ * expiry, idempotent per stage. Use to nudge the customer to update
+ * their card before silent-charge starts failing.
+ */
+export interface PaymentMethodExpiringPayload {
+  paymentMethodId: number;
+  customerId: number;
+  cardLast4: string;
+  cardBrand: string;
+  expiresAt: string;
+  daysUntilExpiry: 30 | 14 | 7;
+}
+
+/**
+ * `payment_method.expired` — fires once on the day-of-expiry when the cron
+ * flips `status='expired'`. Future silent charges short-circuit
+ * with `failureCode='card_expired'` instead of hitting the acquirer.
+ */
+export interface PaymentMethodExpiredPayload {
+  paymentMethodId: number;
+  customerId: number;
+  cardLast4: string;
+  cardBrand: string;
+  expiresAt: string;
+}
+
+/**
+ * Per-product portal customization (Atletia coach-as-product modeling and
+ * any other B2B2C platform). `null` fields inherit from the seller-level
+ * portal config.
+ */
+export interface ProductPortalConfig {
+  id: number;
+  productId: number;
+  businessName: string | null;
+  logoUrl: string | null;
+  primaryColor: string | null;
+  allowCancelSubscription: boolean | null;
+  allowUpdatePaymentMethod: boolean | null;
+  allowUpdateBillingInfo: boolean | null;
+  allowViewInvoices: boolean | null;
+  allowApplyCoupons: boolean | null;
+  requireCancelReason: boolean | null;
+  cancelAtPeriodEndOnly: boolean | null;
+  sendCancellationEmail: boolean | null;
+  sendPaymentMethodUpdatedEmail: boolean | null;
+  customSuccessMessage: string | null;
+  customCancellationMessage: string | null;
+  customWelcomeText: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * Body for `POST` / `PATCH /api/products/:id/portal-config`. Both verbs
+ * are upsert with merge semantics — only fields present are written;
+ * unspecified fields keep their persisted value. Use the `clear`
+ * method (DELETE) to reset everything.
+ */
+export interface SetProductPortalConfigParams {
+  businessName?: string | null;
+  logoUrl?: string | null;
+  primaryColor?: string | null;
+  allowCancelSubscription?: boolean | null;
+  allowUpdatePaymentMethod?: boolean | null;
+  allowUpdateBillingInfo?: boolean | null;
+  allowViewInvoices?: boolean | null;
+  allowApplyCoupons?: boolean | null;
+  requireCancelReason?: boolean | null;
+  cancelAtPeriodEndOnly?: boolean | null;
+  sendCancellationEmail?: boolean | null;
+  sendPaymentMethodUpdatedEmail?: boolean | null;
+  customSuccessMessage?: string | null;
+  customCancellationMessage?: string | null;
+  customWelcomeText?: string | null;
+}

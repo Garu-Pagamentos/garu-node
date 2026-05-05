@@ -51,8 +51,59 @@ describe('products.get', () => {
     const { fetch } = mockFetch([{ status: 404, body: { message: 'Product not found' } }]);
     const garu = new Garu({ apiKey: 'sk_test_abc', fetch, maxRetries: 0 });
 
-    await expect(garu.products.get('does-not-exist')).rejects.toBeInstanceOf(
-      GaruNotFoundError
-    );
+    await expect(garu.products.get('does-not-exist')).rejects.toBeInstanceOf(GaruNotFoundError);
+  });
+});
+
+describe('products.portalConfig', () => {
+  it('GET hits /api/products/:id/portal-config', async () => {
+    const cfg = { id: 1, productId: 57, primaryColor: '#257264', businessName: null };
+    const { fetch, calls } = mockFetch([{ status: 200, body: cfg }]);
+    const garu = new Garu({ apiKey: 'sk_test_abc', fetch, maxRetries: 0 });
+
+    const result = await garu.products.portalConfig.get(57);
+
+    expect(result?.productId).toBe(57);
+    expect(calls[0]!.method).toBe('GET');
+    expect(calls[0]!.url).toBe('https://garu.com.br/api/products/57/portal-config');
+  });
+
+  it('set sends POST with body', async () => {
+    const cfg = { id: 1, productId: 57, primaryColor: '#257264', businessName: 'Coach Maria' };
+    const { fetch, calls } = mockFetch([{ status: 200, body: cfg }]);
+    const garu = new Garu({ apiKey: 'sk_test_abc', fetch, maxRetries: 0 });
+
+    await garu.products.portalConfig.set(57, {
+      businessName: 'Coach Maria',
+      primaryColor: '#257264'
+    });
+
+    expect(calls[0]!.method).toBe('POST');
+    expect(calls[0]!.url).toBe('https://garu.com.br/api/products/57/portal-config');
+    expect(calls[0]!.body).toMatchObject({
+      businessName: 'Coach Maria',
+      primaryColor: '#257264'
+    });
+  });
+
+  it('patch sends PATCH with body', async () => {
+    const cfg = { id: 1, productId: 57, primaryColor: '#888' };
+    const { fetch, calls } = mockFetch([{ status: 200, body: cfg }]);
+    const garu = new Garu({ apiKey: 'sk_test_abc', fetch, maxRetries: 0 });
+
+    await garu.products.portalConfig.patch(57, { primaryColor: '#888' });
+
+    expect(calls[0]!.method).toBe('PATCH');
+    expect(calls[0]!.url).toBe('https://garu.com.br/api/products/57/portal-config');
+  });
+
+  it('clear sends DELETE and returns { removed }', async () => {
+    const { fetch, calls } = mockFetch([{ status: 200, body: { removed: true } }]);
+    const garu = new Garu({ apiKey: 'sk_test_abc', fetch, maxRetries: 0 });
+
+    const result = await garu.products.portalConfig.clear(57);
+
+    expect(result.removed).toBe(true);
+    expect(calls[0]!.method).toBe('DELETE');
   });
 });

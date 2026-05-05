@@ -27,6 +27,9 @@ export type {
   CustomerList,
   CustomerRecord,
   CardInfo,
+  // v0.8.0 — failure codes + per-product portal config + new webhook payloads
+  FailurePayload,
+  GaruFailureCode,
   ListChargesParams,
   ListCustomersParams,
   ListProductsParams,
@@ -37,9 +40,12 @@ export type {
   PaginatedList,
   PauseScheduledChargeParams,
   PaymentMethod,
+  PaymentMethodExpiredPayload,
+  PaymentMethodExpiringPayload,
   PostponeScheduledChargeParams,
   Product,
   ProductList,
+  ProductPortalConfig,
   RecurrenceConfig,
   RecurrenceInterval,
   RefundChargeParams,
@@ -53,6 +59,7 @@ export type {
   ScheduledChargeStatus,
   ScheduledChargeType,
   ScheduledPaymentMethod,
+  SetProductPortalConfigParams,
   UpdateCustomerParams,
   WirePaymentMethodId
 } from './types.js';
