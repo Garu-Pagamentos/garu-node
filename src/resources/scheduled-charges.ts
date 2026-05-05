@@ -5,10 +5,12 @@ import type {
   CancelRecurrenceScheduledChargeParams,
   ChangePaymentMethodScheduledChargeParams,
   CreateScheduledChargeParams,
+  ListScheduledChargeAttemptsParams,
   ListScheduledChargesParams,
   MarkPaidScheduledChargeParams,
   PauseScheduledChargeParams,
   PostponeScheduledChargeParams,
+  ScheduledChargeAttemptList,
   ScheduledChargeDetail,
   ScheduledChargeList,
   ScheduledChargeRecord
@@ -277,6 +279,37 @@ export class ScheduledCharges {
       (this.http.client.DELETE as Function)(`/api/scheduled-charges/${id}/payment-method`, {
         signal
       }).then((r: { data?: ScheduledChargeRecord; error?: unknown; response: Response }) => r)
+    );
+  }
+
+  /**
+   * Per-attempt billing log for the series (SPEC §4.2). One row per
+   * logical billing event — cycle 1 interactive charge, every silent
+   * charge attempt, every retry, every manual mark-paid. Carries the
+   * canonical `failureCode` for declines so you can audit billing
+   * outcomes without cross-referencing Transactions.
+   *
+   * @example
+   * const { data } = await garu.scheduledCharges.listAttempts('sch_abc', {
+   *   cycleNumber: 3
+   * });
+   * const declines = data.filter((a) => a.status === 'declined');
+   */
+  async listAttempts(
+    id: string,
+    params: ListScheduledChargeAttemptsParams = {}
+  ): Promise<ScheduledChargeAttemptList> {
+    const qs = new URLSearchParams();
+    if (params.page !== undefined) qs.set('page', String(params.page));
+    if (params.limit !== undefined) qs.set('limit', String(params.limit));
+    if (params.cycleNumber !== undefined) qs.set('cycleNumber', String(params.cycleNumber));
+    const query = qs.toString();
+    const url = `/api/scheduled-charges/${id}/attempts${query ? `?${query}` : ''}`;
+
+    return this.http.call<ScheduledChargeAttemptList>((signal) =>
+      (this.http.client.GET as Function)(url, { signal }).then(
+        (r: { data?: ScheduledChargeAttemptList; error?: unknown; response: Response }) => r
+      )
     );
   }
 }

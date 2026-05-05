@@ -316,6 +316,48 @@ export interface ScheduledChargeDetail {
 
 export type ScheduledChargeList = PaginatedList<ScheduledChargeRecord>;
 
+/** Source of a billing attempt — see SPEC §3.1. */
+export type ScheduledChargeAttemptSource =
+  | 'cycle1_interactive'
+  | 'silent_charge'
+  | 'card_retry'
+  | 'manual_mark_paid'
+  | 'fallback_pix';
+
+export type ScheduledChargeAttemptStatus =
+  | 'pending'
+  | 'succeeded'
+  | 'declined'
+  | 'canceled'
+  | 'errored';
+
+export interface ScheduledChargeAttempt {
+  id: number;
+  cycleId: string;
+  cycleNumber: number;
+  attemptNumber: number;
+  attemptedAt: string;
+  source: ScheduledChargeAttemptSource;
+  paymentMethod: 'card' | 'pix' | 'boleto' | 'manual';
+  paymentMethodId: number | null;
+  cardLast4: string | null;
+  cardBrand: string | null;
+  status: ScheduledChargeAttemptStatus;
+  failureCode: GaruFailureCode | null;
+  failureReason: string | null;
+  gatewayFailureCode: string | null;
+  gatewayChargeId: number | null;
+  transactionId: number | null;
+}
+
+export type ScheduledChargeAttemptList = PaginatedList<ScheduledChargeAttempt>;
+
+export interface ListScheduledChargeAttemptsParams {
+  page?: number;
+  limit?: number;
+  cycleNumber?: number;
+}
+
 export interface CreateScheduledChargeParams {
   customerId: number;
   /**
