@@ -1,6 +1,9 @@
 import type { HttpClient } from '../http.js';
 import { generateIdempotencyKey } from '../idempotency.js';
 import type {
+  CancelAtPeriodEndScheduledChargeParams,
+  CancelRecurrenceScheduledChargeParams,
+  ChangePaymentMethodScheduledChargeParams,
   CreateScheduledChargeParams,
   ListScheduledChargesParams,
   MarkPaidScheduledChargeParams,
@@ -15,13 +18,15 @@ import type {
  * Scheduled charges — bill a customer on a future date.
  *
  * The seller registers a customer (see `garu.customers.create`), then
- * schedules one or more charges (PIX or Boleto). Garu drives the rest:
- * pre-charge customer email on the due date, dunning to the seller team
- * after the due date, and a state machine for postpone/pause/resume/
- * mark-paid actions.
+ * schedules one or more charges (PIX, Boleto, or Card). Garu drives the
+ * rest: pre-charge customer email on the due date, dunning to the seller
+ * team after the due date, and a state machine for
+ * postpone/pause/resume/mark-paid actions.
  *
- * Recurring schedules are reserved for a future API version; the current
- * `type` field accepts only `one_time`.
+ * Recurring schedules (`type: 'recurring'`) silent-charge the saved card
+ * on every cycle past the first. Optional trial periods, cancel-recurrence,
+ * cancel-at-period-end, and payment-method swap actions cover the SaaS
+ * lifecycle.
  */
 export class ScheduledCharges {
   constructor(private readonly http: HttpClient) {}
@@ -162,10 +167,23 @@ export class ScheduledCharges {
 
   /**
    * Manually mark a scheduled charge as paid, e.g. when the customer paid
-   * outside Garu (bank transfer, cash). Allowed from `due_today` / `overdue`.
+   * outside Garu (bank transfer, cash).
+   *
+   * - **One-time:** omit `cycleNumber`. Allowed from `due_today` / `overdue`.
+   * - **Recurring:** pass `cycleNumber`. Allowed from cycle status
+   *   `due_today` / `overdue` / `failed`. Future cycles continue.
    *
    * @example
+   * // One-time
    * await garu.scheduledCharges.markPaid('sch_abc123', {
+   *   paymentDate: '2026-06-20',
+   *   externalReference: 'TED 4472881'
+   * });
+   *
+   * @example
+   * // Recurring — mark cycle 3 paid; future cycles keep billing
+   * await garu.scheduledCharges.markPaid('sch_abc123', {
+   *   cycleNumber: 3,
    *   paymentDate: '2026-06-20',
    *   externalReference: 'TED 4472881'
    * });
@@ -177,6 +195,86 @@ export class ScheduledCharges {
     return this.http.call<ScheduledChargeRecord>((signal) =>
       (this.http.client.POST as Function)(`/api/scheduled-charges/${id}/mark-paid`, {
         body: params,
+        signal
+      }).then((r: { data?: ScheduledChargeRecord; error?: unknown; response: Response }) => r)
+    );
+  }
+
+  /**
+   * Stop future cycles for a recurring series. The currently in-flight
+   * cycle (if any) remains active until paid, postponed, or marked-paid;
+   * only after that resolves does the series flip to `recurrence_canceled`.
+   * Recurring-only.
+   *
+   * @example
+   * await garu.scheduledCharges.cancelRecurrence('sch_abc123', {
+   *   reason: 'cliente cancelou plano'
+   * });
+   */
+  async cancelRecurrence(
+    id: string,
+    params: CancelRecurrenceScheduledChargeParams = {}
+  ): Promise<ScheduledChargeRecord> {
+    return this.http.call<ScheduledChargeRecord>((signal) =>
+      (this.http.client.POST as Function)(`/api/scheduled-charges/${id}/cancel-recurrence`, {
+        body: params,
+        signal
+      }).then((r: { data?: ScheduledChargeRecord; error?: unknown; response: Response }) => r)
+    );
+  }
+
+  /**
+   * Toggle Stripe-style soft cancel on a recurring series. With
+   * `enabled: true`, the cycle generator stops emitting new cycles after
+   * the next paid cycle; the in-flight cycle still bills + can be paid.
+   * Reversible by passing `enabled: false`. Recurring-only.
+   *
+   * @example
+   * await garu.scheduledCharges.setCancelAtPeriodEnd('sch_abc123', { enabled: true });
+   */
+  async setCancelAtPeriodEnd(
+    id: string,
+    params: CancelAtPeriodEndScheduledChargeParams
+  ): Promise<ScheduledChargeRecord> {
+    return this.http.call<ScheduledChargeRecord>((signal) =>
+      (this.http.client.POST as Function)(`/api/scheduled-charges/${id}/cancel-at-period-end`, {
+        body: params,
+        signal
+      }).then((r: { data?: ScheduledChargeRecord; error?: unknown; response: Response }) => r)
+    );
+  }
+
+  /**
+   * Swap the saved card on a recurring series. The new PaymentMethod must
+   * belong to the same customerId. Future cycles silent-charge the new
+   * card; the in-flight cycle is not retroactively rebound.
+   *
+   * @example
+   * await garu.scheduledCharges.changePaymentMethod('sch_abc123', { paymentMethodId: 42 });
+   */
+  async changePaymentMethod(
+    id: string,
+    params: ChangePaymentMethodScheduledChargeParams
+  ): Promise<ScheduledChargeRecord> {
+    return this.http.call<ScheduledChargeRecord>((signal) =>
+      (this.http.client.POST as Function)(`/api/scheduled-charges/${id}/payment-method`, {
+        body: params,
+        signal
+      }).then((r: { data?: ScheduledChargeRecord; error?: unknown; response: Response }) => r)
+    );
+  }
+
+  /**
+   * Clear the saved card on a recurring series. Future cycles fall back
+   * to the email-with-link flow so the customer can re-enter card details
+   * or pay via PIX/Boleto.
+   *
+   * @example
+   * await garu.scheduledCharges.clearPaymentMethod('sch_abc123');
+   */
+  async clearPaymentMethod(id: string): Promise<ScheduledChargeRecord> {
+    return this.http.call<ScheduledChargeRecord>((signal) =>
+      (this.http.client.DELETE as Function)(`/api/scheduled-charges/${id}/payment-method`, {
         signal
       }).then((r: { data?: ScheduledChargeRecord; error?: unknown; response: Response }) => r)
     );

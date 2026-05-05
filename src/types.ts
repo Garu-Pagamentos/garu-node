@@ -227,7 +227,26 @@ export type ScheduledChargeStatus =
 
 export type ScheduledChargeType = 'one_time' | 'recurring';
 
-export type ScheduledPaymentMethod = 'pix' | 'boleto';
+export type ScheduledPaymentMethod = 'pix' | 'boleto' | 'card';
+
+export type RecurrenceInterval =
+  | 'weekly'
+  | 'biweekly'
+  | 'monthly'
+  | 'bimonthly'
+  | 'quarterly'
+  | 'biannual'
+  | 'yearly';
+
+export interface RecurrenceConfig {
+  interval: RecurrenceInterval;
+  /** Multiplier for the interval (default 1). */
+  intervalCount?: number;
+  /** Stop after N successful cycles. Mutually exclusive with `endsOn`. */
+  endsAfter?: number;
+  /** Stop after this calendar date (YYYY-MM-DD). Mutually exclusive with `endsAfter`. */
+  endsOn?: string;
+}
 
 export type ScheduledChargeEventType =
   | 'created'
@@ -299,19 +318,28 @@ export type ScheduledChargeList = PaginatedList<ScheduledChargeRecord>;
 
 export interface CreateScheduledChargeParams {
   customerId: number;
+  /**
+   * Required when `methods` includes `card` — Celcoin transactions are
+   * scoped per product. Optional otherwise.
+   */
   productId?: number;
   /** Decimal BRL (e.g. `297.50`). */
   amount: number;
   description?: string;
-  /**
-   * Schedule type. Only `one_time` is accepted by the current API; the
-   * literal narrows to that until recurring schedules ship.
-   */
-  type: 'one_time';
+  /** Schedule type. `recurring` requires a `recurrence` block. */
+  type: ScheduledChargeType;
   /** YYYY-MM-DD in São Paulo time. Must be today or future. */
   dueDate: string;
-  /** PIX and Boleto are supported now; card requires tokenization (future). */
+  /** `card` is recurring-only and requires `productId`. */
   methods: ScheduledPaymentMethod[];
+  /** Cadence for `type='recurring'`. Must be omitted when `type='one_time'`. */
+  recurrence?: RecurrenceConfig;
+  /**
+   * Free-trial duration in days (1..365). Recurring-only. When set, cycle 1
+   * is rebased to `today + trialDays` and `customer.trial_started` fires
+   * immediately.
+   */
+  trialDays?: number;
   externalReference?: string;
   metadata?: Record<string, unknown>;
   /**
@@ -350,6 +378,25 @@ export interface MarkPaidScheduledChargeParams {
   paymentDate: string;
   /** Bank reference, internal ID, or any stable string for reconciliation. */
   externalReference?: string;
+  /**
+   * Cycle number to mark paid. REQUIRED for recurring schedules. Omitted
+   * for one-time charges.
+   */
+  cycleNumber?: number;
+}
+
+export interface CancelRecurrenceScheduledChargeParams {
+  reason?: string;
+}
+
+export interface CancelAtPeriodEndScheduledChargeParams {
+  /** `true` enables Stripe-style soft cancel; `false` clears the flag. */
+  enabled: boolean;
+}
+
+export interface ChangePaymentMethodScheduledChargeParams {
+  /** PaymentMethod id to bind. Must belong to the same customerId. */
+  paymentMethodId: number;
 }
 
 export interface Product {
