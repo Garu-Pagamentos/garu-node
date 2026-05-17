@@ -8,9 +8,13 @@ import type {
 } from '../types.js';
 
 /**
- * Per-product portal customization (Garu v0.8.0). Used by B2B2C platforms
- * that model their professionals/coaches as Products under a single seller
- * and want per-product branding on the customer payment + portal pages.
+ * Per-product portal customization. Used by B2B2C platforms that model
+ * their professionals/coaches as Products under a single seller and want
+ * per-product branding on the customer payment + portal pages.
+ *
+ * `productId` accepts either the product UUID (preferred — same identifier
+ * returned by `garu.products.list()` and webhook payloads) or the legacy
+ * numeric id. UUID support added in Garu v0.10.0.
  */
 export class ProductPortalConfigResource {
   constructor(private readonly http: HttpClient) {}
@@ -21,11 +25,11 @@ export class ProductPortalConfigResource {
    * portal config).
    *
    * @example
-   * const cfg = await garu.products.portalConfig.get(57);
+   * const cfg = await garu.products.portalConfig.get('b3f2c1e8-6e4a-4b9f-9d1c-2a1f6c3d4e5f');
    */
-  async get(productId: number): Promise<ProductPortalConfig | null> {
+  async get(productId: string | number): Promise<ProductPortalConfig | null> {
     return this.http.call<ProductPortalConfig | null>((signal) =>
-      (this.http.client.GET as Function)(`/api/products/${productId}/portal-config`, {
+      (this.http.client.GET as Function)(`/api/products/${encodeURIComponent(String(productId))}/portal-config`, {
         signal
       }).then((r: { data?: ProductPortalConfig | null; error?: unknown; response: Response }) => r)
     );
@@ -38,15 +42,18 @@ export class ProductPortalConfigResource {
    * value. Use `clear` to reset everything.
    *
    * @example
-   * await garu.products.portalConfig.set(57, {
+   * await garu.products.portalConfig.set('b3f2c1e8-6e4a-4b9f-9d1c-2a1f6c3d4e5f', {
    *   businessName: 'Coach Maria — Corrida & Trilha',
    *   primaryColor: '#257264',
    *   logoUrl: 'https://cdn.atletia.com.br/coaches/maria.png'
    * });
    */
-  async set(productId: number, params: SetProductPortalConfigParams): Promise<ProductPortalConfig> {
+  async set(
+    productId: string | number,
+    params: SetProductPortalConfigParams
+  ): Promise<ProductPortalConfig> {
     return this.http.call<ProductPortalConfig>((signal) =>
-      (this.http.client.POST as Function)(`/api/products/${productId}/portal-config`, {
+      (this.http.client.POST as Function)(`/api/products/${encodeURIComponent(String(productId))}/portal-config`, {
         body: params,
         signal
       }).then((r: { data?: ProductPortalConfig; error?: unknown; response: Response }) => r)
@@ -55,11 +62,11 @@ export class ProductPortalConfigResource {
 
   /** Same merge semantics as `set` — alias for HTTP-PATCH-prefering callers. */
   async patch(
-    productId: number,
+    productId: string | number,
     params: SetProductPortalConfigParams
   ): Promise<ProductPortalConfig> {
     return this.http.call<ProductPortalConfig>((signal) =>
-      (this.http.client.PATCH as Function)(`/api/products/${productId}/portal-config`, {
+      (this.http.client.PATCH as Function)(`/api/products/${encodeURIComponent(String(productId))}/portal-config`, {
         body: params,
         signal
       }).then((r: { data?: ProductPortalConfig; error?: unknown; response: Response }) => r)
@@ -72,11 +79,11 @@ export class ProductPortalConfigResource {
    * deleted, `{ removed: false }` when there was nothing to remove.
    *
    * @example
-   * await garu.products.portalConfig.clear(57);
+   * await garu.products.portalConfig.clear('b3f2c1e8-6e4a-4b9f-9d1c-2a1f6c3d4e5f');
    */
-  async clear(productId: number): Promise<{ removed: boolean }> {
+  async clear(productId: string | number): Promise<{ removed: boolean }> {
     return this.http.call<{ removed: boolean }>((signal) =>
-      (this.http.client.DELETE as Function)(`/api/products/${productId}/portal-config`, {
+      (this.http.client.DELETE as Function)(`/api/products/${encodeURIComponent(String(productId))}/portal-config`, {
         signal
       }).then((r: { data?: { removed: boolean }; error?: unknown; response: Response }) => r)
     );

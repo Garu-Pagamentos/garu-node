@@ -106,4 +106,31 @@ describe('products.portalConfig', () => {
     expect(result.removed).toBe(true);
     expect(calls[0]!.method).toBe('DELETE');
   });
+
+  it('GET accepts a UUID string and forwards it verbatim', async () => {
+    const uuid = '00d6d5d1-b094-4546-a49a-f9864e822c3c';
+    const { fetch, calls } = mockFetch([{ status: 200, body: { productId: 57 } }]);
+    const garu = new Garu({ apiKey: 'sk_test_abc', fetch, maxRetries: 0 });
+
+    await garu.products.portalConfig.get(uuid);
+
+    expect(calls[0]!.url).toBe(`https://garu.com.br/api/products/${uuid}/portal-config`);
+  });
+
+  it('encodes special characters in productId — blocks query/fragment injection', async () => {
+    const { fetch, calls } = mockFetch([
+      { status: 200, body: { removed: false } },
+      { status: 200, body: { removed: false } },
+      { status: 200, body: { removed: false } }
+    ]);
+    const garu = new Garu({ apiKey: 'sk_test_abc', fetch, maxRetries: 0 });
+
+    await garu.products.portalConfig.clear('57?admin=true');
+    await garu.products.portalConfig.clear('57#frag');
+    await garu.products.portalConfig.clear('../charges');
+
+    expect(calls[0]!.url).toBe('https://garu.com.br/api/products/57%3Fadmin%3Dtrue/portal-config');
+    expect(calls[1]!.url).toBe('https://garu.com.br/api/products/57%23frag/portal-config');
+    expect(calls[2]!.url).toBe('https://garu.com.br/api/products/..%2Fcharges/portal-config');
+  });
 });

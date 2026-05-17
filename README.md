@@ -167,7 +167,9 @@ const { data, meta } = await garu.customers.list({ search: 'maria', limit: 10 })
 
 ## Products
 
-Discover products and customize the per-product portal experience (B2B2C, v0.8.0).
+Discover products and customize the per-product portal experience (B2B2C).
+
+`portalConfig.*` methods accept `productId` as either the product UUID (preferred — same identifier returned by `list()` and webhook payloads) or the legacy numeric id (Garu v0.10.0+).
 
 | Method                              | Description                                                       |
 | ----------------------------------- | ----------------------------------------------------------------- |
@@ -180,14 +182,16 @@ Discover products and customize the per-product portal experience (B2B2C, v0.8.0
 
 ```ts
 // SaaS de coaching: per-coach branding under one Seller account
-await garu.products.portalConfig.set(57, {
+await garu.products.portalConfig.set('b3f2c1e8-6e4a-4b9f-9d1c-2a1f6c3d4e5f', {
   businessName: 'Coach Maria — Corrida & Trilha',
   primaryColor: '#257264',
   logoUrl: 'https://cdn.exemplo.com/coaches/maria.png',
 });
 
 // Pass `null` on a field to inherit from the seller-level config
-await garu.products.portalConfig.patch(57, { primaryColor: null });
+await garu.products.portalConfig.patch('b3f2c1e8-6e4a-4b9f-9d1c-2a1f6c3d4e5f', {
+  primaryColor: null,
+});
 ```
 
 ## Scheduled charges
