@@ -615,6 +615,14 @@ export interface WebhookEvent {
   responseStatus: number | null;
   /** Response body from the most recent attempt, truncated by the gateway. */
   responseBody: string | null;
+  /**
+   * When this row is a clone produced by `webhookEvents.resend(id)`, this is
+   * the numeric id of the original event the clone was forked from. `null`
+   * on every originally-fired event (and on events resurrected via the
+   * legacy `webhookEvents.retry(id)` mutation, which mutates in place
+   * instead of cloning).
+   */
+  manualResendOf: number | null;
   createdAt: string;
   [key: string]: unknown;
 }

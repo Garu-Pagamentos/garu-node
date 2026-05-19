@@ -3,6 +3,34 @@
 All notable changes to `@garuhq/node` are documented in this file. Format:
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [SemVer](https://semver.org/).
 
+## [0.12.0] — 2026-05-19
+
+### Added
+
+- `webhookEvents.resend(id)` — `POST /api/webhook-events/{id}/resend`,
+  the audit-trail-preserving counterpart to `retry()`. The backend
+  inserts a *clone* event (new numeric id) that points back at the
+  source via `manualResendOf`, then dispatches that clone. The
+  original row is untouched, so the historical record of the prior
+  failure (status, response status/body, attempts) survives. Works on
+  any source status (`success` / `failed` / `pending`).
+  - Outbound delivery uses `Idempotency-Key: resend_<originalId>`, so
+    recipient handlers can distinguish a resend from a fresh delivery
+    both by the header prefix and by reading the response payload's
+    `manualResendOf` field.
+- `WebhookEvent.manualResendOf: number | null` — populated with the
+  source event's numeric id on rows produced by `resend()`, `null`
+  everywhere else (originally-fired events and legacy `retry()`
+  outputs).
+
+### Deprecated
+
+- `webhookEvents.retry(id)` is soft-deprecated. It still works and is
+  not scheduled for removal — older CLI / MCP releases depend on it —
+  but new integrations should prefer `resend()`, which preserves the
+  original event's audit trail by cloning instead of mutating the row
+  in place.
+
 ## [0.11.1] — 2026-05-19
 
 ### Fixed

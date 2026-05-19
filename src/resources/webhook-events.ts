@@ -96,10 +96,16 @@ export class WebhookEvents {
   }
 
   /**
+   * @deprecated For most cases prefer {@link resend}, which preserves the
+   * original event's audit trail by cloning rather than mutating. `retry()`
+   * resets the original row in place — once it succeeds, the historical
+   * record of the prior failure is gone. Kept here for callers that
+   * explicitly want the legacy in-place semantics (and for backwards
+   * compatibility with older CLI / MCP releases).
+   *
    * Re-deliver a webhook event by ID. Resets it to `pending`, clears the
    * retry schedule, and triggers an immediate delivery attempt. Works on
-   * any status (`success`, `failed`, `pending`) — use this when a
-   * customer reports a missed or unprocessed event.
+   * any status (`success`, `failed`, `pending`).
    *
    * @example
    * const failed = await garu.webhookEvents.list({ status: 'failed', limit: 5 });
@@ -110,6 +116,44 @@ export class WebhookEvents {
   async retry(id: number): Promise<WebhookEvent> {
     return this.http.call<WebhookEvent>((signal) =>
       (this.http.client.POST as Function)(`/api/webhook-events/${id}/retry`, {
+        body: {},
+        signal
+      }).then((r: { data?: WebhookEvent; error?: unknown; response: Response }) => r)
+    );
+  }
+
+  /**
+   * Re-deliver a webhook event by ID, audit-trail preserving. Unlike
+   * {@link retry}, this does *not* mutate the original row — it inserts a
+   * fresh event (new numeric id) that points back at the source via
+   * `manualResendOf`, then dispatches that clone. The original row is
+   * untouched, so the historical record of the prior failure (and its
+   * response status / body) is preserved.
+   *
+   * Works on any source status (`success`, `failed`, `pending`). Use this
+   * when a customer reports a missed or unprocessed event, or to replay an
+   * event during a backfill — both reasons where you want the original
+   * delivery's outcome to remain on the record.
+   *
+   * **Outbound delivery semantics**: the gateway POSTs the clone with
+   * `Idempotency-Key: resend_<originalId>` (where `<originalId>` is the id
+   * of the source event, not the clone). Recipient handlers that key off
+   * `Idempotency-Key` will see this as a distinct delivery from the
+   * original — distinguishable both by the `resend_` prefix and by reading
+   * the response payload's `manualResendOf` field.
+   *
+   * Returns the *clone* event (new id), not the original. The original is
+   * unchanged on the server.
+   *
+   * @example
+   * const event = await garu.webhookEvents.get(42);
+   * const clone = await garu.webhookEvents.resend(42);
+   * clone.id !== event.id;            // true — clone has its own id
+   * clone.manualResendOf === event.id; // true — points back at the source
+   */
+  async resend(id: number): Promise<WebhookEvent> {
+    return this.http.call<WebhookEvent>((signal) =>
+      (this.http.client.POST as Function)(`/api/webhook-events/${id}/resend`, {
         body: {},
         signal
       }).then((r: { data?: WebhookEvent; error?: unknown; response: Response }) => r)

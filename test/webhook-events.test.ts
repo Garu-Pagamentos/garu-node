@@ -28,6 +28,7 @@ const fakeEvent: WebhookEvent = {
   nextRetryAt: null,
   responseStatus: 500,
   responseBody: 'Internal Server Error',
+  manualResendOf: null,
   createdAt: '2026-05-19T11:00:00Z'
 };
 
@@ -151,5 +152,86 @@ describe('webhookEvents.retry', () => {
     const garu = newClient(fetch);
 
     await expect(garu.webhookEvents.retry(999)).rejects.toBeInstanceOf(GaruNotFoundError);
+  });
+});
+
+describe('webhookEvents.resend', () => {
+  // Clone-on-resend: the backend returns a *new* event (new numeric id) that
+  // points back at the source via `manualResendOf`. The original event is
+  // untouched server-side, so the historical record of the prior failure
+  // (status, response status/body, attempts) survives. These tests assert
+  // the SDK returns the clone shape, not the source row.
+  const cloneEvent: WebhookEvent = {
+    ...fakeEvent,
+    id: 99,
+    status: 'pending',
+    attempts: 0,
+    lastAttemptAt: null,
+    nextRetryAt: null,
+    responseStatus: null,
+    responseBody: null,
+    manualResendOf: 42,
+    createdAt: '2026-05-19T13:00:00Z'
+  };
+
+  it('POSTs to /resend with an empty `{}` body and returns the clone event', async () => {
+    const { fetch, calls } = mockFetch([{ status: 201, body: cloneEvent }]);
+    const garu = newClient(fetch);
+
+    const result = await garu.webhookEvents.resend(42);
+
+    expect(result.id).toBe(99);
+    expect(result.manualResendOf).toBe(42);
+    expect(result.status).toBe('pending');
+    expect(result.attempts).toBe(0);
+    expect(calls[0]!.url).toBe('https://garu.com.br/api/webhook-events/42/resend');
+    expect(calls[0]!.method).toBe('POST');
+    // Same empty-body-mutation contract as retry: openapi-fetch sets
+    // `Content-Type: application/json` unconditionally, so the body-parser
+    // rejects empty bodies. Send `{}`.
+    expect(calls[0]!.body).toEqual({});
+  });
+
+  it('works on any source status — `success` source returns a fresh pending clone', async () => {
+    const successSourceClone: WebhookEvent = {
+      ...cloneEvent,
+      id: 100,
+      manualResendOf: 7
+    };
+    const { fetch, calls } = mockFetch([{ status: 201, body: successSourceClone }]);
+    const garu = newClient(fetch);
+
+    const result = await garu.webhookEvents.resend(7);
+
+    expect(result.id).toBe(100);
+    expect(result.manualResendOf).toBe(7);
+    expect(result.status).toBe('pending');
+    expect(calls[0]!.url).toBe('https://garu.com.br/api/webhook-events/7/resend');
+  });
+
+  it('does not mutate the original event server-side — returned id differs from input id', async () => {
+    const { fetch } = mockFetch([{ status: 201, body: cloneEvent }]);
+    const garu = newClient(fetch);
+
+    const result = await garu.webhookEvents.resend(42);
+
+    expect(result.id).not.toBe(42);
+    expect(result.manualResendOf).toBe(42);
+  });
+
+  it('maps 404 to GaruNotFoundError', async () => {
+    const { fetch } = mockFetch([
+      { status: 404, body: { message: 'Webhook event not found.' } }
+    ]);
+    const garu = newClient(fetch);
+
+    await expect(garu.webhookEvents.resend(999)).rejects.toBeInstanceOf(GaruNotFoundError);
+  });
+
+  it('maps 403 to GaruPermissionError when the event belongs to another seller', async () => {
+    const { fetch } = mockFetch([{ status: 403, body: { message: 'Forbidden' } }]);
+    const garu = newClient(fetch);
+
+    await expect(garu.webhookEvents.resend(42)).rejects.toBeInstanceOf(GaruPermissionError);
   });
 });
