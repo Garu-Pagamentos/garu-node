@@ -21,6 +21,7 @@ const SDK_PATHS = [
   '/api/products',
   '/api/meta',
   '/api/webhook-endpoints',
+  '/api/webhook-events',
 ];
 
 function pathMatchesSDK(path) {

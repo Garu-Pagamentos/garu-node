@@ -568,6 +568,70 @@ export interface PaymentMethodExpiredPayload {
   expiresAt: string;
 }
 
+// ============================================================
+// Webhook events — outgoing event log for a seller's endpoints
+// ============================================================
+
+/**
+ * Delivery state of an outbound webhook event.
+ *
+ * - `pending` — queued or scheduled for a future retry (e.g. exponential backoff).
+ * - `success` — endpoint returned 2xx.
+ * - `failed`  — endpoint exhausted retries or returned a non-2xx the gateway
+ *   refuses to retry. Trigger a manual retry with `webhookEvents.retry(id)`.
+ */
+export type WebhookEventStatus = 'pending' | 'success' | 'failed';
+
+/**
+ * Minimal endpoint info embedded on every event row, so dashboards can
+ * render destination URL + description without a second lookup.
+ */
+export interface WebhookEventEndpoint {
+  id: number;
+  url: string;
+  description: string | null;
+  enabled: boolean;
+  events: string[];
+  [key: string]: unknown;
+}
+
+export interface WebhookEvent {
+  id: number;
+  endpointId: number;
+  /** Eager-loaded endpoint snapshot. */
+  webhookEndpoint: WebhookEventEndpoint;
+  /** Garu event type, e.g. `transaction.payment.paid`. */
+  eventType: string;
+  /** Full JSON payload the gateway POSTed (or will POST) to `webhookEndpoint.url`. */
+  payload: Record<string, unknown>;
+  status: WebhookEventStatus;
+  /** Number of delivery attempts so far. */
+  attempts: number;
+  /** ISO-8601. Null if no attempt has fired yet. */
+  lastAttemptAt: string | null;
+  /** ISO-8601. Null when terminal (`success`/`failed`) or not scheduled yet. */
+  nextRetryAt: string | null;
+  /** HTTP status returned by the endpoint on the most recent attempt. */
+  responseStatus: number | null;
+  /** Response body from the most recent attempt, truncated by the gateway. */
+  responseBody: string | null;
+  createdAt: string;
+  [key: string]: unknown;
+}
+
+export type WebhookEventList = PaginatedList<WebhookEvent>;
+
+export interface ListWebhookEventsParams {
+  page?: number;
+  limit?: number;
+  /** Filter by delivery state. */
+  status?: WebhookEventStatus;
+  /** Filter by Garu event type, e.g. `transaction.payment.paid`. */
+  eventType?: string;
+  /** Filter by the destination endpoint that should receive (or received) the event. */
+  endpointId?: number;
+}
+
 /**
  * Per-product portal customization (Atletia coach-as-product modeling and
  * any other B2B2C platform). `null` fields inherit from the seller-level

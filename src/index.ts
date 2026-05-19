@@ -66,5 +66,10 @@ export type {
   ScheduledPaymentMethod,
   SetProductPortalConfigParams,
   UpdateCustomerParams,
+  WebhookEvent,
+  WebhookEventEndpoint,
+  WebhookEventList,
+  WebhookEventStatus,
+  ListWebhookEventsParams,
   WirePaymentMethodId
 } from './types.js';

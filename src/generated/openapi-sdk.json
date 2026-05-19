@@ -1394,6 +1394,150 @@
           "webhook-endpoints"
         ]
       }
+    },
+    "/api/webhook-events": {
+      "get": {
+        "parameters": [
+          {
+            "name": "endpoint_id",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "pending",
+                "success",
+                "failed"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "event_type",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": 50,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List webhook events with filters",
+        "tags": [
+          "webhook-events"
+        ]
+      }
+    },
+    "/api/webhook-events/{id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OutgoingWebhookEvent"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get webhook event details",
+        "tags": [
+          "webhook-events"
+        ]
+      }
+    },
+    "/api/webhook-events/{id}/retry": {
+      "post": {
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OutgoingWebhookEvent"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Manually retry a failed webhook event",
+        "tags": [
+          "webhook-events"
+        ]
+      }
     }
   },
   "components": {
@@ -2774,36 +2918,131 @@
           }
         }
       },
-      "MetaFeaturesDto": {
+      "OutgoingWebhookEvent": {
         "type": "object",
         "properties": {
-          "subscriptions": {
-            "type": "boolean",
-            "example": true
+          "id": {
+            "type": "number"
           },
-          "checkout_sessions": {
-            "type": "boolean",
-            "example": true
+          "endpointId": {
+            "type": "number"
           },
-          "idempotency_keys": {
-            "type": "boolean",
-            "example": true
+          "webhookEndpoint": {
+            "$ref": "#/components/schemas/WebhookEndpoint"
           },
-          "test_mode": {
-            "type": "boolean",
-            "example": true
+          "eventType": {
+            "type": "string"
           },
-          "webhooks": {
-            "type": "boolean",
-            "example": true
+          "payload": {
+            "type": "object"
+          },
+          "status": {
+            "enum": [
+              "pending",
+              "success",
+              "failed"
+            ],
+            "type": "string"
+          },
+          "attempts": {
+            "type": "number"
+          },
+          "lastAttemptAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "nextRetryAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "responseStatus": {
+            "type": "number",
+            "nullable": true
+          },
+          "responseBody": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
           }
         },
         "required": [
-          "subscriptions",
-          "checkout_sessions",
-          "idempotency_keys",
-          "test_mode",
-          "webhooks"
+          "id",
+          "endpointId",
+          "webhookEndpoint",
+          "eventType",
+          "payload",
+          "status",
+          "attempts",
+          "lastAttemptAt",
+          "nextRetryAt",
+          "responseStatus",
+          "responseBody",
+          "createdAt"
+        ]
+      },
+      "WebhookEndpoint": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "sellerId": {
+            "type": "number"
+          },
+          "seller": {
+            "$ref": "#/components/schemas/Seller"
+          },
+          "url": {
+            "type": "string"
+          },
+          "secret": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "webhookEvents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutgoingWebhookEvent"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "sellerId",
+          "seller",
+          "url",
+          "secret",
+          "enabled",
+          "description",
+          "events",
+          "createdAt",
+          "updatedAt",
+          "webhookEvents"
         ]
       },
       "Seller": {
@@ -3820,6 +4059,38 @@
           "declinedAt",
           "createdAt",
           "updatedAt"
+        ]
+      },
+      "MetaFeaturesDto": {
+        "type": "object",
+        "properties": {
+          "subscriptions": {
+            "type": "boolean",
+            "example": true
+          },
+          "checkout_sessions": {
+            "type": "boolean",
+            "example": true
+          },
+          "idempotency_keys": {
+            "type": "boolean",
+            "example": true
+          },
+          "test_mode": {
+            "type": "boolean",
+            "example": true
+          },
+          "webhooks": {
+            "type": "boolean",
+            "example": true
+          }
+        },
+        "required": [
+          "subscriptions",
+          "checkout_sessions",
+          "idempotency_keys",
+          "test_mode",
+          "webhooks"
         ]
       },
       "Tag": {

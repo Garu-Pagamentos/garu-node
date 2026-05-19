@@ -3,6 +3,40 @@
 All notable changes to `@garuhq/node` are documented in this file. Format:
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [SemVer](https://semver.org/).
 
+## [0.11.0] — 2026-05-19
+
+### Added
+
+- `webhookEvents` resource on the `Garu` client — the seller-facing
+  delivery log for outbound webhooks. Use it to audit deliveries from
+  the seller's API key, the canonical "did my customer's endpoint
+  actually receive event X?" workflow.
+  - `webhookEvents.list({ status?, eventType?, endpointId?, page?, limit? })`
+    — `GET /api/webhook-events`. Filter by delivery state
+    (`pending` / `success` / `failed`), Garu event type, or destination
+    endpoint id. Newest first.
+  - `webhookEvents.get(id)` — `GET /api/webhook-events/{id}`. Returns
+    the full payload, the embedded endpoint snapshot, and the most
+    recent response status/body.
+  - `webhookEvents.retry(id)` — `POST /api/webhook-events/{id}/retry`.
+    Resets the event to `pending`, clears the retry schedule, and
+    triggers an immediate delivery attempt. Works on any status
+    (`success` / `failed` / `pending`) — use this when a customer
+    reports a missed or unprocessed event.
+- Types exported from the package root: `WebhookEvent`,
+  `WebhookEventEndpoint`, `WebhookEventList`, `WebhookEventStatus`,
+  `ListWebhookEventsParams`.
+
+### Fixed
+
+- `webhookEvents.list` now normalizes the legacy backend response
+  (`{ events, total, page, limit, pages }`) into the standard
+  `{ data, meta: { page, limit, total, totalPages } }` paginated shape
+  used by every other SDK resource. Previously the cast-only
+  implementation returned `result.data === undefined` against the real
+  backend; tests had been mocking the post-normalization shape and
+  hid the bug.
+
 ## [0.5.0] — 2026-05-01
 
 ### Added

@@ -1225,6 +1225,121 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/webhook-events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List webhook events with filters */
+        get: {
+            parameters: {
+                query?: {
+                    endpoint_id?: number;
+                    status?: "pending" | "success" | "failed";
+                    event_type?: string;
+                    page?: number;
+                    limit?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": Record<string, never>;
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/webhook-events/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get webhook event details */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["OutgoingWebhookEvent"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/webhook-events/{id}/retry": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Manually retry a failed webhook event */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["OutgoingWebhookEvent"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1701,17 +1816,38 @@ export interface components {
             /** @description Enable or disable this endpoint */
             enabled?: boolean;
         };
-        MetaFeaturesDto: {
-            /** @example true */
-            subscriptions: boolean;
-            /** @example true */
-            checkout_sessions: boolean;
-            /** @example true */
-            idempotency_keys: boolean;
-            /** @example true */
-            test_mode: boolean;
-            /** @example true */
-            webhooks: boolean;
+        OutgoingWebhookEvent: {
+            id: number;
+            endpointId: number;
+            webhookEndpoint: components["schemas"]["WebhookEndpoint"];
+            eventType: string;
+            payload: Record<string, never>;
+            /** @enum {string} */
+            status: "pending" | "success" | "failed";
+            attempts: number;
+            /** Format: date-time */
+            lastAttemptAt: string | null;
+            /** Format: date-time */
+            nextRetryAt: string | null;
+            responseStatus: number | null;
+            responseBody: string | null;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        WebhookEndpoint: {
+            id: number;
+            sellerId: number;
+            seller: components["schemas"]["Seller"];
+            url: string;
+            secret: string;
+            enabled: boolean;
+            description: string | null;
+            events: string[];
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            webhookEvents: components["schemas"]["OutgoingWebhookEvent"][];
         };
         Seller: {
             id: number;
@@ -1993,6 +2129,18 @@ export interface components {
             createdAt: string;
             /** Format: date-time */
             updatedAt: string;
+        };
+        MetaFeaturesDto: {
+            /** @example true */
+            subscriptions: boolean;
+            /** @example true */
+            checkout_sessions: boolean;
+            /** @example true */
+            idempotency_keys: boolean;
+            /** @example true */
+            test_mode: boolean;
+            /** @example true */
+            webhooks: boolean;
         };
         Tag: {
             id: number;
