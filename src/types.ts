@@ -640,6 +640,17 @@ export interface ListWebhookEventsParams {
   endpointId?: number;
 }
 
+export interface ResendWebhookEventParams {
+  /**
+   * SDK→gateway idempotency key. If omitted, the SDK generates a UUIDv4
+   * and forwards it as `X-Idempotency-Key`. Within 24h the backend
+   * returns the original clone instead of creating a new one — pass a
+   * stable key from your own retry layer to dedupe across SDK
+   * invocations.
+   */
+  idempotencyKey?: string;
+}
+
 /**
  * Per-product portal customization (Atletia coach-as-product modeling and
  * any other B2B2C platform). `null` fields inherit from the seller-level

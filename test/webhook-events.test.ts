@@ -1,11 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import {
-  Garu,
-  GaruNotFoundError,
-  GaruPermissionError,
-  type WebhookEvent
-} from '../src/index.js';
+import { Garu, GaruNotFoundError, GaruPermissionError, type WebhookEvent } from '../src/index.js';
 import { mockFetch } from './helpers.js';
 
 const fakeEndpoint = {
@@ -114,9 +109,7 @@ describe('webhookEvents.get', () => {
   });
 
   it('maps 404 to GaruNotFoundError', async () => {
-    const { fetch } = mockFetch([
-      { status: 404, body: { message: 'Webhook event not found.' } }
-    ]);
+    const { fetch } = mockFetch([{ status: 404, body: { message: 'Webhook event not found.' } }]);
     const garu = newClient(fetch);
 
     await expect(garu.webhookEvents.get(999)).rejects.toBeInstanceOf(GaruNotFoundError);
@@ -146,9 +139,7 @@ describe('webhookEvents.retry', () => {
   });
 
   it('maps 404 to GaruNotFoundError', async () => {
-    const { fetch } = mockFetch([
-      { status: 404, body: { message: 'Webhook event not found.' } }
-    ]);
+    const { fetch } = mockFetch([{ status: 404, body: { message: 'Webhook event not found.' } }]);
     const garu = newClient(fetch);
 
     await expect(garu.webhookEvents.retry(999)).rejects.toBeInstanceOf(GaruNotFoundError);
@@ -192,6 +183,27 @@ describe('webhookEvents.resend', () => {
     expect(calls[0]!.body).toEqual({});
   });
 
+  it("auto-attaches an X-Idempotency-Key (UUIDv4) so transient SDK retries can't duplicate clones", async () => {
+    const { fetch, calls } = mockFetch([{ status: 201, body: cloneEvent }]);
+    const garu = newClient(fetch);
+
+    await garu.webhookEvents.resend(42);
+
+    expect(calls[0]!.headers['x-idempotency-key']).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/
+    );
+  });
+
+  it('forwards a caller-supplied idempotencyKey verbatim and does not leak it into the body', async () => {
+    const { fetch, calls } = mockFetch([{ status: 201, body: cloneEvent }]);
+    const garu = newClient(fetch);
+
+    await garu.webhookEvents.resend(42, { idempotencyKey: 'my-stable-key' });
+
+    expect(calls[0]!.headers['x-idempotency-key']).toBe('my-stable-key');
+    expect(calls[0]!.body).toEqual({});
+  });
+
   it('works on any source status — `success` source returns a fresh pending clone', async () => {
     const successSourceClone: WebhookEvent = {
       ...cloneEvent,
@@ -220,9 +232,7 @@ describe('webhookEvents.resend', () => {
   });
 
   it('maps 404 to GaruNotFoundError', async () => {
-    const { fetch } = mockFetch([
-      { status: 404, body: { message: 'Webhook event not found.' } }
-    ]);
+    const { fetch } = mockFetch([{ status: 404, body: { message: 'Webhook event not found.' } }]);
     const garu = newClient(fetch);
 
     await expect(garu.webhookEvents.resend(999)).rejects.toBeInstanceOf(GaruNotFoundError);

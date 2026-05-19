@@ -50,6 +50,7 @@ export type {
   RecurrenceConfig,
   RecurrenceInterval,
   RefundChargeParams,
+  ResendWebhookEventParams,
   ScheduledChargeActor,
   ScheduledChargeAttempt,
   ScheduledChargeAttemptList,

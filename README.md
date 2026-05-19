@@ -292,6 +292,38 @@ app.post('/webhooks/garu', express.raw({ type: 'application/json' }), (req, res)
 > [!IMPORTANT]
 > Always pass the raw request body to `verify()`. Parsing and re-serializing JSON will break the signature check.
 
+## Webhook events
+
+The seller-facing delivery log for outbound webhooks. Use it to audit deliveries, surface failures, and replay events when a customer's endpoint missed one. Webhook endpoint *configuration* (URL, subscribed events, secret) is still dashboard-only — this resource only covers the event log + manual retries.
+
+```ts
+// Surface anything that didn't make it through
+const failed = await garu.webhookEvents.list({ status: 'failed', limit: 50 });
+
+// Inspect one event end-to-end
+const event = await garu.webhookEvents.get(42);
+console.log(event.responseStatus, event.responseBody);
+
+// Audit-trail-preserving replay (recommended)
+const clone = await garu.webhookEvents.resend(42);
+clone.id !== event.id;             // true — fresh row with its own id
+clone.manualResendOf === event.id; // true — points back at the source
+```
+
+`resend(id)` is the audit-preserving counterpart to `retry(id)` — the backend inserts a fresh event whose `manualResendOf` points back at the source, then dispatches that clone. The original row stays exactly as it was, so the historical record of the prior failure (status, response status/body, attempts) survives. Works on any source status (`success` / `failed` / `pending`).
+
+Outbound deliveries of a resent event carry `Idempotency-Key: resend_<originalId>`, so recipient handlers can distinguish a resend from a fresh delivery both by the header prefix and by reading the response payload's `manualResendOf` field.
+
+> [!NOTE]
+> The SDK auto-attaches `X-Idempotency-Key` (UUIDv4) on `resend()` so transient transport retries can't create duplicate clones. Pass `{ idempotencyKey }` to dedupe across your own retry layer.
+
+| Method                          | Purpose                                                                            |
+| ------------------------------- | ---------------------------------------------------------------------------------- |
+| `list(params?)`                 | Paginated event log. Filter by `status`, `eventType`, `endpointId`. Newest first. |
+| `get(id)`                       | One event — full payload, endpoint snapshot, most recent response.                |
+| `resend(id, params?)`           | Clone-on-resend. Returns the new event; original is untouched. **Preferred.**     |
+| `retry(id)`                     | Legacy in-place reset (mutates the original row). Soft-deprecated.                |
+
 ## Error handling
 
 Every error extends `GaruError`. API errors include `status`, `requestId`, and `body`.

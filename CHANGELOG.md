@@ -3,6 +3,27 @@
 All notable changes to `@garuhq/node` are documented in this file. Format:
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [SemVer](https://semver.org/).
 
+## [0.12.1] — 2026-05-19
+
+### Fixed
+
+- `webhookEvents.resend(id)` now auto-attaches `X-Idempotency-Key`
+  (UUIDv4) so transient transport retries (5xx → SDK backoff) cannot
+  create duplicate clones. Previously, a 503 mid-flight after the
+  backend had already committed the clone could trigger an SDK retry
+  and produce a second clone with a different id. With the
+  idempotency key in place, the backend returns the original clone on
+  the second call within 24h. Pass `{ idempotencyKey }` to dedupe
+  across your own retry layer.
+
+### Added
+
+- `ResendWebhookEventParams` type exported from the package root —
+  the optional `{ idempotencyKey?: string }` for `resend()`.
+- README quickstart entry for `webhookEvents`
+  (`list` / `get` / `resend` / `retry`), including the audit-trail
+  contract and the SDK→gateway idempotency note.
+
 ## [0.12.0] — 2026-05-19
 
 ### Added
