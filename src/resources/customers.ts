@@ -127,9 +127,10 @@ export class Customers {
    */
   async delete(id: number): Promise<void> {
     await this.http.call<unknown>((signal) =>
-      (this.http.client.DELETE as Function)(`/api/customers/${id}`, { signal }).then(
-        (r: { data?: unknown; error?: unknown; response: Response }) => r
-      )
+      (this.http.client.DELETE as Function)(`/api/customers/${id}`, {
+        body: {},
+        signal
+      }).then((r: { data?: unknown; error?: unknown; response: Response }) => r)
     );
   }
 }

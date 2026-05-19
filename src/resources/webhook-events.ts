@@ -109,9 +109,10 @@ export class WebhookEvents {
    */
   async retry(id: number): Promise<WebhookEvent> {
     return this.http.call<WebhookEvent>((signal) =>
-      (this.http.client.POST as Function)(`/api/webhook-events/${id}/retry`, { signal }).then(
-        (r: { data?: WebhookEvent; error?: unknown; response: Response }) => r
-      )
+      (this.http.client.POST as Function)(`/api/webhook-events/${id}/retry`, {
+        body: {},
+        signal
+      }).then((r: { data?: WebhookEvent; error?: unknown; response: Response }) => r)
     );
   }
 }

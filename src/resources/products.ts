@@ -84,6 +84,7 @@ export class ProductPortalConfigResource {
   async clear(productId: string | number): Promise<{ removed: boolean }> {
     return this.http.call<{ removed: boolean }>((signal) =>
       (this.http.client.DELETE as Function)(`/api/products/${encodeURIComponent(String(productId))}/portal-config`, {
+        body: {},
         signal
       }).then((r: { data?: { removed: boolean }; error?: unknown; response: Response }) => r)
     );

@@ -234,7 +234,7 @@ describe('scheduledCharges.pause / resume', () => {
     expect(calls[0]!.body).toEqual({});
   });
 
-  it('resume posts no body', async () => {
+  it('resume posts an empty `{}` body so the backend body-parser accepts it', async () => {
     const { fetch, calls } = mockFetch([
       { status: 200, body: { ...fakeCharge, status: 'scheduled' } }
     ]);
@@ -244,7 +244,7 @@ describe('scheduledCharges.pause / resume', () => {
 
     expect(calls[0]!.url).toBe('https://garu.com.br/api/scheduled-charges/sch_abc123/resume');
     expect(calls[0]!.method).toBe('POST');
-    expect(calls[0]!.body).toBeUndefined();
+    expect(calls[0]!.body).toEqual({});
   });
 });
 

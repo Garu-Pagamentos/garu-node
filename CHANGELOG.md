@@ -3,6 +3,21 @@
 All notable changes to `@garuhq/node` are documented in this file. Format:
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [SemVer](https://semver.org/).
 
+## [0.11.1] — 2026-05-19
+
+### Fixed
+
+- Empty-body mutations (`webhookEvents.retry`, `scheduledCharges.resume`,
+  `customers.delete`, `products.portalConfig.clear`,
+  `scheduledCharges.clearPaymentMethod`) now send an explicit `{}` body.
+  `openapi-fetch` sets `Content-Type: application/json` as a default
+  header on every request, and the backend body-parser rejects
+  `Content-Type: json` + empty body with
+  `Body cannot be empty when content-type is set to 'application/json'`.
+  Previously these calls failed against production; the SDK's mock-fetch
+  tests didn't surface the regression because the mock never hits the
+  body-parser middleware.
+
 ## [0.11.0] — 2026-05-19
 
 ### Added

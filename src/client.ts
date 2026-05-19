@@ -26,7 +26,7 @@ export interface GaruOptions {
 const DEFAULT_BASE_URL = 'https://garu.com.br';
 const DEFAULT_TIMEOUT_MS = 30_000;
 const DEFAULT_MAX_RETRIES = 2;
-const SDK_VERSION = '0.11.0';
+const SDK_VERSION = '0.11.1';
 
 /**
  * The Garu SDK client.

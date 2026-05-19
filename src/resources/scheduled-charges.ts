@@ -162,6 +162,7 @@ export class ScheduledCharges {
   async resume(id: string): Promise<ScheduledChargeRecord> {
     return this.http.call<ScheduledChargeRecord>((signal) =>
       (this.http.client.POST as Function)(`/api/scheduled-charges/${id}/resume`, {
+        body: {},
         signal
       }).then((r: { data?: ScheduledChargeRecord; error?: unknown; response: Response }) => r)
     );
@@ -277,6 +278,7 @@ export class ScheduledCharges {
   async clearPaymentMethod(id: string): Promise<ScheduledChargeRecord> {
     return this.http.call<ScheduledChargeRecord>((signal) =>
       (this.http.client.DELETE as Function)(`/api/scheduled-charges/${id}/payment-method`, {
+        body: {},
         signal
       }).then((r: { data?: ScheduledChargeRecord; error?: unknown; response: Response }) => r)
     );

@@ -123,7 +123,7 @@ describe('webhookEvents.get', () => {
 });
 
 describe('webhookEvents.retry', () => {
-  it('POSTs to /retry without a body and returns the reset event', async () => {
+  it('POSTs an empty `{}` body so the backend body-parser accepts it', async () => {
     const resetEvent: WebhookEvent = {
       ...fakeEvent,
       status: 'pending',
@@ -139,8 +139,9 @@ describe('webhookEvents.retry', () => {
     expect(result.attempts).toBe(0);
     expect(calls[0]!.url).toBe('https://garu.com.br/api/webhook-events/42/retry');
     expect(calls[0]!.method).toBe('POST');
-    // No body required for retry — the action is fully addressed by the URL.
-    expect(calls[0]!.body).toBeFalsy();
+    // openapi-fetch unconditionally sets `Content-Type: application/json`, so the
+    // backend body-parser rejects `Content-Type: json` + empty body. Send `{}`.
+    expect(calls[0]!.body).toEqual({});
   });
 
   it('maps 404 to GaruNotFoundError', async () => {
