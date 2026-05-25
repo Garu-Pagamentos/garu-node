@@ -278,6 +278,11 @@ export interface ScheduledChargeRecord {
   methods: ScheduledPaymentMethod[];
   status: ScheduledChargeStatus;
   externalReference: string | null;
+  /**
+   * Max days past `dueDate` the daily recovery sweep will still auto-bill a
+   * missed charge. `null` means the system default (14) applies.
+   */
+  maxRecoveryDays: number | null;
   metadata: Record<string, unknown> | null;
   createdAt: string;
   updatedAt: string;
@@ -385,6 +390,11 @@ export interface CreateScheduledChargeParams {
   externalReference?: string;
   metadata?: Record<string, unknown>;
   /**
+   * Max days past `dueDate` the daily recovery sweep will still auto-bill a
+   * missed charge (integer 1..365). Omit for the system default (14).
+   */
+  maxRecoveryDays?: number;
+  /**
    * Optional idempotency key for safe retries. The SDK auto-generates a
    * UUIDv4 when omitted and forwards it as `X-Idempotency-Key`.
    */
@@ -439,6 +449,40 @@ export interface CancelAtPeriodEndScheduledChargeParams {
 export interface ChangePaymentMethodScheduledChargeParams {
   /** PaymentMethod id to bind. Must belong to the same customerId. */
   paymentMethodId: number;
+}
+
+/**
+ * Result of `scheduledCharges.chargeNow(id)` — what the immediate dispatch did:
+ *
+ * - `dispatched`   — sent now (customer email/notification + outbound webhook + timeline event).
+ * - `already_sent` — this cycle's d-day was already dispatched; no-op (the action is idempotent).
+ * - `not_sent`     — couldn't send; see `reason` (e.g. `no_email`, `lock_lost`, `no_saved_payment_method`).
+ * - `failed`       — card charge failed; see `reason` (e.g. `card_expired`, or a gateway decline code).
+ */
+export type ChargeNowOutcome = 'dispatched' | 'already_sent' | 'not_sent' | 'failed';
+
+/**
+ * Why a `not_sent` / `failed` charge-now didn't go through. The documented
+ * literals are stable; `failed` may also surface a raw gateway decline code,
+ * so the type stays open (`string & {}`) without losing autocomplete.
+ */
+export type ChargeNowReason =
+  | 'no_email'
+  | 'lock_lost'
+  | 'no_saved_payment_method'
+  | 'card_expired'
+  | 'payment_method_missing'
+  | 'customer_missing'
+  | (string & {});
+
+export interface ChargeNowResult {
+  outcome: ChargeNowOutcome;
+  /** Cycle that was dispatched/attempted, or `null` for one-time charges. */
+  cycleNumber: number | null;
+  /** Present on `not_sent` / `failed`. See {@link ChargeNowReason}. */
+  reason?: ChargeNowReason;
+  /** Ready-to-show pt-BR message describing the outcome. */
+  message: string;
 }
 
 export interface Product {

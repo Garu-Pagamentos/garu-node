@@ -4,6 +4,7 @@ import type {
   CancelAtPeriodEndScheduledChargeParams,
   CancelRecurrenceScheduledChargeParams,
   ChangePaymentMethodScheduledChargeParams,
+  ChargeNowResult,
   CreateScheduledChargeParams,
   ListScheduledChargeAttemptsParams,
   ListScheduledChargesParams,
@@ -107,9 +108,9 @@ export class ScheduledCharges {
    */
   async get(id: string): Promise<ScheduledChargeDetail> {
     return this.http.call<ScheduledChargeDetail>((signal) =>
-      (this.http.client.GET as Function)(`/api/scheduled-charges/${id}`, { signal }).then(
-        (r: { data?: ScheduledChargeDetail; error?: unknown; response: Response }) => r
-      )
+      (this.http.client.GET as Function)(`/api/scheduled-charges/${encodeURIComponent(id)}`, {
+        signal
+      }).then((r: { data?: ScheduledChargeDetail; error?: unknown; response: Response }) => r)
     );
   }
 
@@ -129,10 +130,13 @@ export class ScheduledCharges {
     params: PostponeScheduledChargeParams
   ): Promise<ScheduledChargeRecord> {
     return this.http.call<ScheduledChargeRecord>((signal) =>
-      (this.http.client.POST as Function)(`/api/scheduled-charges/${id}/postpone`, {
-        body: params,
-        signal
-      }).then((r: { data?: ScheduledChargeRecord; error?: unknown; response: Response }) => r)
+      (this.http.client.POST as Function)(
+        `/api/scheduled-charges/${encodeURIComponent(id)}/postpone`,
+        {
+          body: params,
+          signal
+        }
+      ).then((r: { data?: ScheduledChargeRecord; error?: unknown; response: Response }) => r)
     );
   }
 
@@ -146,10 +150,13 @@ export class ScheduledCharges {
    */
   async pause(id: string, params: PauseScheduledChargeParams = {}): Promise<ScheduledChargeRecord> {
     return this.http.call<ScheduledChargeRecord>((signal) =>
-      (this.http.client.POST as Function)(`/api/scheduled-charges/${id}/pause`, {
-        body: params,
-        signal
-      }).then((r: { data?: ScheduledChargeRecord; error?: unknown; response: Response }) => r)
+      (this.http.client.POST as Function)(
+        `/api/scheduled-charges/${encodeURIComponent(id)}/pause`,
+        {
+          body: params,
+          signal
+        }
+      ).then((r: { data?: ScheduledChargeRecord; error?: unknown; response: Response }) => r)
     );
   }
 
@@ -161,10 +168,13 @@ export class ScheduledCharges {
    */
   async resume(id: string): Promise<ScheduledChargeRecord> {
     return this.http.call<ScheduledChargeRecord>((signal) =>
-      (this.http.client.POST as Function)(`/api/scheduled-charges/${id}/resume`, {
-        body: {},
-        signal
-      }).then((r: { data?: ScheduledChargeRecord; error?: unknown; response: Response }) => r)
+      (this.http.client.POST as Function)(
+        `/api/scheduled-charges/${encodeURIComponent(id)}/resume`,
+        {
+          body: {},
+          signal
+        }
+      ).then((r: { data?: ScheduledChargeRecord; error?: unknown; response: Response }) => r)
     );
   }
 
@@ -196,10 +206,53 @@ export class ScheduledCharges {
     params: MarkPaidScheduledChargeParams
   ): Promise<ScheduledChargeRecord> {
     return this.http.call<ScheduledChargeRecord>((signal) =>
-      (this.http.client.POST as Function)(`/api/scheduled-charges/${id}/mark-paid`, {
-        body: params,
-        signal
-      }).then((r: { data?: ScheduledChargeRecord; error?: unknown; response: Response }) => r)
+      (this.http.client.POST as Function)(
+        `/api/scheduled-charges/${encodeURIComponent(id)}/mark-paid`,
+        {
+          body: params,
+          signal
+        }
+      ).then((r: { data?: ScheduledChargeRecord; error?: unknown; response: Response }) => r)
+    );
+  }
+
+  /**
+   * Force-bill the current cycle right now instead of waiting for its due
+   * date. Runs the same dispatch the daily billing cron would (customer
+   * email/notification + outbound webhook + timeline event). Allowed only
+   * from a billable status (`scheduled` / `due_today`); a recurring series
+   * must have an open cycle (else the backend returns 400).
+   *
+   * Idempotent: if this cycle's d-day was already dispatched it reports
+   * `already_sent` and does not re-charge. Inspect `outcome` to branch.
+   *
+   * @example
+   * const result = await garu.scheduledCharges.chargeNow('sch_abc123');
+   * switch (result.outcome) {
+   *   case 'dispatched':
+   *     console.log(`Cobrança enviada (ciclo ${result.cycleNumber}).`);
+   *     break;
+   *   case 'already_sent':
+   *     console.log('Já havia sido enviada — nada a fazer.');
+   *     break;
+   *   case 'failed':
+   *     // result.reason is e.g. 'card_expired' or a gateway decline code
+   *     console.error(`Falha na cobrança: ${result.reason}. ${result.message}`);
+   *     break;
+   *   case 'not_sent':
+   *     console.warn(`Não enviada (${result.reason}): ${result.message}`);
+   *     break;
+   * }
+   */
+  async chargeNow(id: string): Promise<ChargeNowResult> {
+    return this.http.call<ChargeNowResult>((signal) =>
+      (this.http.client.POST as Function)(
+        `/api/scheduled-charges/${encodeURIComponent(id)}/charge-now`,
+        {
+          body: {},
+          signal
+        }
+      ).then((r: { data?: ChargeNowResult; error?: unknown; response: Response }) => r)
     );
   }
 
@@ -219,10 +272,13 @@ export class ScheduledCharges {
     params: CancelRecurrenceScheduledChargeParams = {}
   ): Promise<ScheduledChargeRecord> {
     return this.http.call<ScheduledChargeRecord>((signal) =>
-      (this.http.client.POST as Function)(`/api/scheduled-charges/${id}/cancel-recurrence`, {
-        body: params,
-        signal
-      }).then((r: { data?: ScheduledChargeRecord; error?: unknown; response: Response }) => r)
+      (this.http.client.POST as Function)(
+        `/api/scheduled-charges/${encodeURIComponent(id)}/cancel-recurrence`,
+        {
+          body: params,
+          signal
+        }
+      ).then((r: { data?: ScheduledChargeRecord; error?: unknown; response: Response }) => r)
     );
   }
 
@@ -240,10 +296,13 @@ export class ScheduledCharges {
     params: CancelAtPeriodEndScheduledChargeParams
   ): Promise<ScheduledChargeRecord> {
     return this.http.call<ScheduledChargeRecord>((signal) =>
-      (this.http.client.POST as Function)(`/api/scheduled-charges/${id}/cancel-at-period-end`, {
-        body: params,
-        signal
-      }).then((r: { data?: ScheduledChargeRecord; error?: unknown; response: Response }) => r)
+      (this.http.client.POST as Function)(
+        `/api/scheduled-charges/${encodeURIComponent(id)}/cancel-at-period-end`,
+        {
+          body: params,
+          signal
+        }
+      ).then((r: { data?: ScheduledChargeRecord; error?: unknown; response: Response }) => r)
     );
   }
 
@@ -260,10 +319,13 @@ export class ScheduledCharges {
     params: ChangePaymentMethodScheduledChargeParams
   ): Promise<ScheduledChargeRecord> {
     return this.http.call<ScheduledChargeRecord>((signal) =>
-      (this.http.client.POST as Function)(`/api/scheduled-charges/${id}/payment-method`, {
-        body: params,
-        signal
-      }).then((r: { data?: ScheduledChargeRecord; error?: unknown; response: Response }) => r)
+      (this.http.client.POST as Function)(
+        `/api/scheduled-charges/${encodeURIComponent(id)}/payment-method`,
+        {
+          body: params,
+          signal
+        }
+      ).then((r: { data?: ScheduledChargeRecord; error?: unknown; response: Response }) => r)
     );
   }
 
@@ -277,10 +339,13 @@ export class ScheduledCharges {
    */
   async clearPaymentMethod(id: string): Promise<ScheduledChargeRecord> {
     return this.http.call<ScheduledChargeRecord>((signal) =>
-      (this.http.client.DELETE as Function)(`/api/scheduled-charges/${id}/payment-method`, {
-        body: {},
-        signal
-      }).then((r: { data?: ScheduledChargeRecord; error?: unknown; response: Response }) => r)
+      (this.http.client.DELETE as Function)(
+        `/api/scheduled-charges/${encodeURIComponent(id)}/payment-method`,
+        {
+          body: {},
+          signal
+        }
+      ).then((r: { data?: ScheduledChargeRecord; error?: unknown; response: Response }) => r)
     );
   }
 
@@ -306,7 +371,7 @@ export class ScheduledCharges {
     if (params.limit !== undefined) qs.set('limit', String(params.limit));
     if (params.cycleNumber !== undefined) qs.set('cycleNumber', String(params.cycleNumber));
     const query = qs.toString();
-    const url = `/api/scheduled-charges/${id}/attempts${query ? `?${query}` : ''}`;
+    const url = `/api/scheduled-charges/${encodeURIComponent(id)}/attempts${query ? `?${query}` : ''}`;
 
     return this.http.call<ScheduledChargeAttemptList>((signal) =>
       (this.http.client.GET as Function)(url, { signal }).then(

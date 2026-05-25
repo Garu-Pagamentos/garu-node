@@ -203,6 +203,7 @@ Bill an existing customer on a future date — one-time or recurring with card t
 | `create(params)`                              | Create one-time or recurring schedule. Auto-attaches `X-Idempotency-Key`.  |
 | `list(params?)`                               | Paginated list with status / type / dueFrom / dueTo / customerId filters.  |
 | `get(id)`                                     | Detail bundle: charge + event timeline + linked transactions.              |
+| `chargeNow(id)`                               | Force-bill the current cycle now instead of waiting for the due date.      |
 | `markPaid(id, params)`                        | Mark cycle paid (off-Garu reconciliation).                                 |
 | `postpone(id, params)`                        | Move the next cycle's due date forward.                                    |
 | `pause(id, params?)` / `resume(id)`           | Suspend / re-enable a series.                                              |
@@ -213,7 +214,8 @@ Bill an existing customer on a future date — one-time or recurring with card t
 | `listAttempts(id, params?)`                   | Per-attempt billing log — every silent-charge / retry / mark-paid (v0.8.2).|
 
 ```ts
-// Recurring with 7-day trial
+// Recurring with 7-day trial. `maxRecoveryDays` caps how long past the due
+// date the daily recovery sweep keeps auto-billing a missed charge (default 14).
 const series = await garu.scheduledCharges.create({
   customerId: 42,
   productId: 17,
@@ -223,7 +225,16 @@ const series = await garu.scheduledCharges.create({
   methods: ['card', 'pix'],
   recurrence: { interval: 'monthly' },
   trialDays: 7,
+  maxRecoveryDays: 30,
 });
+
+// Force-bill the current cycle now instead of waiting for the due date.
+// Idempotent: a cycle already dispatched today reports `already_sent`.
+const result = await garu.scheduledCharges.chargeNow(series.id);
+if (result.outcome === 'failed') {
+  // result.reason is e.g. 'card_expired' or a gateway decline code
+  console.error(`${result.message} (${result.reason})`);
+}
 
 // Audit why cycle 3 failed (v0.8.2)
 const { data } = await garu.scheduledCharges.listAttempts(series.id, {
