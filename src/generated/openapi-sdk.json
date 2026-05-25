@@ -588,6 +588,169 @@
         ]
       }
     },
+    "/api/products/{id}/portal-config": {
+      "get": {
+        "description": "Returns null when no per-product config exists (the product falls back to seller-level portal config). Accepts either the product UUID or its integer id.",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get the portal customization for a product",
+        "tags": [
+          "products"
+        ]
+      },
+      "post": {
+        "description": "Creates or replaces the per-product portal config. Use PATCH for partial updates. Idempotent: subsequent calls with the same body return 200 with the persisted state. Accepts either the product UUID or its integer id.",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductPortalConfigRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductPortalConfiguration"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Set the portal customization for a product",
+        "tags": [
+          "products"
+        ]
+      },
+      "patch": {
+        "description": "Partial update — only provided fields are written. Missing fields keep their persisted value. Accepts either the product UUID or its integer id.",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductPortalConfigRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductPortalConfiguration"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Patch the portal customization for a product",
+        "tags": [
+          "products"
+        ]
+      },
+      "delete": {
+        "description": "Removes the per-product config. The product falls back to the seller-level portal config. Accepts either the product UUID or its integer id.",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete the portal customization for a product",
+        "tags": [
+          "products"
+        ]
+      }
+    },
     "/api/customers": {
       "post": {
         "description": "Creates a customer record linked to the calling seller. The seller-side profile (CustomerSellerProfile) is upserted with the latest name/email/phone.",
@@ -615,6 +778,9 @@
           }
         },
         "security": [
+          {
+            "api-key": []
+          },
           {
             "garu-gateway": []
           }
@@ -666,6 +832,9 @@
         },
         "security": [
           {
+            "api-key": []
+          },
+          {
             "garu-gateway": []
           }
         ],
@@ -700,6 +869,9 @@
           }
         },
         "security": [
+          {
+            "api-key": []
+          },
           {
             "garu-gateway": []
           }
@@ -744,6 +916,9 @@
         },
         "security": [
           {
+            "api-key": []
+          },
+          {
             "garu-gateway": []
           }
         ],
@@ -769,6 +944,9 @@
           }
         },
         "security": [
+          {
+            "api-key": []
+          },
           {
             "garu-gateway": []
           }
@@ -808,6 +986,9 @@
           }
         },
         "security": [
+          {
+            "api-key": []
+          },
           {
             "garu-gateway": []
           }
@@ -976,6 +1157,97 @@
         ]
       }
     },
+    "/api/scheduled-charges/{id}/attempts": {
+      "get": {
+        "description": "Returns one row per logical billing attempt across all cycles in the series — cycle 1 interactive, every silent-charge, every retry, every manual mark-paid. Includes the canonical failureCode for declines. Filterable by cycleNumber.",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cycleNumber",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated attempt log for the series"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          },
+          {
+            "garu-gateway": []
+          }
+        ],
+        "summary": "Per-attempt billing log for a scheduled charge (SPEC §4.2)",
+        "tags": [
+          "scheduled-charges"
+        ]
+      }
+    },
+    "/api/scheduled-charges/{id}/charge-now": {
+      "post": {
+        "description": "Runs the same dispatch the daily cron would (customer email/notification + webhook + timeline event) immediately, instead of waiting for the dueDate. Idempotent: if the current cycle was already dispatched it reports `already_sent` and does not re-charge. Allowed from scheduled / due_today.",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Dispatch outcome"
+          },
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          },
+          {
+            "garu-gateway": []
+          }
+        ],
+        "summary": "Charge a scheduled charge now",
+        "tags": [
+          "scheduled-charges"
+        ]
+      }
+    },
     "/api/scheduled-charges/{id}/postpone": {
       "post": {
         "description": "Allowed from scheduled / due_today / overdue / paused. Clears the dunning chain so the new dueDate gets a fresh D-day notice.",
@@ -1122,9 +1394,113 @@
         ]
       }
     },
+    "/api/scheduled-charges/{id}/cancel-recurrence": {
+      "post": {
+        "description": "Recurring schedules only. Generator and billing skip the series from now on; the in-flight cycle does not fire its email. Final — use a new series to restart.",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CancelRecurrenceScheduledChargeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Recurrence canceled"
+          },
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScheduledCharge"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          },
+          {
+            "garu-gateway": []
+          }
+        ],
+        "summary": "Stop future cycles for a recurring scheduled charge (hard cancel)",
+        "tags": [
+          "scheduled-charges"
+        ]
+      }
+    },
+    "/api/scheduled-charges/{id}/cancel-at-period-end": {
+      "post": {
+        "description": "Recurring schedules only. When `enabled=true`, the cycle generator stops emitting new cycles after the next paid cycle. Reversible by passing `enabled=false`. Mutually exclusive with `recurrence.endsAfter` and `recurrence.endsOn`.",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CancelAtPeriodEndScheduledChargeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Toggle applied"
+          },
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScheduledCharge"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          },
+          {
+            "garu-gateway": []
+          }
+        ],
+        "summary": "Toggle Stripe-style soft cancel on a recurring scheduled charge",
+        "tags": [
+          "scheduled-charges"
+        ]
+      }
+    },
     "/api/scheduled-charges/{id}/mark-paid": {
       "post": {
-        "description": "Use when the customer paid off-Garu (bank transfer, etc.). Allowed from due_today / overdue.",
+        "description": "Use when the customer paid off-Garu (bank transfer, etc.). For one-time charges: omit `cycleNumber`; allowed from due_today / overdue. For recurring: pass `cycleNumber`; allowed from cycle status due_today / overdue / failed. Future cycles continue.",
         "parameters": [
           {
             "name": "id",
@@ -1154,7 +1530,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ScheduledCharge"
+                  "type": "object"
                 }
               }
             }
@@ -1169,6 +1545,88 @@
           }
         ],
         "summary": "Manually mark a scheduled charge as paid",
+        "tags": [
+          "scheduled-charges"
+        ]
+      }
+    },
+    "/api/scheduled-charges/{id}/payment-method": {
+      "post": {
+        "description": "Recurring schedules only. The new PaymentMethod must belong to the same customer. Future cycles silent-charge the new card; the in-flight cycle (if already due_today) is not retroactively rebound.",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangePaymentMethodScheduledChargeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Payment method changed"
+          },
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScheduledCharge"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          },
+          {
+            "garu-gateway": []
+          }
+        ],
+        "summary": "Swap the saved card on a recurring scheduled charge",
+        "tags": [
+          "scheduled-charges"
+        ]
+      },
+      "delete": {
+        "description": "Recurring schedules only. Future cycles fall back to the email-with-link flow so the customer can re-enter card details or pay via PIX/boleto.",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Payment method cleared"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          },
+          {
+            "garu-gateway": []
+          }
+        ],
+        "summary": "Clear the saved card on a recurring scheduled charge",
         "tags": [
           "scheduled-charges"
         ]
@@ -1395,6 +1853,51 @@
         ]
       }
     },
+    "/api/webhook-endpoints/{id}/trigger": {
+      "post": {
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TriggerWebhookEndpointRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Trigger a sample payload for any subscribed event type — used by sellers to validate their integration end-to-end without waiting for real traffic. Payload carries metadata.test=true so receivers can branch.",
+        "tags": [
+          "webhook-endpoints"
+        ]
+      }
+    },
     "/api/webhook-events": {
       "get": {
         "parameters": [
@@ -1460,7 +1963,10 @@
         },
         "security": [
           {
-            "bearer": []
+            "api-key": []
+          },
+          {
+            "garu-gateway": []
           }
         ],
         "summary": "List webhook events with filters",
@@ -1495,7 +2001,10 @@
         },
         "security": [
           {
-            "bearer": []
+            "api-key": []
+          },
+          {
+            "garu-gateway": []
           }
         ],
         "summary": "Get webhook event details",
@@ -1530,10 +2039,51 @@
         },
         "security": [
           {
-            "bearer": []
+            "api-key": []
+          },
+          {
+            "garu-gateway": []
           }
         ],
         "summary": "Manually retry a failed webhook event",
+        "tags": [
+          "webhook-events"
+        ]
+      }
+    },
+    "/api/webhook-events/{id}/resend": {
+      "post": {
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OutgoingWebhookEvent"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          },
+          {
+            "garu-gateway": []
+          }
+        ],
+        "summary": "Clone a webhook event and deliver the clone (works on any status)",
         "tags": [
           "webhook-events"
         ]
@@ -1696,6 +2246,10 @@
             "nullable": true,
             "description": "Optional link back to a `scheduled_charge` row. Set when this\ntransaction was minted to fulfil a scheduled-charge dispatch (M2+).\nDrives the Celcoin webhook ingestion path that flips the schedule's\nstatus to `paid`."
           },
+          "scheduledChargeCycleId": {
+            "type": "string",
+            "nullable": true
+          },
           "subscriptionId": {
             "type": "number",
             "nullable": true
@@ -1717,6 +2271,23 @@
           },
           "billingCycle": {
             "type": "number",
+            "nullable": true
+          },
+          "failureCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "failureReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "gatewayFailureCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "failedAt": {
+            "format": "date-time",
+            "type": "string",
             "nullable": true
           },
           "refundedAt": {
@@ -1782,11 +2353,16 @@
           "deadline",
           "status",
           "scheduledChargeId",
+          "scheduledChargeCycleId",
           "subscriptionId",
           "subscription",
           "isRecurring",
           "billingReason",
           "billingCycle",
+          "failureCode",
+          "failureReason",
+          "gatewayFailureCode",
+          "failedAt",
           "refundedAt",
           "refundAmount",
           "refundReason",
@@ -2286,6 +2862,183 @@
           "coProducers"
         ]
       },
+      "ProductPortalConfigRequest": {
+        "type": "object",
+        "properties": {
+          "businessName": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Display name shown on the hosted payment page header."
+          },
+          "logoUrl": {
+            "type": "string",
+            "maxLength": 500,
+            "format": "uri",
+            "description": "HTTPS URL of the logo image. PNG/JPG, recommended 4:1 aspect ratio."
+          },
+          "primaryColor": {
+            "type": "string",
+            "pattern": "^#?([0-9A-F]{3}|[0-9A-F]{4}|[0-9A-F]{6}|[0-9A-F]{8})$",
+            "description": "Primary brand color in hex (e.g. \"#257264\"). Used for buttons and accents.",
+            "example": "#257264"
+          },
+          "allowCancelSubscription": {
+            "type": "boolean",
+            "description": "Show the Cancel Subscription button on the customer portal."
+          },
+          "allowUpdatePaymentMethod": {
+            "type": "boolean",
+            "description": "Show the Update Payment Method button."
+          },
+          "allowUpdateBillingInfo": {
+            "type": "boolean",
+            "description": "Show the Update Billing Info button."
+          },
+          "allowViewInvoices": {
+            "type": "boolean",
+            "description": "Show the Invoices tab on the customer portal."
+          },
+          "allowApplyCoupons": {
+            "type": "boolean",
+            "description": "Allow customers to apply coupon codes at checkout."
+          },
+          "requireCancelReason": {
+            "type": "boolean",
+            "description": "Force the customer to enter a reason on cancel."
+          },
+          "cancelAtPeriodEndOnly": {
+            "type": "boolean",
+            "description": "Soft-cancel: the customer can only cancel at end of period (Stripe-style). Hard-cancel disabled."
+          },
+          "sendCancellationEmail": {
+            "type": "boolean",
+            "description": "Email the customer when their subscription is canceled."
+          },
+          "sendPaymentMethodUpdatedEmail": {
+            "type": "boolean",
+            "description": "Email the customer when their saved card is updated via the portal."
+          },
+          "customSuccessMessage": {
+            "type": "string",
+            "maxLength": 500,
+            "description": "Free-form text shown on the post-payment success screen."
+          },
+          "customCancellationMessage": {
+            "type": "string",
+            "maxLength": 500,
+            "description": "Free-form text shown on the cancellation confirmation screen."
+          },
+          "customWelcomeText": {
+            "type": "string",
+            "maxLength": 500,
+            "description": "Free-form welcome text shown on the customer portal home."
+          }
+        }
+      },
+      "ProductPortalConfiguration": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "productId": {
+            "type": "number"
+          },
+          "product": {
+            "$ref": "#/components/schemas/Product"
+          },
+          "businessName": {
+            "type": "string",
+            "nullable": true
+          },
+          "logoUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "primaryColor": {
+            "type": "string",
+            "nullable": true
+          },
+          "allowCancelSubscription": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "allowUpdatePaymentMethod": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "allowUpdateBillingInfo": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "allowViewInvoices": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "allowApplyCoupons": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "requireCancelReason": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "cancelAtPeriodEndOnly": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "sendCancellationEmail": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "sendPaymentMethodUpdatedEmail": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "customSuccessMessage": {
+            "type": "string",
+            "nullable": true
+          },
+          "customCancellationMessage": {
+            "type": "string",
+            "nullable": true
+          },
+          "customWelcomeText": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "productId",
+          "product",
+          "businessName",
+          "logoUrl",
+          "primaryColor",
+          "allowCancelSubscription",
+          "allowUpdatePaymentMethod",
+          "allowUpdateBillingInfo",
+          "allowViewInvoices",
+          "allowApplyCoupons",
+          "requireCancelReason",
+          "cancelAtPeriodEndOnly",
+          "sendCancellationEmail",
+          "sendPaymentMethodUpdatedEmail",
+          "customSuccessMessage",
+          "customCancellationMessage",
+          "customWelcomeText",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
       "CreateCustomerRequest": {
         "type": "object",
         "properties": {
@@ -2545,9 +3298,10 @@
           "type": {
             "type": "string",
             "enum": [
-              "one_time"
+              "one_time",
+              "recurring"
             ],
-            "description": "Schedule type. Only `one_time` is supported in this version."
+            "description": "Schedule type. `recurring` requires a `recurrence` block; `one_time` must omit it."
           },
           "dueDate": {
             "type": "string",
@@ -2559,18 +3313,28 @@
             "type": "array",
             "enum": [
               "pix",
-              "boleto"
+              "boleto",
+              "card"
             ],
             "uniqueItems": true,
             "minItems": 1,
-            "description": "Payment methods to offer. M2 only supports pix and boleto; card requires M3.",
+            "description": "Payment methods to offer. `card` is only valid when `type=recurring` (cycle 1 tokenizes the card via Celcoin and cycles 2+ auto-charge it).",
             "items": {
               "type": "string",
               "enum": [
                 "pix",
-                "boleto"
+                "boleto",
+                "card"
               ]
             }
+          },
+          "recurrence": {
+            "description": "Recurrence config. Required when `type=recurring`; must be omitted otherwise.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RecurrenceConfigRequest"
+              }
+            ]
           },
           "externalReference": {
             "type": "string",
@@ -2580,6 +3344,20 @@
           "metadata": {
             "type": "object",
             "description": "Free-form metadata. Persisted as JSONB; not interpreted by Garu."
+          },
+          "trialDays": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 365,
+            "description": "Free-trial duration in days. Only valid when `type=recurring`. When set, cycle 1 is scheduled at `today + trialDays` and a `customer.trial_started` webhook fires immediately.",
+            "example": 7
+          },
+          "maxRecoveryDays": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 365,
+            "description": "Max days past `dueDate` this charge may still be auto-billed by the daily recovery sweep if a run missed it. Omit to use the system default. Lower it for time-sensitive charges where billing late is worse than not billing.",
+            "example": 14
           }
         },
         "required": [
@@ -2667,22 +3445,40 @@
           },
           "subscriptionId": {
             "type": "number",
-            "nullable": true,
-            "description": "Forward-compat (M3): Subscription.id when type='recurring'."
+            "nullable": true
           },
           "trialEndsAt": {
             "format": "date-time",
             "type": "string",
-            "nullable": true,
-            "description": "Forward-compat (M3): trial visibility flag."
+            "nullable": true
           },
           "pendingTokenization": {
             "type": "boolean",
-            "description": "Forward-compat (M3): card-only recurring waiting for first tokenization."
+            "description": "Deprecated; pay-now-card flow no longer uses this state."
+          },
+          "paymentMethodId": {
+            "type": "number",
+            "nullable": true
+          },
+          "paymentMethod": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PaymentMethod"
+              }
+            ]
+          },
+          "cancelAtPeriodEnd": {
+            "type": "boolean"
           },
           "externalReference": {
             "type": "string",
             "nullable": true
+          },
+          "maxRecoveryDays": {
+            "type": "number",
+            "nullable": true,
+            "description": "Max days past `dueDate` the recovery sweep may still auto-bill this\ncharge if a daily run missed it. NULL falls back to the system default\n(SCHEDULED_CHARGE_MAX_RECOVERY_DAYS, default 14)."
           },
           "createdBy": {
             "type": "object"
@@ -2698,6 +3494,12 @@
           "updatedAt": {
             "format": "date-time",
             "type": "string"
+          },
+          "cycles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ScheduledChargeCycle"
+            }
           }
         },
         "required": [
@@ -2718,11 +3520,16 @@
           "subscriptionId",
           "trialEndsAt",
           "pendingTokenization",
+          "paymentMethodId",
+          "paymentMethod",
+          "cancelAtPeriodEnd",
           "externalReference",
+          "maxRecoveryDays",
           "createdBy",
           "metadata",
           "createdAt",
-          "updatedAt"
+          "updatedAt",
+          "cycles"
         ]
       },
       "PauseScheduledChargeRequest": {
@@ -2734,6 +3541,29 @@
             "description": "Optional reason recorded on the schedule timeline."
           }
         }
+      },
+      "CancelRecurrenceScheduledChargeRequest": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "maxLength": 500,
+            "description": "Optional reason recorded on the schedule timeline and audit log."
+          }
+        }
+      },
+      "CancelAtPeriodEndScheduledChargeRequest": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "When true, the cycle generator stops emitting new cycles after the next paid cycle. Reversible.",
+            "example": true
+          }
+        },
+        "required": [
+          "enabled"
+        ]
       },
       "MarkPaidScheduledChargeRequest": {
         "type": "object",
@@ -2748,10 +3578,30 @@
             "type": "string",
             "maxLength": 255,
             "description": "Seller-side reference for the off-Garu payment (e.g. bank-transfer ID)."
+          },
+          "cycleNumber": {
+            "type": "number",
+            "minimum": 1,
+            "description": "Cycle number to mark paid. REQUIRED for recurring schedules; ignored for one-time.",
+            "example": 3
           }
         },
         "required": [
           "paymentDate"
+        ]
+      },
+      "ChangePaymentMethodScheduledChargeRequest": {
+        "type": "object",
+        "properties": {
+          "paymentMethodId": {
+            "type": "number",
+            "minimum": 1,
+            "description": "PaymentMethod id to bind to this recurring series. Must belong to the same customer.",
+            "example": 42
+          }
+        },
+        "required": [
+          "paymentMethodId"
         ]
       },
       "MetaResponse": {
@@ -2918,6 +3768,26 @@
           }
         }
       },
+      "TriggerWebhookEndpointRequest": {
+        "type": "object",
+        "properties": {
+          "event": {
+            "type": "string",
+            "description": "Event type to trigger. Must be in the manual-test whitelist and the endpoint must already be subscribed to it.",
+            "example": "transaction.payment.failed"
+          },
+          "payloadOverrides": {
+            "type": "object",
+            "description": "Shallow-merged into the sample payload's data.object so callers can pin specific values (e.g. failureCode='card_expired').",
+            "example": {
+              "failureCode": "card_expired"
+            }
+          }
+        },
+        "required": [
+          "event"
+        ]
+      },
       "OutgoingWebhookEvent": {
         "type": "object",
         "properties": {
@@ -2965,6 +3835,10 @@
             "type": "string",
             "nullable": true
           },
+          "manualResendOf": {
+            "type": "number",
+            "nullable": true
+          },
           "createdAt": {
             "format": "date-time",
             "type": "string"
@@ -2982,6 +3856,7 @@
           "nextRetryAt",
           "responseStatus",
           "responseBody",
+          "manualResendOf",
           "createdAt"
         ]
       },
@@ -4093,77 +4968,75 @@
           "webhooks"
         ]
       },
-      "Tag": {
+      "PaymentMethod": {
         "type": "object",
         "properties": {
           "id": {
             "type": "number"
           },
-          "name": {
-            "type": "string"
-          },
-          "products": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Product"
-            }
-          }
-        },
-        "required": [
-          "id",
-          "name",
-          "products"
-        ]
-      },
-      "SubscriptionPrice": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "object"
-          },
-          "productId": {
+          "customerId": {
             "type": "number"
           },
-          "product": {
-            "$ref": "#/components/schemas/Product"
+          "customer": {
+            "$ref": "#/components/schemas/Customer"
           },
           "gatewayProvider": {
             "type": "string"
           },
-          "gatewayPlanId": {
+          "gatewayCardId": {
             "type": "string"
           },
-          "name": {
+          "cardBrand": {
             "type": "string"
           },
-          "pricingModel": {
+          "cardLast4": {
             "type": "string"
           },
-          "unitAmount": {
+          "cardExpMonth": {
             "type": "number"
           },
-          "currency": {
-            "type": "string"
-          },
-          "billingInterval": {
-            "type": "string"
-          },
-          "billingIntervalCount": {
+          "cardExpYear": {
             "type": "number"
           },
-          "trialPeriodDays": {
-            "type": "number"
+          "cardholderName": {
+            "type": "string"
           },
-          "description": {
+          "isDefault": {
+            "type": "boolean"
+          },
+          "isBackup": {
+            "type": "boolean"
+          },
+          "status": {
+            "type": "string"
+          },
+          "lastUsedAt": {
+            "format": "date-time",
             "type": "string",
             "nullable": true
           },
-          "metadata": {
-            "type": "object",
+          "failedAttempts": {
+            "type": "number"
+          },
+          "expiringSoonNotifiedAt": {
+            "format": "date-time",
+            "type": "string",
             "nullable": true
           },
-          "isActive": {
-            "type": "boolean"
+          "expiring14dNotifiedAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "expiring7dNotifiedAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "expiredAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
           },
           "createdAt": {
             "format": "date-time",
@@ -4182,64 +5055,96 @@
         },
         "required": [
           "id",
-          "productId",
-          "product",
+          "customerId",
+          "customer",
           "gatewayProvider",
-          "gatewayPlanId",
-          "name",
-          "pricingModel",
-          "unitAmount",
-          "currency",
-          "billingInterval",
-          "billingIntervalCount",
-          "trialPeriodDays",
-          "description",
-          "metadata",
-          "isActive",
+          "gatewayCardId",
+          "cardBrand",
+          "cardLast4",
+          "cardExpMonth",
+          "cardExpYear",
+          "cardholderName",
+          "isDefault",
+          "isBackup",
+          "status",
+          "lastUsedAt",
+          "failedAttempts",
+          "expiringSoonNotifiedAt",
+          "expiring14dNotifiedAt",
+          "expiring7dNotifiedAt",
+          "expiredAt",
           "createdAt",
           "updatedAt",
           "subscriptions"
         ]
       },
-      "CoProducer": {
+      "ScheduledChargeCycle": {
         "type": "object",
         "properties": {
           "id": {
-            "type": "number"
-          },
-          "productId": {
-            "type": "number"
-          },
-          "product": {
-            "$ref": "#/components/schemas/Product"
-          },
-          "sellerId": {
-            "type": "number"
-          },
-          "seller": {
-            "$ref": "#/components/schemas/Seller"
-          },
-          "shareType": {
             "type": "object"
           },
-          "shareValue": {
+          "scheduledChargeId": {
+            "type": "object"
+          },
+          "scheduledCharge": {
+            "$ref": "#/components/schemas/ScheduledCharge"
+          },
+          "cycleNumber": {
             "type": "number"
+          },
+          "dueDate": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number",
+            "description": "Snapshot from parent at creation; series price changes don't rewrite history."
           },
           "status": {
             "type": "object"
           },
-          "invitedBySellerId": {
+          "transactionId": {
+            "type": "number",
+            "nullable": true
+          },
+          "transaction": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Transaction"
+              }
+            ]
+          },
+          "attemptCount": {
             "type": "number"
           },
-          "invitedBySeller": {
-            "$ref": "#/components/schemas/Seller"
+          "lastError": {
+            "type": "string",
+            "nullable": true
           },
-          "acceptedAt": {
+          "failureCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "failureReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "gatewayFailureCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "nextRetryAt": {
             "format": "date-time",
             "type": "string",
             "nullable": true
           },
-          "removedAt": {
+          "paidAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "failedAt": {
             "format": "date-time",
             "type": "string",
             "nullable": true
@@ -4255,17 +5160,22 @@
         },
         "required": [
           "id",
-          "productId",
-          "product",
-          "sellerId",
-          "seller",
-          "shareType",
-          "shareValue",
+          "scheduledChargeId",
+          "scheduledCharge",
+          "cycleNumber",
+          "dueDate",
+          "amount",
           "status",
-          "invitedBySellerId",
-          "invitedBySeller",
-          "acceptedAt",
-          "removedAt",
+          "transactionId",
+          "transaction",
+          "attemptCount",
+          "lastError",
+          "failureCode",
+          "failureReason",
+          "gatewayFailureCode",
+          "nextRetryAt",
+          "paidAt",
+          "failedAt",
           "createdAt",
           "updatedAt"
         ]
@@ -4448,55 +5358,55 @@
           "transactions"
         ]
       },
-      "PaymentMethod": {
+      "SubscriptionPrice": {
         "type": "object",
         "properties": {
           "id": {
+            "type": "object"
+          },
+          "productId": {
             "type": "number"
           },
-          "customerId": {
-            "type": "number"
-          },
-          "customer": {
-            "$ref": "#/components/schemas/Customer"
+          "product": {
+            "$ref": "#/components/schemas/Product"
           },
           "gatewayProvider": {
             "type": "string"
           },
-          "gatewayCardId": {
+          "gatewayPlanId": {
             "type": "string"
           },
-          "cardBrand": {
+          "name": {
             "type": "string"
           },
-          "cardLast4": {
+          "pricingModel": {
             "type": "string"
           },
-          "cardExpMonth": {
+          "unitAmount": {
             "type": "number"
           },
-          "cardExpYear": {
+          "currency": {
+            "type": "string"
+          },
+          "billingInterval": {
+            "type": "string"
+          },
+          "billingIntervalCount": {
             "type": "number"
           },
-          "cardholderName": {
-            "type": "string"
+          "trialPeriodDays": {
+            "type": "number"
           },
-          "isDefault": {
-            "type": "boolean"
-          },
-          "isBackup": {
-            "type": "boolean"
-          },
-          "status": {
-            "type": "string"
-          },
-          "lastUsedAt": {
-            "format": "date-time",
+          "description": {
             "type": "string",
             "nullable": true
           },
-          "failedAttempts": {
-            "type": "number"
+          "metadata": {
+            "type": "object",
+            "nullable": true
+          },
+          "isActive": {
+            "type": "boolean"
           },
           "createdAt": {
             "format": "date-time",
@@ -4515,20 +5425,20 @@
         },
         "required": [
           "id",
-          "customerId",
-          "customer",
+          "productId",
+          "product",
           "gatewayProvider",
-          "gatewayCardId",
-          "cardBrand",
-          "cardLast4",
-          "cardExpMonth",
-          "cardExpYear",
-          "cardholderName",
-          "isDefault",
-          "isBackup",
-          "status",
-          "lastUsedAt",
-          "failedAttempts",
+          "gatewayPlanId",
+          "name",
+          "pricingModel",
+          "unitAmount",
+          "currency",
+          "billingInterval",
+          "billingIntervalCount",
+          "trialPeriodDays",
+          "description",
+          "metadata",
+          "isActive",
           "createdAt",
           "updatedAt",
           "subscriptions"
@@ -4574,6 +5484,134 @@
           "gatewayEventId",
           "eventData",
           "createdAt"
+        ]
+      },
+      "RecurrenceConfigRequest": {
+        "type": "object",
+        "properties": {
+          "interval": {
+            "type": "string",
+            "enum": [
+              "weekly",
+              "biweekly",
+              "monthly",
+              "bimonthly",
+              "quarterly",
+              "biannual",
+              "yearly"
+            ],
+            "description": "Cadence between cycles."
+          },
+          "intervalCount": {
+            "type": "number",
+            "minimum": 1,
+            "description": "Multiplier for the interval (default 1)."
+          },
+          "endsAfter": {
+            "type": "number",
+            "minimum": 1,
+            "description": "Stop after N successful cycles."
+          },
+          "endsOn": {
+            "type": "string",
+            "pattern": "/^\\d{4}-\\d{2}-\\d{2}$/",
+            "description": "Stop after this calendar date (YYYY-MM-DD, São Paulo TZ).",
+            "example": "2027-01-15"
+          }
+        },
+        "required": [
+          "interval"
+        ]
+      },
+      "Tag": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "products": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Product"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "products"
+        ]
+      },
+      "CoProducer": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "productId": {
+            "type": "number"
+          },
+          "product": {
+            "$ref": "#/components/schemas/Product"
+          },
+          "sellerId": {
+            "type": "number"
+          },
+          "seller": {
+            "$ref": "#/components/schemas/Seller"
+          },
+          "shareType": {
+            "type": "object"
+          },
+          "shareValue": {
+            "type": "number"
+          },
+          "status": {
+            "type": "object"
+          },
+          "invitedBySellerId": {
+            "type": "number"
+          },
+          "invitedBySeller": {
+            "$ref": "#/components/schemas/Seller"
+          },
+          "acceptedAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "removedAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "productId",
+          "product",
+          "sellerId",
+          "seller",
+          "shareType",
+          "shareValue",
+          "status",
+          "invitedBySellerId",
+          "invitedBySeller",
+          "acceptedAt",
+          "removedAt",
+          "createdAt",
+          "updatedAt"
         ]
       },
       "TransactionDto": {
