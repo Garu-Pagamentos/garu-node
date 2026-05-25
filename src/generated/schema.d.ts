@@ -487,6 +487,124 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/products/{id}/portal-config": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get the portal customization for a product
+         * @description Returns null when no per-product config exists (the product falls back to seller-level portal config). Accepts either the product UUID or its integer id.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": Record<string, never>;
+                    };
+                };
+            };
+        };
+        put?: never;
+        /**
+         * Set the portal customization for a product
+         * @description Creates or replaces the per-product portal config. Use PATCH for partial updates. Idempotent: subsequent calls with the same body return 200 with the persisted state. Accepts either the product UUID or its integer id.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ProductPortalConfigRequest"];
+                };
+            };
+            responses: {
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProductPortalConfiguration"];
+                    };
+                };
+            };
+        };
+        /**
+         * Delete the portal customization for a product
+         * @description Removes the per-product config. The product falls back to the seller-level portal config. Accepts either the product UUID or its integer id.
+         */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        /**
+         * Patch the portal customization for a product
+         * @description Partial update — only provided fields are written. Missing fields keep their persisted value. Accepts either the product UUID or its integer id.
+         */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ProductPortalConfigRequest"];
+                };
+            };
+            responses: {
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProductPortalConfiguration"];
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
     "/api/customers": {
         parameters: {
             query?: never;
@@ -784,6 +902,94 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/scheduled-charges/{id}/attempts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Per-attempt billing log for a scheduled charge (SPEC §4.2)
+         * @description Returns one row per logical billing attempt across all cycles in the series — cycle 1 interactive, every silent-charge, every retry, every manual mark-paid. Includes the canonical failureCode for declines. Filterable by cycleNumber.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    cycleNumber?: number;
+                    limit?: number;
+                    page?: number;
+                };
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Paginated attempt log for the series */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/scheduled-charges/{id}/charge-now": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Charge a scheduled charge now
+         * @description Runs the same dispatch the daily cron would (customer email/notification + webhook + timeline event) immediately, instead of waiting for the dueDate. Idempotent: if the current cycle was already dispatched it reports `already_sent` and does not re-charge. Allowed from scheduled / due_today.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Dispatch outcome */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/scheduled-charges/{id}/postpone": {
         parameters: {
             query?: never;
@@ -933,6 +1139,108 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/scheduled-charges/{id}/cancel-recurrence": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Stop future cycles for a recurring scheduled charge (hard cancel)
+         * @description Recurring schedules only. Generator and billing skip the series from now on; the in-flight cycle does not fire its email. Final — use a new series to restart.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["CancelRecurrenceScheduledChargeRequest"];
+                };
+            };
+            responses: {
+                /** @description Recurrence canceled */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ScheduledCharge"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/scheduled-charges/{id}/cancel-at-period-end": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Toggle Stripe-style soft cancel on a recurring scheduled charge
+         * @description Recurring schedules only. When `enabled=true`, the cycle generator stops emitting new cycles after the next paid cycle. Reversible by passing `enabled=false`. Mutually exclusive with `recurrence.endsAfter` and `recurrence.endsOn`.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["CancelAtPeriodEndScheduledChargeRequest"];
+                };
+            };
+            responses: {
+                /** @description Toggle applied */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ScheduledCharge"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/scheduled-charges/{id}/mark-paid": {
         parameters: {
             query?: never;
@@ -944,7 +1252,7 @@ export interface paths {
         put?: never;
         /**
          * Manually mark a scheduled charge as paid
-         * @description Use when the customer paid off-Garu (bank transfer, etc.). Allowed from due_today / overdue.
+         * @description Use when the customer paid off-Garu (bank transfer, etc.). For one-time charges: omit `cycleNumber`; allowed from due_today / overdue. For recurring: pass `cycleNumber`; allowed from cycle status due_today / overdue / failed. Future cycles continue.
          */
         post: {
             parameters: {
@@ -973,12 +1281,86 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["ScheduledCharge"];
+                        "application/json": Record<string, never>;
                     };
                 };
             };
         };
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/scheduled-charges/{id}/payment-method": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Swap the saved card on a recurring scheduled charge
+         * @description Recurring schedules only. The new PaymentMethod must belong to the same customer. Future cycles silent-charge the new card; the in-flight cycle (if already due_today) is not retroactively rebound.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ChangePaymentMethodScheduledChargeRequest"];
+                };
+            };
+            responses: {
+                /** @description Payment method changed */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ScheduledCharge"];
+                    };
+                };
+            };
+        };
+        /**
+         * Clear the saved card on a recurring scheduled charge
+         * @description Recurring schedules only. Future cycles fall back to the email-with-link flow so the customer can re-enter card details or pay via PIX/boleto.
+         */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Payment method cleared */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
         options?: never;
         head?: never;
         patch?: never;
@@ -1225,6 +1607,47 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/webhook-endpoints/{id}/trigger": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Trigger a sample payload for any subscribed event type — used by sellers to validate their integration end-to-end without waiting for real traffic. Payload carries metadata.test=true so receivers can branch. */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["TriggerWebhookEndpointRequest"];
+                };
+            };
+            responses: {
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": Record<string, never>;
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/webhook-events": {
         parameters: {
             query?: never;
@@ -1340,6 +1763,43 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/webhook-events/{id}/resend": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Clone a webhook event and deliver the clone (works on any status) */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["OutgoingWebhookEvent"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1411,11 +1871,17 @@ export interface components {
              *     Drives the Celcoin webhook ingestion path that flips the schedule's
              *     status to `paid`. */
             scheduledChargeId: string | null;
+            scheduledChargeCycleId: string | null;
             subscriptionId: number | null;
             subscription: components["schemas"]["Subscription"] | null;
             isRecurring: boolean;
             billingReason: string | null;
             billingCycle: number | null;
+            failureCode: string | null;
+            failureReason: string | null;
+            gatewayFailureCode: string | null;
+            /** Format: date-time */
+            failedAt: string | null;
             /** Format: date-time */
             refundedAt: string | null;
             refundAmount: number | null;
@@ -1561,6 +2027,68 @@ export interface components {
             affiliateAutoApprove: boolean;
             coProducers: components["schemas"]["CoProducer"][];
         };
+        ProductPortalConfigRequest: {
+            /** @description Display name shown on the hosted payment page header. */
+            businessName?: string;
+            /**
+             * Format: uri
+             * @description HTTPS URL of the logo image. PNG/JPG, recommended 4:1 aspect ratio.
+             */
+            logoUrl?: string;
+            /**
+             * @description Primary brand color in hex (e.g. "#257264"). Used for buttons and accents.
+             * @example #257264
+             */
+            primaryColor?: string;
+            /** @description Show the Cancel Subscription button on the customer portal. */
+            allowCancelSubscription?: boolean;
+            /** @description Show the Update Payment Method button. */
+            allowUpdatePaymentMethod?: boolean;
+            /** @description Show the Update Billing Info button. */
+            allowUpdateBillingInfo?: boolean;
+            /** @description Show the Invoices tab on the customer portal. */
+            allowViewInvoices?: boolean;
+            /** @description Allow customers to apply coupon codes at checkout. */
+            allowApplyCoupons?: boolean;
+            /** @description Force the customer to enter a reason on cancel. */
+            requireCancelReason?: boolean;
+            /** @description Soft-cancel: the customer can only cancel at end of period (Stripe-style). Hard-cancel disabled. */
+            cancelAtPeriodEndOnly?: boolean;
+            /** @description Email the customer when their subscription is canceled. */
+            sendCancellationEmail?: boolean;
+            /** @description Email the customer when their saved card is updated via the portal. */
+            sendPaymentMethodUpdatedEmail?: boolean;
+            /** @description Free-form text shown on the post-payment success screen. */
+            customSuccessMessage?: string;
+            /** @description Free-form text shown on the cancellation confirmation screen. */
+            customCancellationMessage?: string;
+            /** @description Free-form welcome text shown on the customer portal home. */
+            customWelcomeText?: string;
+        };
+        ProductPortalConfiguration: {
+            id: number;
+            productId: number;
+            product: components["schemas"]["Product"];
+            businessName: string | null;
+            logoUrl: string | null;
+            primaryColor: string | null;
+            allowCancelSubscription: boolean | null;
+            allowUpdatePaymentMethod: boolean | null;
+            allowUpdateBillingInfo: boolean | null;
+            allowViewInvoices: boolean | null;
+            allowApplyCoupons: boolean | null;
+            requireCancelReason: boolean | null;
+            cancelAtPeriodEndOnly: boolean | null;
+            sendCancellationEmail: boolean | null;
+            sendPaymentMethodUpdatedEmail: boolean | null;
+            customSuccessMessage: string | null;
+            customCancellationMessage: string | null;
+            customWelcomeText: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
         CreateCustomerRequest: {
             /** @description Customer name */
             name: string;
@@ -1654,24 +2182,36 @@ export interface components {
             /** @description Free-form description shown on the customer email and payment page */
             description?: string;
             /**
-             * @description Schedule type. Only `one_time` is supported in this version.
+             * @description Schedule type. `recurring` requires a `recurrence` block; `one_time` must omit it.
              * @enum {string}
              */
-            type: "one_time";
+            type: "one_time" | "recurring";
             /**
              * @description Due date in YYYY-MM-DD (São Paulo TZ). Must be today or future.
              * @example 2026-05-15
              */
             dueDate: string;
             /**
-             * @description Payment methods to offer. M2 only supports pix and boleto; card requires M3.
+             * @description Payment methods to offer. `card` is only valid when `type=recurring` (cycle 1 tokenizes the card via Celcoin and cycles 2+ auto-charge it).
              * @enum {array}
              */
-            methods: "pix" | "boleto";
+            methods: "pix" | "boleto" | "card";
+            /** @description Recurrence config. Required when `type=recurring`; must be omitted otherwise. */
+            recurrence?: components["schemas"]["RecurrenceConfigRequest"];
             /** @description Seller-controlled identifier for this schedule (deduping, reconciliation). */
             externalReference?: string;
             /** @description Free-form metadata. Persisted as JSONB; not interpreted by Garu. */
             metadata?: Record<string, never>;
+            /**
+             * @description Free-trial duration in days. Only valid when `type=recurring`. When set, cycle 1 is scheduled at `today + trialDays` and a `customer.trial_started` webhook fires immediately.
+             * @example 7
+             */
+            trialDays?: number;
+            /**
+             * @description Max days past `dueDate` this charge may still be auto-billed by the daily recovery sweep if a run missed it. Omit to use the system default. Lower it for time-sensitive charges where billing late is worse than not billing.
+             * @example 14
+             */
+            maxRecoveryDays?: number;
         };
         PostponeScheduledChargeRequest: {
             /**
@@ -1697,26 +2237,41 @@ export interface components {
             methods: Record<string, never>[];
             recurrence: Record<string, never>;
             status: Record<string, never>;
-            /** @description Forward-compat (M3): Subscription.id when type='recurring'. */
             subscriptionId: number | null;
-            /**
-             * Format: date-time
-             * @description Forward-compat (M3): trial visibility flag.
-             */
+            /** Format: date-time */
             trialEndsAt: string | null;
-            /** @description Forward-compat (M3): card-only recurring waiting for first tokenization. */
+            /** @description Deprecated; pay-now-card flow no longer uses this state. */
             pendingTokenization: boolean;
+            paymentMethodId: number | null;
+            paymentMethod: components["schemas"]["PaymentMethod"] | null;
+            cancelAtPeriodEnd: boolean;
             externalReference: string | null;
+            /** @description Max days past `dueDate` the recovery sweep may still auto-bill this
+             *     charge if a daily run missed it. NULL falls back to the system default
+             *     (SCHEDULED_CHARGE_MAX_RECOVERY_DAYS, default 14). */
+            maxRecoveryDays: number | null;
             createdBy: Record<string, never>;
             metadata: Record<string, never>;
             /** Format: date-time */
             createdAt: string;
             /** Format: date-time */
             updatedAt: string;
+            cycles: components["schemas"]["ScheduledChargeCycle"][];
         };
         PauseScheduledChargeRequest: {
             /** @description Optional reason recorded on the schedule timeline. */
             reason?: string;
+        };
+        CancelRecurrenceScheduledChargeRequest: {
+            /** @description Optional reason recorded on the schedule timeline and audit log. */
+            reason?: string;
+        };
+        CancelAtPeriodEndScheduledChargeRequest: {
+            /**
+             * @description When true, the cycle generator stops emitting new cycles after the next paid cycle. Reversible.
+             * @example true
+             */
+            enabled: boolean;
         };
         MarkPaidScheduledChargeRequest: {
             /**
@@ -1726,6 +2281,18 @@ export interface components {
             paymentDate: string;
             /** @description Seller-side reference for the off-Garu payment (e.g. bank-transfer ID). */
             externalReference?: string;
+            /**
+             * @description Cycle number to mark paid. REQUIRED for recurring schedules; ignored for one-time.
+             * @example 3
+             */
+            cycleNumber?: number;
+        };
+        ChangePaymentMethodScheduledChargeRequest: {
+            /**
+             * @description PaymentMethod id to bind to this recurring series. Must belong to the same customer.
+             * @example 42
+             */
+            paymentMethodId: number;
         };
         MetaResponse: {
             /** @example Garu */
@@ -1816,6 +2383,20 @@ export interface components {
             /** @description Enable or disable this endpoint */
             enabled?: boolean;
         };
+        TriggerWebhookEndpointRequest: {
+            /**
+             * @description Event type to trigger. Must be in the manual-test whitelist and the endpoint must already be subscribed to it.
+             * @example transaction.payment.failed
+             */
+            event: string;
+            /**
+             * @description Shallow-merged into the sample payload's data.object so callers can pin specific values (e.g. failureCode='card_expired').
+             * @example {
+             *       "failureCode": "card_expired"
+             *     }
+             */
+            payloadOverrides?: Record<string, never>;
+        };
         OutgoingWebhookEvent: {
             id: number;
             endpointId: number;
@@ -1831,6 +2412,7 @@ export interface components {
             nextRetryAt: string | null;
             responseStatus: number | null;
             responseBody: string | null;
+            manualResendOf: number | null;
             /** Format: date-time */
             createdAt: string;
         };
@@ -2142,48 +2724,59 @@ export interface components {
             /** @example true */
             webhooks: boolean;
         };
-        Tag: {
+        PaymentMethod: {
             id: number;
-            name: string;
-            products: components["schemas"]["Product"][];
-        };
-        SubscriptionPrice: {
-            id: Record<string, never>;
-            productId: number;
-            product: components["schemas"]["Product"];
+            customerId: number;
+            customer: components["schemas"]["Customer"];
             gatewayProvider: string;
-            gatewayPlanId: string;
-            name: string;
-            pricingModel: string;
-            unitAmount: number;
-            currency: string;
-            billingInterval: string;
-            billingIntervalCount: number;
-            trialPeriodDays: number;
-            description: string | null;
-            metadata: Record<string, never>;
-            isActive: boolean;
+            gatewayCardId: string;
+            cardBrand: string;
+            cardLast4: string;
+            cardExpMonth: number;
+            cardExpYear: number;
+            cardholderName: string;
+            isDefault: boolean;
+            isBackup: boolean;
+            status: string;
+            /** Format: date-time */
+            lastUsedAt: string | null;
+            failedAttempts: number;
+            /** Format: date-time */
+            expiringSoonNotifiedAt: string | null;
+            /** Format: date-time */
+            expiring14dNotifiedAt: string | null;
+            /** Format: date-time */
+            expiring7dNotifiedAt: string | null;
+            /** Format: date-time */
+            expiredAt: string | null;
             /** Format: date-time */
             createdAt: string;
             /** Format: date-time */
             updatedAt: string;
             subscriptions: components["schemas"]["Subscription"][];
         };
-        CoProducer: {
-            id: number;
-            productId: number;
-            product: components["schemas"]["Product"];
-            sellerId: number;
-            seller: components["schemas"]["Seller"];
-            shareType: Record<string, never>;
-            shareValue: number;
+        ScheduledChargeCycle: {
+            id: Record<string, never>;
+            scheduledChargeId: Record<string, never>;
+            scheduledCharge: components["schemas"]["ScheduledCharge"];
+            cycleNumber: number;
+            dueDate: string;
+            /** @description Snapshot from parent at creation; series price changes don't rewrite history. */
+            amount: number;
             status: Record<string, never>;
-            invitedBySellerId: number;
-            invitedBySeller: components["schemas"]["Seller"];
+            transactionId: number | null;
+            transaction: components["schemas"]["Transaction"] | null;
+            attemptCount: number;
+            lastError: string | null;
+            failureCode: string | null;
+            failureReason: string | null;
+            gatewayFailureCode: string | null;
             /** Format: date-time */
-            acceptedAt: string | null;
+            nextRetryAt: string | null;
             /** Format: date-time */
-            removedAt: string | null;
+            paidAt: string | null;
+            /** Format: date-time */
+            failedAt: string | null;
             /** Format: date-time */
             createdAt: string;
             /** Format: date-time */
@@ -2236,23 +2829,22 @@ export interface components {
             events: components["schemas"]["SubscriptionEvent"][];
             transactions: components["schemas"]["Transaction"][];
         };
-        PaymentMethod: {
-            id: number;
-            customerId: number;
-            customer: components["schemas"]["Customer"];
+        SubscriptionPrice: {
+            id: Record<string, never>;
+            productId: number;
+            product: components["schemas"]["Product"];
             gatewayProvider: string;
-            gatewayCardId: string;
-            cardBrand: string;
-            cardLast4: string;
-            cardExpMonth: number;
-            cardExpYear: number;
-            cardholderName: string;
-            isDefault: boolean;
-            isBackup: boolean;
-            status: string;
-            /** Format: date-time */
-            lastUsedAt: string | null;
-            failedAttempts: number;
+            gatewayPlanId: string;
+            name: string;
+            pricingModel: string;
+            unitAmount: number;
+            currency: string;
+            billingInterval: string;
+            billingIntervalCount: number;
+            trialPeriodDays: number;
+            description: string | null;
+            metadata: Record<string, never>;
+            isActive: boolean;
             /** Format: date-time */
             createdAt: string;
             /** Format: date-time */
@@ -2269,6 +2861,47 @@ export interface components {
             eventData: Record<string, never>;
             /** Format: date-time */
             createdAt: string;
+        };
+        RecurrenceConfigRequest: {
+            /**
+             * @description Cadence between cycles.
+             * @enum {string}
+             */
+            interval: "weekly" | "biweekly" | "monthly" | "bimonthly" | "quarterly" | "biannual" | "yearly";
+            /** @description Multiplier for the interval (default 1). */
+            intervalCount?: number;
+            /** @description Stop after N successful cycles. */
+            endsAfter?: number;
+            /**
+             * @description Stop after this calendar date (YYYY-MM-DD, São Paulo TZ).
+             * @example 2027-01-15
+             */
+            endsOn?: string;
+        };
+        Tag: {
+            id: number;
+            name: string;
+            products: components["schemas"]["Product"][];
+        };
+        CoProducer: {
+            id: number;
+            productId: number;
+            product: components["schemas"]["Product"];
+            sellerId: number;
+            seller: components["schemas"]["Seller"];
+            shareType: Record<string, never>;
+            shareValue: number;
+            status: Record<string, never>;
+            invitedBySellerId: number;
+            invitedBySeller: components["schemas"]["Seller"];
+            /** Format: date-time */
+            acceptedAt: string | null;
+            /** Format: date-time */
+            removedAt: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
         };
         TransactionDto: {
             myId?: string;
