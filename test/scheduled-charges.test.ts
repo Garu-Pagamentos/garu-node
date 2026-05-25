@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { Garu, GaruNotFoundError } from '../src/index.js';
+import { Garu, GaruNotFoundError, GaruValidationError } from '../src/index.js';
 import { mockFetch } from './helpers.js';
 
 const fakeCharge = {
@@ -15,6 +15,7 @@ const fakeCharge = {
   methods: ['pix', 'boleto'] as const,
   status: 'scheduled' as const,
   externalReference: null,
+  maxRecoveryDays: null,
   metadata: null,
   createdAt: '2026-05-01T12:00:00Z',
   updatedAt: '2026-05-01T12:00:00Z'
@@ -66,6 +67,25 @@ describe('scheduledCharges.create', () => {
     );
     // The idempotency key must NOT leak into the request body.
     expect(calls[0]!.body).not.toHaveProperty('idempotencyKey');
+  });
+
+  it('forwards optional maxRecoveryDays in the body', async () => {
+    const { fetch, calls } = mockFetch([
+      { status: 201, body: { ...fakeCharge, maxRecoveryDays: 30 } }
+    ]);
+    const garu = newClient(fetch);
+
+    const result = await garu.scheduledCharges.create({
+      customerId: 42,
+      amount: 297.5,
+      type: 'one_time',
+      dueDate: '2026-06-15',
+      methods: ['pix'],
+      maxRecoveryDays: 30
+    });
+
+    expect(result.maxRecoveryDays).toBe(30);
+    expect(calls[0]!.body).toMatchObject({ maxRecoveryDays: 30 });
   });
 
   it('respects a caller-supplied idempotency key', async () => {
@@ -263,5 +283,133 @@ describe('scheduledCharges.markPaid', () => {
       paymentDate: '2026-06-20',
       externalReference: 'TED 4472881'
     });
+  });
+});
+
+describe('scheduledCharges.chargeNow', () => {
+  it('posts an empty `{}` body to the charge-now endpoint and returns the dispatch result', async () => {
+    const { fetch, calls } = mockFetch([
+      {
+        status: 200,
+        body: {
+          outcome: 'dispatched',
+          cycleNumber: 1,
+          message: 'Cobrança enviada agora.'
+        }
+      }
+    ]);
+    const garu = newClient(fetch);
+
+    const result = await garu.scheduledCharges.chargeNow('sch_abc123');
+
+    expect(result.outcome).toBe('dispatched');
+    expect(result.cycleNumber).toBe(1);
+    expect(result.message).toBe('Cobrança enviada agora.');
+    expect(calls[0]!.url).toBe('https://garu.com.br/api/scheduled-charges/sch_abc123/charge-now');
+    expect(calls[0]!.method).toBe('POST');
+    expect(calls[0]!.body).toEqual({});
+  });
+
+  it('does not attach an idempotency key — the endpoint is idempotent server-side', async () => {
+    const { fetch, calls } = mockFetch([
+      { status: 200, body: { outcome: 'dispatched', cycleNumber: null, message: 'ok' } }
+    ]);
+    const garu = newClient(fetch);
+
+    await garu.scheduledCharges.chargeNow('sch_abc123');
+
+    expect(calls[0]!.headers).not.toHaveProperty('x-idempotency-key');
+  });
+
+  it('URL-encodes the id in the path so a stray special char cannot alter the route', async () => {
+    const { fetch, calls } = mockFetch([
+      { status: 200, body: { outcome: 'dispatched', cycleNumber: null, message: 'ok' } }
+    ]);
+    const garu = newClient(fetch);
+
+    await garu.scheduledCharges.chargeNow('sch a/b');
+
+    expect(calls[0]!.url).toBe('https://garu.com.br/api/scheduled-charges/sch%20a%2Fb/charge-now');
+  });
+
+  it('surfaces the already_sent no-op outcome', async () => {
+    const { fetch } = mockFetch([
+      {
+        status: 200,
+        body: {
+          outcome: 'already_sent',
+          cycleNumber: 3,
+          message: 'Cobrança deste ciclo já havia sido enviada.'
+        }
+      }
+    ]);
+    const garu = newClient(fetch);
+
+    const result = await garu.scheduledCharges.chargeNow('sch_abc123');
+
+    expect(result.outcome).toBe('already_sent');
+    expect(result.cycleNumber).toBe(3);
+  });
+
+  it('surfaces a not_sent outcome with a reason (distinct from failed)', async () => {
+    const { fetch } = mockFetch([
+      {
+        status: 200,
+        body: {
+          outcome: 'not_sent',
+          cycleNumber: 1,
+          reason: 'no_saved_payment_method',
+          message: 'Nenhum método de pagamento salvo para cobrar.'
+        }
+      }
+    ]);
+    const garu = newClient(fetch);
+
+    const result = await garu.scheduledCharges.chargeNow('sch_abc123');
+
+    expect(result.outcome).toBe('not_sent');
+    expect(result.reason).toBe('no_saved_payment_method');
+  });
+
+  it('surfaces a failed outcome with a reason', async () => {
+    const { fetch } = mockFetch([
+      {
+        status: 200,
+        body: {
+          outcome: 'failed',
+          cycleNumber: 2,
+          reason: 'card_expired',
+          message: 'O cartão salvo está vencido.'
+        }
+      }
+    ]);
+    const garu = newClient(fetch);
+
+    const result = await garu.scheduledCharges.chargeNow('sch_abc123');
+
+    expect(result.outcome).toBe('failed');
+    expect(result.reason).toBe('card_expired');
+  });
+
+  it('maps 400 (not in a billable status) to GaruValidationError', async () => {
+    const { fetch } = mockFetch([
+      { status: 400, body: { message: 'Scheduled charge is not in a billable status.' } }
+    ]);
+    const garu = newClient(fetch);
+
+    await expect(garu.scheduledCharges.chargeNow('sch_paid')).rejects.toBeInstanceOf(
+      GaruValidationError
+    );
+  });
+
+  it('maps 404 (not the caller’s charge) to GaruNotFoundError', async () => {
+    const { fetch } = mockFetch([
+      { status: 404, body: { message: 'Scheduled charge not found.' } }
+    ]);
+    const garu = newClient(fetch);
+
+    await expect(garu.scheduledCharges.chargeNow('sch_missing')).rejects.toBeInstanceOf(
+      GaruNotFoundError
+    );
   });
 });

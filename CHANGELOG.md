@@ -3,6 +3,32 @@
 All notable changes to `@garuhq/node` are documented in this file. Format:
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [SemVer](https://semver.org/).
 
+## [0.13.0] — 2026-05-25
+
+### Added
+
+- `scheduledCharges.chargeNow(id)` — `POST /api/scheduled-charges/{id}/charge-now`.
+  Force-bills the current cycle right now instead of waiting for its due
+  date, running the same dispatch the daily billing cron would (customer
+  email/notification + outbound webhook + timeline event). Allowed only
+  from a billable status (`scheduled` / `due_today`); a recurring series
+  must have an open cycle. **Idempotent** — a cycle whose d-day was
+  already dispatched reports `already_sent` and does not re-charge.
+  Returns `{ outcome, cycleNumber, reason?, message }`:
+  - `outcome` is `'dispatched' | 'already_sent' | 'not_sent' | 'failed'`.
+  - `reason` (on `not_sent` / `failed`) is one of the documented literals
+    (`no_email`, `lock_lost`, `no_saved_payment_method`, `card_expired`,
+    `payment_method_missing`, `customer_missing`) or a raw gateway decline
+    code.
+  - `message` is a ready-to-show pt-BR string.
+- `ChargeNowOutcome`, `ChargeNowReason`, and `ChargeNowResult` types
+  exported from the package root.
+- `maxRecoveryDays?: number` (integer 1–365) on
+  `CreateScheduledChargeParams` — caps how many days past `dueDate` the
+  daily recovery sweep will still auto-bill a missed charge. Omit for the
+  system default (14). Also surfaced on the scheduled charge object as
+  `ScheduledChargeRecord.maxRecoveryDays: number | null`.
+
 ## [0.12.1] — 2026-05-19
 
 ### Fixed
