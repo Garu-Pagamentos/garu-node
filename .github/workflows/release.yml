@@ -1,14 +1,24 @@
 name: Release
 
+# Publishes to npm on every push to `main`, but ONLY when the version in
+# package.json isn't already on the registry. Ordinary commits (docs,
+# refactors, CI changes) test-and-skip instead of failing on a duplicate
+# version. To cut a release: bump `version` in package.json + update
+# CHANGELOG.md, commit, and push to main.
+#
+# NOTE: npm Trusted Publishing (OIDC) is pinned to THIS workflow filename
+# (release.yml). Keep publishing here — moving it to another workflow would
+# require reconfiguring the npm trusted-publisher settings by hand.
+
 on:
   push:
-    tags: ["v*"]
+    branches: [main]
 
 jobs:
   publish:
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
       id-token: write
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -17,7 +27,28 @@ jobs:
           node-version: 24
           registry-url: https://registry.npmjs.org
           cache: npm
+
       - run: npm ci
-      - run: npm test
-      - run: npm run build
-      - run: npm publish --access public --provenance
+
+      - name: Check whether this version is already published
+        id: published
+        run: |
+          NAME=$(node -p "require('./package.json').name")
+          VERSION=$(node -p "require('./package.json').version")
+          if npm view "$NAME@$VERSION" version >/dev/null 2>&1; then
+            echo "$NAME@$VERSION is already on npm — skipping publish."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "$NAME@$VERSION is new — will test, build, and publish."
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - if: steps.published.outputs.skip == 'false'
+        run: npm test
+
+      - if: steps.published.outputs.skip == 'false'
+        run: npm run build
+
+      - name: Publish with provenance
+        if: steps.published.outputs.skip == 'false'
+        run: npm publish --access public --provenance
