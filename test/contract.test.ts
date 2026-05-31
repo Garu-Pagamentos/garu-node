@@ -104,8 +104,26 @@ describe('OpenAPI contract', () => {
     const schema = typedSpec.components.schemas.ProductResponse;
     expect(schema?.properties).toBeDefined();
     const props = schema!.properties!;
-    for (const key of ['id', 'uuid', 'name', 'value', 'pix', 'boleto', 'creditCard']) {
+    for (const key of [
+      'id',
+      'uuid',
+      'name',
+      'value',
+      'pix',
+      'boleto',
+      'creditCard',
+      'pixAutomatic'
+    ]) {
       expect(props[key], `ProductResponse.${key}`).toBeDefined();
     }
+  });
+
+  it('CreateScheduledChargeRequest.methods offers pix_automatic', () => {
+    const schema = typedSpec.components.schemas.CreateScheduledChargeRequest;
+    expect(schema?.properties).toBeDefined();
+    const methods = schema!.properties!.methods as { enum?: string[] };
+    expect(methods.enum).toEqual(
+      expect.arrayContaining(['pix', 'boleto', 'card', 'pix_automatic'])
+    );
   });
 });

@@ -124,7 +124,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get Transaction Status by GalaxPay ID (Public) */
+        /** Get Transaction Status by Gateway ID (Public) */
         get: {
             parameters: {
                 query?: never;
@@ -798,6 +798,50 @@ export interface paths {
         };
         trace?: never;
     };
+    "/api/scheduled-charges/available-methods": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List scheduled charges for the calling seller
+         * @description Drives the dashboard create-charge drawer. Returns the base set (pix/boleto/card) plus pix_automatic if the seller is allowlisted for the Pix Automático canary.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    search?: string;
+                    dueTo?: string;
+                    dueFrom?: string;
+                    type?: "one_time" | "recurring";
+                    status?: string[];
+                    customerId?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Methods available to the current seller */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/scheduled-charges": {
         parameters: {
             query?: never;
@@ -805,18 +849,16 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** List scheduled charges for the calling seller */
         get: {
             parameters: {
-                query?: {
-                    customerId?: number;
-                    type?: "one_time" | "recurring";
-                    dueFrom?: string;
-                    dueTo?: string;
-                    search?: string;
+                query: {
+                    customerId: string;
+                    type: string;
+                    dueFrom: string;
+                    dueTo: string;
+                    search: string;
                     limit?: number;
                     page?: number;
-                    status?: string[];
                 };
                 header?: never;
                 path?: never;
@@ -1851,6 +1893,14 @@ export interface components {
         Transaction: {
             id: number;
             galaxPayId: number;
+            /** @description Which processor handled this transaction. NULL is read as 'celcoin'
+             *     (every pre-Woovi row). Woovi rows set this to 'woovi' and keep
+             *     `galaxPayId=0` (sentinel) since Woovi ids are strings — see
+             *     `gatewayChargeId`. */
+            gatewayProvider: string | null;
+            /** @description String charge reference for non-Celcoin processors (Woovi correlationID /
+             *     charge globalID). Used to reconcile inbound webhooks. NULL for Celcoin. */
+            gatewayChargeId: string | null;
             product: components["schemas"]["Product"];
             customer: components["schemas"]["Customer"];
             affiliation: components["schemas"]["Affiliations"] | null;
@@ -1930,6 +1980,7 @@ export interface components {
             boleto: boolean;
             creditCard: boolean;
             pix: boolean;
+            pixAutomatic?: boolean;
             installments: Record<string, never>[];
             tags?: components["schemas"]["Tag"][];
             pixelFB?: string;
@@ -1998,6 +2049,11 @@ export interface components {
             boleto: boolean;
             creditCard: boolean;
             pix: boolean;
+            /** @description Per-product Pix Automático (Woovi recurring) enablement. Defaults true;
+             *     sellers can disable per product when they don't want the recurring-Pix
+             *     tab on a specific subscription product. Only the subscription checkout
+             *     mode reads this flag. */
+            pixAutomatic: boolean;
             installments: number;
             affiliation: boolean;
             affiliationOrderAccept: boolean;
@@ -2192,10 +2248,10 @@ export interface components {
              */
             dueDate: string;
             /**
-             * @description Payment methods to offer. `card` is only valid when `type=recurring` (cycle 1 tokenizes the card via Celcoin and cycles 2+ auto-charge it).
+             * @description Payment methods to offer. `card` and `pix_automatic` are only valid when `type=recurring` and a `productId` is set — cycle 1 captures a one-time authorization (card tokenization, or a Pix Automático consent the customer authorizes in their bank app) and cycles 2+ auto-charge it silently.
              * @enum {array}
              */
-            methods: "pix" | "boleto" | "card";
+            methods: "pix" | "boleto" | "card" | "pix_automatic";
             /** @description Recurrence config. Required when `type=recurring`; must be omitted otherwise. */
             recurrence?: components["schemas"]["RecurrenceConfigRequest"];
             /** @description Seller-controlled identifier for this schedule (deduping, reconciliation). */
@@ -2729,6 +2785,9 @@ export interface components {
             customerId: number;
             customer: components["schemas"]["Customer"];
             gatewayProvider: string;
+            kind: Record<string, never>;
+            /** @description Provider credential reference. For `card`: the Celcoin tokenized-card id.
+             *     For `pix_automatic`: the Woovi subscription/authorization globalID. */
             gatewayCardId: string;
             cardBrand: string;
             cardLast4: string;

@@ -168,7 +168,7 @@
             }
           }
         },
-        "summary": "Get Transaction Status by GalaxPay ID (Public)",
+        "summary": "Get Transaction Status by Gateway ID (Public)",
         "tags": [
           "transactions"
         ]
@@ -999,15 +999,34 @@
         ]
       }
     },
-    "/api/scheduled-charges": {
+    "/api/scheduled-charges/available-methods": {
       "get": {
+        "description": "Drives the dashboard create-charge drawer. Returns the base set (pix/boleto/card) plus pix_automatic if the seller is allowlisted for the Pix Automático canary.",
         "parameters": [
           {
-            "name": "customerId",
+            "name": "search",
             "required": false,
             "in": "query",
             "schema": {
-              "type": "number"
+              "type": "string"
+            }
+          },
+          {
+            "name": "dueTo",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "2026-05-31",
+              "type": "string"
+            }
+          },
+          {
+            "name": "dueFrom",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "2026-05-01",
+              "type": "string"
             }
           },
           {
@@ -1023,26 +1042,82 @@
             }
           },
           {
-            "name": "dueFrom",
+            "name": "status",
             "required": false,
             "in": "query",
             "schema": {
-              "example": "2026-05-01",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "customerId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Methods available to the current seller"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          },
+          {
+            "garu-gateway": []
+          }
+        ],
+        "summary": "List scheduled charges for the calling seller",
+        "tags": [
+          "scheduled-charges"
+        ]
+      }
+    },
+    "/api/scheduled-charges": {
+      "get": {
+        "parameters": [
+          {
+            "name": "customerId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "type",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dueFrom",
+            "required": true,
+            "in": "query",
+            "schema": {
               "type": "string"
             }
           },
           {
             "name": "dueTo",
-            "required": false,
+            "required": true,
             "in": "query",
             "schema": {
-              "example": "2026-05-31",
               "type": "string"
             }
           },
           {
             "name": "search",
-            "required": false,
+            "required": true,
             "in": "query",
             "schema": {
               "type": "string"
@@ -1063,17 +1138,6 @@
             "schema": {
               "type": "number"
             }
-          },
-          {
-            "name": "status",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
           }
         ],
         "responses": {
@@ -1089,7 +1153,6 @@
             "garu-gateway": []
           }
         ],
-        "summary": "List scheduled charges for the calling seller",
         "tags": [
           "scheduled-charges"
         ]
@@ -2192,6 +2255,16 @@
           "galaxPayId": {
             "type": "number"
           },
+          "gatewayProvider": {
+            "type": "string",
+            "nullable": true,
+            "description": "Which processor handled this transaction. NULL is read as 'celcoin'\n(every pre-Woovi row). Woovi rows set this to 'woovi' and keep\n`galaxPayId=0` (sentinel) since Woovi ids are strings — see\n`gatewayChargeId`."
+          },
+          "gatewayChargeId": {
+            "type": "string",
+            "nullable": true,
+            "description": "String charge reference for non-Celcoin processors (Woovi correlationID /\ncharge globalID). Used to reconcile inbound webhooks. NULL for Celcoin."
+          },
           "product": {
             "$ref": "#/components/schemas/Product"
           },
@@ -2339,6 +2412,8 @@
         "required": [
           "id",
           "galaxPayId",
+          "gatewayProvider",
+          "gatewayChargeId",
           "product",
           "customer",
           "affiliation",
@@ -2472,6 +2547,9 @@
             "type": "boolean"
           },
           "pix": {
+            "type": "boolean"
+          },
+          "pixAutomatic": {
             "type": "boolean"
           },
           "installments": {
@@ -2723,6 +2801,10 @@
           "pix": {
             "type": "boolean"
           },
+          "pixAutomatic": {
+            "type": "boolean",
+            "description": "Per-product Pix Automático (Woovi recurring) enablement. Defaults true;\nsellers can disable per product when they don't want the recurring-Pix\ntab on a specific subscription product. Only the subscription checkout\nmode reads this flag."
+          },
           "installments": {
             "type": "number"
           },
@@ -2835,6 +2917,7 @@
           "boleto",
           "creditCard",
           "pix",
+          "pixAutomatic",
           "installments",
           "affiliation",
           "affiliationOrderAccept",
@@ -3314,17 +3397,19 @@
             "enum": [
               "pix",
               "boleto",
-              "card"
+              "card",
+              "pix_automatic"
             ],
             "uniqueItems": true,
             "minItems": 1,
-            "description": "Payment methods to offer. `card` is only valid when `type=recurring` (cycle 1 tokenizes the card via Celcoin and cycles 2+ auto-charge it).",
+            "description": "Payment methods to offer. `card` and `pix_automatic` are only valid when `type=recurring` and a `productId` is set — cycle 1 captures a one-time authorization (card tokenization, or a Pix Automático consent the customer authorizes in their bank app) and cycles 2+ auto-charge it silently.",
             "items": {
               "type": "string",
               "enum": [
                 "pix",
                 "boleto",
-                "card"
+                "card",
+                "pix_automatic"
               ]
             }
           },
@@ -4983,8 +5068,12 @@
           "gatewayProvider": {
             "type": "string"
           },
+          "kind": {
+            "type": "object"
+          },
           "gatewayCardId": {
-            "type": "string"
+            "type": "string",
+            "description": "Provider credential reference. For `card`: the Celcoin tokenized-card id.\nFor `pix_automatic`: the Woovi subscription/authorization globalID."
           },
           "cardBrand": {
             "type": "string"
@@ -5058,6 +5147,7 @@
           "customerId",
           "customer",
           "gatewayProvider",
+          "kind",
           "gatewayCardId",
           "cardBrand",
           "cardLast4",

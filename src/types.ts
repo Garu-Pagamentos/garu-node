@@ -19,8 +19,13 @@ export type WireMetaResponse = components['schemas']['MetaResponse'];
 
 export type PaymentMethod = 'pix' | 'credit_card' | 'boleto';
 
-/** Payment-method identifier as sent to the backend over the wire. */
-export type WirePaymentMethodId = 'pix' | 'creditcard' | 'boleto';
+/**
+ * Payment-method identifier as it appears on the wire. `pix_automatic`
+ * (Pix Automático auto-debit) surfaces here on transactions/charges read
+ * back from Pix Automático recurring cycles. It is never produced by
+ * `toWirePaymentMethod`, since one-off charges can't use it.
+ */
+export type WirePaymentMethodId = 'pix' | 'creditcard' | 'boleto' | 'pix_automatic';
 
 export type ChargeStatus =
   | 'pending'
@@ -227,7 +232,16 @@ export type ScheduledChargeStatus =
 
 export type ScheduledChargeType = 'one_time' | 'recurring';
 
-export type ScheduledPaymentMethod = 'pix' | 'boleto' | 'card';
+/**
+ * Payment method for a scheduled charge.
+ *
+ * `pix_automatic` is Pix Automático — Brazil's BACEN auto-debit recurring
+ * Pix. The customer authorizes **once** via a consent link/QR in their bank
+ * app; every cycle from the second onward debits silently with no further
+ * action. It is only valid when `type='recurring'` **and** `productId` is
+ * set; the product must also have Pix Automático enabled (`pixAutomatic`).
+ */
+export type ScheduledPaymentMethod = 'pix' | 'boleto' | 'card' | 'pix_automatic';
 
 export type RecurrenceInterval =
   | 'weekly'
@@ -343,7 +357,7 @@ export interface ScheduledChargeAttempt {
   attemptNumber: number;
   attemptedAt: string;
   source: ScheduledChargeAttemptSource;
-  paymentMethod: 'card' | 'pix' | 'boleto' | 'manual';
+  paymentMethod: 'card' | 'pix' | 'boleto' | 'pix_automatic' | 'manual';
   paymentMethodId: number | null;
   cardLast4: string | null;
   cardBrand: string | null;
@@ -377,7 +391,11 @@ export interface CreateScheduledChargeParams {
   type: ScheduledChargeType;
   /** YYYY-MM-DD in São Paulo time. Must be today or future. */
   dueDate: string;
-  /** `card` is recurring-only and requires `productId`. */
+  /**
+   * `card` is recurring-only and requires `productId`. `pix_automatic`
+   * (Pix Automático auto-debit) likewise requires `type='recurring'` **and**
+   * `productId`, and the product must have Pix Automático enabled.
+   */
   methods: ScheduledPaymentMethod[];
   /** Cadence for `type='recurring'`. Must be omitted when `type='one_time'`. */
   recurrence?: RecurrenceConfig;
@@ -498,6 +516,13 @@ export interface Product {
   pix: boolean;
   boleto: boolean;
   creditCard: boolean;
+  /**
+   * When `true`, the public subscription checkout exposes Pix Automático
+   * (BACEN auto-debit recurring Pix) as a payment option. Enabled by
+   * default; sellers can disable it per product. Only the subscription
+   * checkout mode reads this flag. See {@link ScheduledPaymentMethod}.
+   */
+  pixAutomatic: boolean;
   installments: number[];
   tags?: string[];
   isSubscription?: boolean;

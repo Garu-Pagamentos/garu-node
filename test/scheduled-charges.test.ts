@@ -88,6 +88,35 @@ describe('scheduledCharges.create', () => {
     expect(calls[0]!.body).toMatchObject({ maxRecoveryDays: 30 });
   });
 
+  it('forwards a recurring pix_automatic schedule (BACEN auto-debit)', async () => {
+    const pixAutomaticCharge = {
+      ...fakeCharge,
+      productId: 17,
+      type: 'recurring' as const,
+      methods: ['pix_automatic'] as const
+    };
+    const { fetch, calls } = mockFetch([{ status: 201, body: pixAutomaticCharge }]);
+    const garu = newClient(fetch);
+
+    const result = await garu.scheduledCharges.create({
+      customerId: 42,
+      productId: 17,
+      amount: 49.9,
+      type: 'recurring',
+      dueDate: '2026-06-15',
+      methods: ['pix_automatic'],
+      recurrence: { interval: 'monthly' }
+    });
+
+    expect(result.methods).toEqual(['pix_automatic']);
+    expect(calls[0]!.body).toMatchObject({
+      productId: 17,
+      type: 'recurring',
+      methods: ['pix_automatic'],
+      recurrence: { interval: 'monthly' }
+    });
+  });
+
   it('respects a caller-supplied idempotency key', async () => {
     const { fetch, calls } = mockFetch([{ status: 201, body: fakeCharge }]);
     const garu = newClient(fetch);

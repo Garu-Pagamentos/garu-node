@@ -48,6 +48,20 @@ export class ScheduledCharges {
    *   methods: ['pix', 'boleto'],
    *   description: 'Mensalidade Junho'
    * });
+   *
+   * @example
+   * // Pix Automático (BACEN auto-debit). Requires `type: 'recurring'` and a
+   * // `productId` whose product has Pix Automático enabled. The customer
+   * // authorizes once via their bank app; cycles 2+ debit silently.
+   * const series = await garu.scheduledCharges.create({
+   *   customerId: 42,
+   *   productId: 17,
+   *   amount: 49.9,
+   *   type: 'recurring',
+   *   dueDate: '2026-06-15',
+   *   methods: ['pix_automatic'],
+   *   recurrence: { interval: 'monthly' }
+   * });
    */
   async create(params: CreateScheduledChargeParams): Promise<ScheduledChargeRecord> {
     const idempotencyKey = params.idempotencyKey ?? generateIdempotencyKey();

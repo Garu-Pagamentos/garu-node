@@ -54,8 +54,8 @@ const charge = await garu.charges.create({
     name: 'Maria Silva',
     email: 'maria@exemplo.com.br',
     document: '12345678909', // CPF, digits only
-    phone: '11987654321',
-  },
+    phone: '11987654321'
+  }
 });
 
 console.log(charge.id, charge.status);
@@ -78,7 +78,7 @@ const garu = new Garu({ apiKey: process.env.GARU_API_KEY });
 const garu = new Garu({
   apiKey: process.env.GARU_API_KEY,
   timeoutMs: 30_000, // default
-  maxRetries: 2,     // default (3 total attempts)
+  maxRetries: 2 // default (3 total attempts)
 });
 ```
 
@@ -101,8 +101,8 @@ const charge = await garu.charges.create({
     name: 'Maria Silva',
     email: 'maria@exemplo.com.br',
     document: '12345678909',
-    phone: '11987654321',
-  },
+    phone: '11987654321'
+  }
 });
 ```
 
@@ -117,14 +117,14 @@ const charge = await garu.charges.create({
     holderName: 'MARIA SILVA',
     expirationMonth: '12',
     expirationYear: '2028',
-    cvv: '123',
+    cvv: '123'
   },
   customer: {
     name: 'Maria Silva',
     email: 'maria@exemplo.com.br',
     document: '12345678909',
-    phone: '11987654321',
-  },
+    phone: '11987654321'
+  }
 });
 ```
 
@@ -145,13 +145,13 @@ await garu.charges.refund(4472, { amount: 1000 }); // partial refund (R$10.00)
 
 ## Customers
 
-| Method                    | Description                                   |
-| ------------------------- | --------------------------------------------- |
-| `create(params)`          | Create a new customer.                        |
-| `list(params?)`           | List customers with pagination and search.    |
-| `get(id)`                 | Fetch a single customer by ID.                |
-| `update(id, params)`      | Update a customer's profile.                  |
-| `delete(id)`              | Delete a customer.                            |
+| Method               | Description                                |
+| -------------------- | ------------------------------------------ |
+| `create(params)`     | Create a new customer.                     |
+| `list(params?)`      | List customers with pagination and search. |
+| `get(id)`            | Fetch a single customer by ID.             |
+| `update(id, params)` | Update a customer's profile.               |
+| `delete(id)`         | Delete a customer.                         |
 
 ```ts
 const customer = await garu.customers.create({
@@ -159,7 +159,7 @@ const customer = await garu.customers.create({
   email: 'maria@exemplo.com.br',
   document: '12345678909',
   phone: '11987654321',
-  personType: 'fisica',
+  personType: 'fisica'
 });
 
 const { data, meta } = await garu.customers.list({ search: 'maria', limit: 10 });
@@ -171,26 +171,26 @@ Discover products and customize the per-product portal experience (B2B2C).
 
 `portalConfig.*` methods accept `productId` as either the product UUID (preferred — same identifier returned by `list()` and webhook payloads) or the legacy numeric id (Garu v0.10.0+).
 
-| Method                              | Description                                                       |
-| ----------------------------------- | ----------------------------------------------------------------- |
-| `list(params?)`                     | Paginated list of products for the seller.                        |
-| `get(uuid)`                         | Fetch a single product by UUID — same id used by charges.         |
-| `portalConfig.get(productId)`       | Read per-product portal customization. Returns `null` if unset.   |
-| `portalConfig.set(productId, p)`    | Upsert with merge — only fields present are written.              |
-| `portalConfig.patch(productId, p)`  | Same merge semantics as `set` — alias for HTTP-PATCH callers.     |
-| `portalConfig.clear(productId)`     | Remove the customization; product falls back to seller config.    |
+| Method                             | Description                                                     |
+| ---------------------------------- | --------------------------------------------------------------- |
+| `list(params?)`                    | Paginated list of products for the seller.                      |
+| `get(uuid)`                        | Fetch a single product by UUID — same id used by charges.       |
+| `portalConfig.get(productId)`      | Read per-product portal customization. Returns `null` if unset. |
+| `portalConfig.set(productId, p)`   | Upsert with merge — only fields present are written.            |
+| `portalConfig.patch(productId, p)` | Same merge semantics as `set` — alias for HTTP-PATCH callers.   |
+| `portalConfig.clear(productId)`    | Remove the customization; product falls back to seller config.  |
 
 ```ts
 // SaaS de coaching: per-coach branding under one Seller account
 await garu.products.portalConfig.set('b3f2c1e8-6e4a-4b9f-9d1c-2a1f6c3d4e5f', {
   businessName: 'Coach Maria — Corrida & Trilha',
   primaryColor: '#257264',
-  logoUrl: 'https://cdn.exemplo.com/coaches/maria.png',
+  logoUrl: 'https://cdn.exemplo.com/coaches/maria.png'
 });
 
 // Pass `null` on a field to inherit from the seller-level config
 await garu.products.portalConfig.patch('b3f2c1e8-6e4a-4b9f-9d1c-2a1f6c3d4e5f', {
-  primaryColor: null,
+  primaryColor: null
 });
 ```
 
@@ -198,20 +198,20 @@ await garu.products.portalConfig.patch('b3f2c1e8-6e4a-4b9f-9d1c-2a1f6c3d4e5f', {
 
 Bill an existing customer on a future date — one-time or recurring with card tokenization. The Garu drives email reminders, dunning, retries, and the lifecycle state machine.
 
-| Method                                        | Description                                                                |
-| --------------------------------------------- | -------------------------------------------------------------------------- |
-| `create(params)`                              | Create one-time or recurring schedule. Auto-attaches `X-Idempotency-Key`.  |
-| `list(params?)`                               | Paginated list with status / type / dueFrom / dueTo / customerId filters.  |
-| `get(id)`                                     | Detail bundle: charge + event timeline + linked transactions.              |
-| `chargeNow(id)`                               | Force-bill the current cycle now instead of waiting for the due date.      |
-| `markPaid(id, params)`                        | Mark cycle paid (off-Garu reconciliation).                                 |
-| `postpone(id, params)`                        | Move the next cycle's due date forward.                                    |
-| `pause(id, params?)` / `resume(id)`           | Suspend / re-enable a series.                                              |
-| `cancelRecurrence(id, params?)`               | Hard-stop future cycles (recurring only).                                  |
-| `cancelAtPeriodEnd(id, { enabled })`          | Stripe-style soft-cancel; reversible.                                      |
-| `changePaymentMethod(id, params)`             | Swap the saved card.                                                       |
-| `clearPaymentMethod(id)`                      | Remove the saved card; future cycles email-with-link.                      |
-| `listAttempts(id, params?)`                   | Per-attempt billing log — every silent-charge / retry / mark-paid (v0.8.2).|
+| Method                               | Description                                                                 |
+| ------------------------------------ | --------------------------------------------------------------------------- |
+| `create(params)`                     | Create one-time or recurring schedule. Auto-attaches `X-Idempotency-Key`.   |
+| `list(params?)`                      | Paginated list with status / type / dueFrom / dueTo / customerId filters.   |
+| `get(id)`                            | Detail bundle: charge + event timeline + linked transactions.               |
+| `chargeNow(id)`                      | Force-bill the current cycle now instead of waiting for the due date.       |
+| `markPaid(id, params)`               | Mark cycle paid (off-Garu reconciliation).                                  |
+| `postpone(id, params)`               | Move the next cycle's due date forward.                                     |
+| `pause(id, params?)` / `resume(id)`  | Suspend / re-enable a series.                                               |
+| `cancelRecurrence(id, params?)`      | Hard-stop future cycles (recurring only).                                   |
+| `cancelAtPeriodEnd(id, { enabled })` | Stripe-style soft-cancel; reversible.                                       |
+| `changePaymentMethod(id, params)`    | Swap the saved card.                                                        |
+| `clearPaymentMethod(id)`             | Remove the saved card; future cycles email-with-link.                       |
+| `listAttempts(id, params?)`          | Per-attempt billing log — every silent-charge / retry / mark-paid (v0.8.2). |
 
 ```ts
 // Recurring with 7-day trial. `maxRecoveryDays` caps how long past the due
@@ -225,7 +225,7 @@ const series = await garu.scheduledCharges.create({
   methods: ['card', 'pix'],
   recurrence: { interval: 'monthly' },
   trialDays: 7,
-  maxRecoveryDays: 30,
+  maxRecoveryDays: 30
 });
 
 // Force-bill the current cycle now instead of waiting for the due date.
@@ -238,7 +238,7 @@ if (result.outcome === 'failed') {
 
 // Audit why cycle 3 failed (v0.8.2)
 const { data } = await garu.scheduledCharges.listAttempts(series.id, {
-  cycleNumber: 3,
+  cycleNumber: 3
 });
 const declines = data.filter((a) => a.status === 'declined');
 // → each declines[i].failureCode is one of GaruFailureCode (insufficient_funds,
@@ -264,6 +264,83 @@ function shouldAskForNewCard(code: GaruFailureCode): boolean {
 
 Full table at [docs.garu.com.br/api-reference/webhooks/codigos-de-falha](https://docs.garu.com.br/api-reference/webhooks/codigos-de-falha).
 
+## Pix Automático
+
+Pix Automático is Brazil's BACEN auto-debit recurring Pix. The customer authorizes **once** — they open their bank app, find the "Pix Automático" / "Recorrência Pix" section, and approve a consent QR/link. Every cycle from the second onward debits silently, with no further customer action.
+
+**When to use it:** recurring billing where you want bank-level auto-debit instead of a saved card — subscriptions, mensalidades, memberships. Use card recurrence when you need installments or international cards; use Pix Automático for low-friction domestic recurring Pix.
+
+It rides the **same SDK surface** as card-backed recurrence — no new methods, no new webhook events. The only differences are the `pix_automatic` method literal and a per-product enable flag.
+
+### 1. Enable it on a product
+
+Pix Automático only shows up on a product's checkout when the product has it enabled (`Product.pixAutomatic`). This is a property of the product (managed in the dashboard / product API); the SDK surfaces it as a boolean:
+
+```ts
+const product = await garu.products.get('b3f2c1e8-6e4a-4b9f-9d1c-2a1f6c3d4e5f');
+if (!product.pixAutomatic) {
+  // Pix Automático is off for this product — enable it before scheduling a
+  // `pix_automatic` charge, or the create call will 400.
+}
+```
+
+### 2. Create a Pix Automático scheduled charge
+
+`pix_automatic` is **recurring-only** and **requires `productId`** (the product must have `pixAutomatic` enabled). The charge starts in a waiting state until the customer approves the consent; cycles 2+ then debit silently.
+
+```ts
+const series = await garu.scheduledCharges.create({
+  customerId: 42,
+  productId: 17,
+  amount: 49.9,
+  type: 'recurring',
+  dueDate: '2026-06-15',
+  methods: ['pix_automatic'],
+  recurrence: { interval: 'monthly' }
+});
+```
+
+Cancel and the rest of the lifecycle use the **same methods** as card-backed series — `cancelRecurrence(id)`, `cancelAtPeriodEnd(id, { enabled })`, `pause(id)` / `resume(id)`. The customer can also revoke the authorization directly in their bank app; Garu surfaces that as a `subscription.cancelled` event.
+
+### 3. Handle the webhooks
+
+Pix Automático fires the **same events** as card recurrence — there are no Pix-Automático-specific event names. Branch on the payload's `paymentMethod` field (`'pix_automatic'`) when you need method-specific handling:
+
+```ts
+app.post('/webhooks/garu', express.raw({ type: 'application/json' }), (req, res) => {
+  const { event } = Garu.webhooks.verify({
+    payload: req.body,
+    signature: req.header('x-garu-signature') ?? '',
+    secret: process.env.GARU_WEBHOOK_SECRET!
+  });
+
+  // `event` is the verified payload. It carries the Garu `eventType` and a
+  // `paymentMethod` field; branch on `paymentMethod` to special-case Pix
+  // Automático. (Field paths follow your webhook payload reference.)
+  const { eventType, paymentMethod } = event as {
+    eventType?: string;
+    paymentMethod?: string;
+  };
+
+  if (paymentMethod === 'pix_automatic') {
+    switch (eventType) {
+      case 'transaction.payment.succeeded':
+        // a Pix Automático cycle debited
+        break;
+      case 'subscription.payment_failed':
+        // Pix Automático does NOT retry a refused debit at the network level —
+        // Garu flips the series to `past_due` and the usual dunning applies.
+        break;
+    }
+  }
+
+  res.sendStatus(200);
+});
+```
+
+> [!NOTE]
+> Failure model: Pix Automático does not retry a refused debit at the payment-network level. On a refused cycle Garu fires `subscription.payment_failed` and moves the series to `past_due`; your existing dunning handles recovery.
+
 ## Meta
 
 Discover available payment methods and webhook events. No authentication required.
@@ -288,7 +365,7 @@ app.post('/webhooks/garu', express.raw({ type: 'application/json' }), (req, res)
     const { event } = Garu.webhooks.verify({
       payload: req.body, // raw Buffer — do NOT re-serialize parsed JSON
       signature: req.header('x-garu-signature') ?? '',
-      secret: process.env.GARU_WEBHOOK_SECRET!,
+      secret: process.env.GARU_WEBHOOK_SECRET!
     });
 
     console.log('Received', event);
@@ -305,7 +382,7 @@ app.post('/webhooks/garu', express.raw({ type: 'application/json' }), (req, res)
 
 ## Webhook events
 
-The seller-facing delivery log for outbound webhooks. Use it to audit deliveries, surface failures, and replay events when a customer's endpoint missed one. Webhook endpoint *configuration* (URL, subscribed events, secret) is still dashboard-only — this resource only covers the event log + manual retries.
+The seller-facing delivery log for outbound webhooks. Use it to audit deliveries, surface failures, and replay events when a customer's endpoint missed one. Webhook endpoint _configuration_ (URL, subscribed events, secret) is still dashboard-only — this resource only covers the event log + manual retries.
 
 ```ts
 // Surface anything that didn't make it through
@@ -317,7 +394,7 @@ console.log(event.responseStatus, event.responseBody);
 
 // Audit-trail-preserving replay (recommended)
 const clone = await garu.webhookEvents.resend(42);
-clone.id !== event.id;             // true — fresh row with its own id
+clone.id !== event.id; // true — fresh row with its own id
 clone.manualResendOf === event.id; // true — points back at the source
 ```
 
@@ -328,12 +405,12 @@ Outbound deliveries of a resent event carry `Idempotency-Key: resend_<originalId
 > [!NOTE]
 > The SDK auto-attaches `X-Idempotency-Key` (UUIDv4) on `resend()` so transient transport retries can't create duplicate clones. Pass `{ idempotencyKey }` to dedupe across your own retry layer.
 
-| Method                          | Purpose                                                                            |
-| ------------------------------- | ---------------------------------------------------------------------------------- |
-| `list(params?)`                 | Paginated event log. Filter by `status`, `eventType`, `endpointId`. Newest first. |
-| `get(id)`                       | One event — full payload, endpoint snapshot, most recent response.                |
-| `resend(id, params?)`           | Clone-on-resend. Returns the new event; original is untouched. **Preferred.**     |
-| `retry(id)`                     | Legacy in-place reset (mutates the original row). Soft-deprecated.                |
+| Method                | Purpose                                                                           |
+| --------------------- | --------------------------------------------------------------------------------- |
+| `list(params?)`       | Paginated event log. Filter by `status`, `eventType`, `endpointId`. Newest first. |
+| `get(id)`             | One event — full payload, endpoint snapshot, most recent response.                |
+| `resend(id, params?)` | Clone-on-resend. Returns the new event; original is untouched. **Preferred.**     |
+| `retry(id)`           | Legacy in-place reset (mutates the original row). Soft-deprecated.                |
 
 ## Error handling
 
@@ -344,7 +421,7 @@ import {
   GaruAPIError,
   GaruNotFoundError,
   GaruRateLimitError,
-  GaruValidationError,
+  GaruValidationError
 } from '@garuhq/node';
 
 try {
@@ -365,16 +442,16 @@ try {
 }
 ```
 
-| Error class                         | HTTP status        |
-| ----------------------------------- | ------------------ |
-| `GaruAuthenticationError`           | `401`              |
-| `GaruPermissionError`               | `403`              |
-| `GaruNotFoundError`                 | `404`              |
-| `GaruValidationError`               | `400` / `422`      |
-| `GaruRateLimitError`                | `429`              |
-| `GaruServerError`                   | `5xx`              |
-| `GaruConnectionError`               | Network failure    |
-| `GaruSignatureVerificationError`    | Webhook mismatch   |
+| Error class                      | HTTP status      |
+| -------------------------------- | ---------------- |
+| `GaruAuthenticationError`        | `401`            |
+| `GaruPermissionError`            | `403`            |
+| `GaruNotFoundError`              | `404`            |
+| `GaruValidationError`            | `400` / `422`    |
+| `GaruRateLimitError`             | `429`            |
+| `GaruServerError`                | `5xx`            |
+| `GaruConnectionError`            | Network failure  |
+| `GaruSignatureVerificationError` | Webhook mismatch |
 
 ## Retries
 
@@ -392,7 +469,7 @@ import type {
   Customer,
   CardInfo,
   PaymentMethod,
-  MetaResponse,
+  MetaResponse
 } from '@garuhq/node';
 ```
 

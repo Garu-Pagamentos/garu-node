@@ -3,6 +3,36 @@
 All notable changes to `@garuhq/node` are documented in this file. Format:
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [SemVer](https://semver.org/).
 
+## [0.14.0] — 2026-05-31
+
+### Added
+
+- **Pix Automático support** — Brazil's BACEN auto-debit recurring Pix, where
+  the customer authorizes once via a consent QR/link in their bank app and
+  cycles 2+ debit silently. All changes are additive; existing
+  Card / Pix / Boleto callers are unaffected.
+  - `'pix_automatic'` added to the `ScheduledPaymentMethod` union, so
+    `scheduledCharges.create({ methods: ['pix_automatic'], ... })` is now
+    typed. Recurring-only and requires `productId` (whose product must have
+    Pix Automático enabled).
+  - `Product.pixAutomatic: boolean` — when `true`, the public subscription
+    checkout exposes Pix Automático. Enabled by default; sellers can disable
+    it per product.
+  - `'pix_automatic'` added to the `ScheduledChargeAttempt.paymentMethod`
+    union and to `WirePaymentMethodId`, so transactions/charges read back
+    from Pix Automático cycles type-check.
+- README: new **Pix Automático** section — what it is, when to use it, how to
+  enable it on a product, creating a `pix_automatic` scheduled charge, and
+  branching webhook handlers on `paymentMethod === 'pix_automatic'`.
+
+### Notes
+
+- No new webhook event names: Pix Automático fires the same
+  `subscription.*` / `transaction.*` events as card recurrence. Branch on the
+  payload's `paymentMethod` field. Refused debits are **not** retried at the
+  network level — Garu fires `subscription.payment_failed` and moves the
+  series to `past_due`.
+
 ## [0.13.0] — 2026-05-25
 
 ### Added
@@ -56,7 +86,7 @@ All notable changes to `@garuhq/node` are documented in this file. Format:
 
 - `webhookEvents.resend(id)` — `POST /api/webhook-events/{id}/resend`,
   the audit-trail-preserving counterpart to `retry()`. The backend
-  inserts a *clone* event (new numeric id) that points back at the
+  inserts a _clone_ event (new numeric id) that points back at the
   source via `manualResendOf`, then dispatches that clone. The
   original row is untouched, so the historical record of the prior
   failure (status, response status/body, attempts) survives. Works on
