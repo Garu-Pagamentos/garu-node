@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { Garu, GaruNotFoundError } from '../src/index.js';
+import { Garu, GaruNotFoundError, GaruValidationError } from '../src/index.js';
 import { mockFetch } from './helpers.js';
 
 describe('products.list', () => {
@@ -132,5 +132,94 @@ describe('products.portalConfig', () => {
     expect(calls[0]!.url).toBe('https://garu.com.br/api/products/57%3Fadmin%3Dtrue/portal-config');
     expect(calls[1]!.url).toBe('https://garu.com.br/api/products/57%23frag/portal-config');
     expect(calls[2]!.url).toBe('https://garu.com.br/api/products/..%2Fcharges/portal-config');
+  });
+});
+
+describe('products.create', () => {
+  it('POSTs to /api/products and returns the created product', async () => {
+    const product = { id: 99, uuid: 'new-uuid', name: 'Plano Mensal', value: 4990 };
+    const { fetch, calls } = mockFetch([{ status: 201, body: product }]);
+    const garu = new Garu({ apiKey: 'sk_test_abc', fetch, maxRetries: 0 });
+
+    const result = await garu.products.create({
+      name: 'Plano Mensal',
+      value: 4990,
+      pix: true,
+      creditCard: true,
+      pixAutomatic: true
+    });
+
+    expect(result.id).toBe(99);
+    expect(calls[0]!.method).toBe('POST');
+    expect(calls[0]!.url).toBe('https://garu.com.br/api/products');
+    expect(calls[0]!.body).toMatchObject({
+      name: 'Plano Mensal',
+      value: 4990,
+      pix: true,
+      creditCard: true,
+      pixAutomatic: true
+    });
+  });
+
+  it('auto-generates an X-Idempotency-Key header', async () => {
+    const { fetch, calls } = mockFetch([{ status: 201, body: { id: 1, name: 'Curso' } }]);
+    const garu = new Garu({ apiKey: 'sk_test_abc', fetch, maxRetries: 0 });
+
+    await garu.products.create({ name: 'Curso' });
+
+    expect(calls[0]!.headers['x-idempotency-key']).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/
+    );
+  });
+
+  it('respects a caller-supplied idempotencyKey and omits it from the body', async () => {
+    const { fetch, calls } = mockFetch([{ status: 201, body: { id: 1, name: 'Curso' } }]);
+    const garu = new Garu({ apiKey: 'sk_test_abc', fetch, maxRetries: 0 });
+
+    await garu.products.create({ name: 'Curso', idempotencyKey: 'my-custom-key' });
+
+    expect(calls[0]!.headers['x-idempotency-key']).toBe('my-custom-key');
+    expect(calls[0]!.body).toEqual({ name: 'Curso' });
+  });
+
+  it('maps a 422 to GaruValidationError', async () => {
+    const { fetch } = mockFetch([{ status: 422, body: { message: 'name is required' } }]);
+    const garu = new Garu({ apiKey: 'sk_test_abc', fetch, maxRetries: 0 });
+
+    await expect(garu.products.create({ name: '' })).rejects.toBeInstanceOf(GaruValidationError);
+  });
+});
+
+describe('products.update', () => {
+  it('PATCHes /api/products/:id with a partial body', async () => {
+    const product = { id: 42, uuid: 'u', name: 'Curso', value: 5990 };
+    const { fetch, calls } = mockFetch([{ status: 200, body: product }]);
+    const garu = new Garu({ apiKey: 'sk_test_abc', fetch, maxRetries: 0 });
+
+    const result = await garu.products.update(42, { value: 5990, pixAutomatic: true });
+
+    expect(result.value).toBe(5990);
+    expect(calls[0]!.method).toBe('PATCH');
+    expect(calls[0]!.url).toBe('https://garu.com.br/api/products/42');
+    expect(calls[0]!.body).toEqual({ value: 5990, pixAutomatic: true });
+  });
+
+  it('accepts a UUID identifier and forwards it verbatim', async () => {
+    const uuid = '00d6d5d1-b094-4546-a49a-f9864e822c3c';
+    const { fetch, calls } = mockFetch([{ status: 200, body: { id: 42, uuid } }]);
+    const garu = new Garu({ apiKey: 'sk_test_abc', fetch, maxRetries: 0 });
+
+    await garu.products.update(uuid, { name: 'Renomeado' });
+
+    expect(calls[0]!.url).toBe(`https://garu.com.br/api/products/${uuid}`);
+  });
+
+  it('encodes special characters in id — blocks query/fragment injection', async () => {
+    const { fetch, calls } = mockFetch([{ status: 200, body: { id: 1 } }]);
+    const garu = new Garu({ apiKey: 'sk_test_abc', fetch, maxRetries: 0 });
+
+    await garu.products.update('57?admin=true', { name: 'x' });
+
+    expect(calls[0]!.url).toBe('https://garu.com.br/api/products/57%3Fadmin%3Dtrue');
   });
 });

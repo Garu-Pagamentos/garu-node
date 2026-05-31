@@ -3,6 +3,28 @@
 All notable changes to `@garuhq/node` are documented in this file. Format:
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [SemVer](https://semver.org/).
 
+## [0.15.0] — 2026-05-31
+
+### Added
+
+- **Product writes** — the `Products` resource now wraps the create and update
+  endpoints, not just reads:
+  - `products.create(params)` — `POST /api/products`, returns the created
+    `Product`. Only `name` is required; all other fields fall back to
+    seller/server defaults. Auto-attaches an `X-Idempotency-Key` (override
+    via `params.idempotencyKey`), so the built-in retry can't create a
+    duplicate product.
+  - `products.update(id, params)` — `PATCH /api/products/{id}`, partial update
+    returning the updated `Product`. `id` accepts the numeric id or the
+    product UUID, matching the `/api/products/:id` portal-config methods.
+  - New exported param types `CreateProductParams` and `UpdateProductParams`,
+    covering `name`, `value` (centavos), `description`, `image`, `tags`,
+    `pix`, `boleto`, `creditCard`, `pixAutomatic`, `installments`,
+    `isSubscription`, `subscriptionType`, `unitLabel`, `returnUrl`,
+    `returnUrlButtonText`, and `statementDescriptor`.
+  - Both param types include `pixAutomatic` so you can toggle Pix Automático
+    on the subscription checkout at create/update time.
+
 ## [0.14.0] — 2026-05-31
 
 ### Added

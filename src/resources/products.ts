@@ -1,10 +1,13 @@
 import type { HttpClient } from '../http.js';
+import { generateIdempotencyKey } from '../idempotency.js';
 import type {
+  CreateProductParams,
   ListProductsParams,
   Product,
   ProductList,
   ProductPortalConfig,
-  SetProductPortalConfigParams
+  SetProductPortalConfigParams,
+  UpdateProductParams
 } from '../types.js';
 
 /**
@@ -29,9 +32,12 @@ export class ProductPortalConfigResource {
    */
   async get(productId: string | number): Promise<ProductPortalConfig | null> {
     return this.http.call<ProductPortalConfig | null>((signal) =>
-      (this.http.client.GET as Function)(`/api/products/${encodeURIComponent(String(productId))}/portal-config`, {
-        signal
-      }).then((r: { data?: ProductPortalConfig | null; error?: unknown; response: Response }) => r)
+      (this.http.client.GET as Function)(
+        `/api/products/${encodeURIComponent(String(productId))}/portal-config`,
+        {
+          signal
+        }
+      ).then((r: { data?: ProductPortalConfig | null; error?: unknown; response: Response }) => r)
     );
   }
 
@@ -53,10 +59,13 @@ export class ProductPortalConfigResource {
     params: SetProductPortalConfigParams
   ): Promise<ProductPortalConfig> {
     return this.http.call<ProductPortalConfig>((signal) =>
-      (this.http.client.POST as Function)(`/api/products/${encodeURIComponent(String(productId))}/portal-config`, {
-        body: params,
-        signal
-      }).then((r: { data?: ProductPortalConfig; error?: unknown; response: Response }) => r)
+      (this.http.client.POST as Function)(
+        `/api/products/${encodeURIComponent(String(productId))}/portal-config`,
+        {
+          body: params,
+          signal
+        }
+      ).then((r: { data?: ProductPortalConfig; error?: unknown; response: Response }) => r)
     );
   }
 
@@ -66,10 +75,13 @@ export class ProductPortalConfigResource {
     params: SetProductPortalConfigParams
   ): Promise<ProductPortalConfig> {
     return this.http.call<ProductPortalConfig>((signal) =>
-      (this.http.client.PATCH as Function)(`/api/products/${encodeURIComponent(String(productId))}/portal-config`, {
-        body: params,
-        signal
-      }).then((r: { data?: ProductPortalConfig; error?: unknown; response: Response }) => r)
+      (this.http.client.PATCH as Function)(
+        `/api/products/${encodeURIComponent(String(productId))}/portal-config`,
+        {
+          body: params,
+          signal
+        }
+      ).then((r: { data?: ProductPortalConfig; error?: unknown; response: Response }) => r)
     );
   }
 
@@ -83,10 +95,13 @@ export class ProductPortalConfigResource {
    */
   async clear(productId: string | number): Promise<{ removed: boolean }> {
     return this.http.call<{ removed: boolean }>((signal) =>
-      (this.http.client.DELETE as Function)(`/api/products/${encodeURIComponent(String(productId))}/portal-config`, {
-        body: {},
-        signal
-      }).then((r: { data?: { removed: boolean }; error?: unknown; response: Response }) => r)
+      (this.http.client.DELETE as Function)(
+        `/api/products/${encodeURIComponent(String(productId))}/portal-config`,
+        {
+          body: {},
+          signal
+        }
+      ).then((r: { data?: { removed: boolean }; error?: unknown; response: Response }) => r)
     );
   }
 }
@@ -141,6 +156,64 @@ export class Products {
       (this.http.client.GET as Function)(`/api/products/uuid/${uuid}`, { signal }).then(
         (r: { data?: Product; error?: unknown; response: Response }) => r
       )
+    );
+  }
+
+  /**
+   * Create a product for the authenticated seller. Returns the created
+   * product (HTTP 201). Only `name` is required; everything else falls back
+   * to seller/server defaults.
+   *
+   * Automatically attaches an `X-Idempotency-Key` header — if you don't pass
+   * `idempotencyKey`, the SDK generates a UUIDv4. This makes the built-in
+   * retry on transient failures safe: a retried POST returns the original
+   * product instead of creating a duplicate.
+   *
+   * @example
+   * const product = await garu.products.create({
+   *   name: 'Plano Mensal',
+   *   value: 4990, // R$ 49,90 in centavos
+   *   description: 'Acesso completo à plataforma',
+   *   pix: true,
+   *   creditCard: true,
+   *   isSubscription: true,
+   *   subscriptionType: 'monthly',
+   *   pixAutomatic: true // expose Pix Automático on the subscription checkout
+   * });
+   */
+  async create(params: CreateProductParams): Promise<Product> {
+    const { idempotencyKey, ...body } = params;
+    const key = idempotencyKey ?? generateIdempotencyKey();
+
+    return this.http.call<Product>((signal) =>
+      (this.http.client.POST as Function)('/api/products', {
+        body,
+        headers: { 'X-Idempotency-Key': key },
+        signal
+      }).then((r: { data?: Product; error?: unknown; response: Response }) => r)
+    );
+  }
+
+  /**
+   * Update a product (partial PATCH — only the fields you pass are changed).
+   * Returns the updated product.
+   *
+   * `id` accepts the numeric id or the product UUID — the same identifiers
+   * accepted elsewhere on the `/api/products/:id` path (see
+   * {@link ProductPortalConfigResource}).
+   *
+   * @example
+   * const updated = await garu.products.update('b3f2c1e8-6e4a-4b9f-9d1c-2a1f6c3d4e5f', {
+   *   value: 5990,
+   *   pixAutomatic: true // turn on Pix Automático for this product
+   * });
+   */
+  async update(id: string | number, params: UpdateProductParams): Promise<Product> {
+    return this.http.call<Product>((signal) =>
+      (this.http.client.PATCH as Function)(`/api/products/${encodeURIComponent(String(id))}`, {
+        body: params,
+        signal
+      }).then((r: { data?: Product; error?: unknown; response: Response }) => r)
     );
   }
 }

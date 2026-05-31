@@ -548,6 +548,59 @@ export interface ListProductsParams {
   tab?: string;
 }
 
+export interface CreateProductParams {
+  name: string;
+  /** Price in centavos (BRL × 100). */
+  value?: number;
+  description?: string;
+  /** HTTPS URL of the product cover image. */
+  image?: string;
+  tags?: string[];
+  pix?: boolean;
+  boleto?: boolean;
+  creditCard?: boolean;
+  /**
+   * Enable Pix Automático (BACEN auto-debit recurring Pix) on the
+   * subscription checkout. Defaults to enabled server-side. Only the
+   * subscription checkout mode reads this flag. See {@link Product.pixAutomatic}.
+   */
+  pixAutomatic?: boolean;
+  /** Max number of installments offered on credit card. */
+  installments?: number;
+  isSubscription?: boolean;
+  subscriptionType?: string;
+  unitLabel?: string;
+  returnUrl?: string;
+  returnUrlButtonText?: string;
+  /** Text shown on the buyer's card/bank statement. */
+  statementDescriptor?: string;
+  /**
+   * Idempotency key for the create request. Defaults to a generated UUIDv4.
+   * Pass your own to make a retry across process restarts safe — the backend
+   * returns the original product instead of creating a duplicate.
+   */
+  idempotencyKey?: string;
+}
+
+export interface UpdateProductParams {
+  name?: string;
+  value?: number;
+  description?: string;
+  image?: string;
+  tags?: string[];
+  pix?: boolean;
+  boleto?: boolean;
+  creditCard?: boolean;
+  pixAutomatic?: boolean;
+  installments?: number;
+  isSubscription?: boolean;
+  subscriptionType?: string;
+  unitLabel?: string;
+  returnUrl?: string;
+  returnUrlButtonText?: string;
+  statementDescriptor?: string;
+}
+
 export interface MetaFeatures {
   subscriptions: boolean;
   checkout_sessions: boolean;
