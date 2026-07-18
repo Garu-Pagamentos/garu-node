@@ -509,7 +509,7 @@ export interface Product {
   name: string;
   description: string;
   image: string;
-  /** Price in centavos (BRL × 100). */
+  /** Price in decimal BRL / reais (e.g. `297.50`) — NOT centavos. */
   value: number;
   sellerId: number;
   sellerName?: string;
@@ -550,7 +550,7 @@ export interface ListProductsParams {
 
 export interface CreateProductParams {
   name: string;
-  /** Price in centavos (BRL × 100). */
+  /** Price in decimal BRL / reais (e.g. `297.50`) — NOT centavos. */
   value?: number;
   description?: string;
   /** HTTPS URL of the product cover image. */
@@ -584,6 +584,7 @@ export interface CreateProductParams {
 
 export interface UpdateProductParams {
   name?: string;
+  /** Price in decimal BRL / reais (e.g. `297.50`) — NOT centavos. */
   value?: number;
   description?: string;
   image?: string;

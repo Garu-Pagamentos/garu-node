@@ -172,7 +172,7 @@ export class Products {
    * @example
    * const product = await garu.products.create({
    *   name: 'Plano Mensal',
-   *   value: 4990, // R$ 49,90 in centavos
+   *   value: 49.90, // R$ 49,90 in reais (decimal BRL), NOT centavos
    *   description: 'Acesso completo à plataforma',
    *   pix: true,
    *   creditCard: true,
@@ -204,7 +204,7 @@ export class Products {
    *
    * @example
    * const updated = await garu.products.update('b3f2c1e8-6e4a-4b9f-9d1c-2a1f6c3d4e5f', {
-   *   value: 5990,
+   *   value: 59.90, // reais (decimal BRL), NOT centavos
    *   pixAutomatic: true // turn on Pix Automático for this product
    * });
    */
