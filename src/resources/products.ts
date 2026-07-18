@@ -33,7 +33,7 @@ export class ProductPortalConfigResource {
   async get(productId: string | number): Promise<ProductPortalConfig | null> {
     return this.http.call<ProductPortalConfig | null>((signal) =>
       (this.http.client.GET as Function)(
-        `/api/products/${encodeURIComponent(String(productId))}/portal-config`,
+        `/api/v1/products/${encodeURIComponent(String(productId))}/portal-config`,
         {
           signal
         }
@@ -60,7 +60,7 @@ export class ProductPortalConfigResource {
   ): Promise<ProductPortalConfig> {
     return this.http.call<ProductPortalConfig>((signal) =>
       (this.http.client.POST as Function)(
-        `/api/products/${encodeURIComponent(String(productId))}/portal-config`,
+        `/api/v1/products/${encodeURIComponent(String(productId))}/portal-config`,
         {
           body: params,
           signal
@@ -76,7 +76,7 @@ export class ProductPortalConfigResource {
   ): Promise<ProductPortalConfig> {
     return this.http.call<ProductPortalConfig>((signal) =>
       (this.http.client.PATCH as Function)(
-        `/api/products/${encodeURIComponent(String(productId))}/portal-config`,
+        `/api/v1/products/${encodeURIComponent(String(productId))}/portal-config`,
         {
           body: params,
           signal
@@ -96,7 +96,7 @@ export class ProductPortalConfigResource {
   async clear(productId: string | number): Promise<{ removed: boolean }> {
     return this.http.call<{ removed: boolean }>((signal) =>
       (this.http.client.DELETE as Function)(
-        `/api/products/${encodeURIComponent(String(productId))}/portal-config`,
+        `/api/v1/products/${encodeURIComponent(String(productId))}/portal-config`,
         {
           body: {},
           signal
@@ -125,17 +125,16 @@ export class Products {
    * List products for the authenticated seller, with pagination and search.
    *
    * @example
-   * const { data, meta } = await garu.products.list({ search: 'curso', limit: 10 });
+   * const { data, totalCount } = await garu.products.list({ search: 'curso', limit: 10 });
    */
   async list(params: ListProductsParams = {}): Promise<ProductList> {
     const query: Record<string, string> = {};
     if (params.page !== undefined) query.page = String(params.page);
     if (params.limit !== undefined) query.limit = String(params.limit);
     if (params.search) query.search = params.search;
-    if (params.tab) query.tab = params.tab;
 
     const qs = new URLSearchParams(query).toString();
-    const url = `/api/products/seller${qs ? `?${qs}` : ''}`;
+    const url = `/api/v1/products${qs ? `?${qs}` : ''}`;
 
     return this.http.call<ProductList>((signal) =>
       (this.http.client.GET as Function)(url, { signal }).then(
@@ -153,7 +152,7 @@ export class Products {
    */
   async get(uuid: string): Promise<Product> {
     return this.http.call<Product>((signal) =>
-      (this.http.client.GET as Function)(`/api/products/uuid/${uuid}`, { signal }).then(
+      (this.http.client.GET as Function)(`/api/v1/products/${uuid}`, { signal }).then(
         (r: { data?: Product; error?: unknown; response: Response }) => r
       )
     );
@@ -186,7 +185,7 @@ export class Products {
     const key = idempotencyKey ?? generateIdempotencyKey();
 
     return this.http.call<Product>((signal) =>
-      (this.http.client.POST as Function)('/api/products', {
+      (this.http.client.POST as Function)('/api/v1/products', {
         body,
         headers: { 'X-Idempotency-Key': key },
         signal
@@ -198,8 +197,8 @@ export class Products {
    * Update a product (partial PATCH — only the fields you pass are changed).
    * Returns the updated product.
    *
-   * `id` accepts the numeric id or the product UUID — the same identifiers
-   * accepted elsewhere on the `/api/products/:id` path (see
+   * `id` accepts the product UUID (recommended) or the legacy numeric id —
+   * both resolve on the `/api/v1/products/:id` path (see
    * {@link ProductPortalConfigResource}).
    *
    * @example
@@ -210,7 +209,7 @@ export class Products {
    */
   async update(id: string | number, params: UpdateProductParams): Promise<Product> {
     return this.http.call<Product>((signal) =>
-      (this.http.client.PATCH as Function)(`/api/products/${encodeURIComponent(String(id))}`, {
+      (this.http.client.PATCH as Function)(`/api/v1/products/${encodeURIComponent(String(id))}`, {
         body: params,
         signal
       }).then((r: { data?: Product; error?: unknown; response: Response }) => r)

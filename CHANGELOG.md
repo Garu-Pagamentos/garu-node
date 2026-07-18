@@ -3,6 +3,37 @@
 All notable changes to `@garuhq/node` are documented in this file. Format:
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [SemVer](https://semver.org/).
 
+## [0.16.0] — 2026-07-18
+
+### Changed
+
+- **Products now use the versioned public API `/api/v1/products`.** Every product
+  method (`list`, `get`, `create`, `update`, `portalConfig.*`) moved from the
+  un-versioned `/api/products/*` (dashboard) paths to `/api/v1/products`. Method
+  signatures are unchanged — `get`/`update`/portal-config still accept the product
+  UUID (recommended) or the legacy numeric id.
+- **`Product.value` is decimal reais (BRL), not centavos.** The type comments and
+  create/update examples wrongly said centavos — following them created a product
+  priced 100× (`4990` → R$ 4.990,00 instead of R$ 49,90). No behavior change: the
+  SDK already sent `value` as-is. Charges/refunds `amount` remain centavos.
+- **`ProductList` is the real flat shape** `{ data, count, totalCount, totalPages }`
+  (previously mistyped `{ data, meta }`, which was never populated at runtime).
+- **`Product.installments` is `Installment[]`** (`{ quantity, value }`) — was
+  `number[]`, which didn't match the API.
+
+### Deprecated
+
+- **`Product.id`** — the v1 API no longer returns a numeric id; use `uuid`. It is
+  now optional and `undefined` on v1 responses, though still accepted as an input
+  identifier on `get`/`update`/portal-config.
+- **`ListProductsParams.tab`** — not supported by v1 (ignored). `list()` returns
+  the authenticated seller's own products.
+
+### Migration
+
+Read a product's `uuid`, not `.id`. Persisted numeric ids still work as **input**
+identifiers, but responses now carry only `uuid`.
+
 ## [0.15.0] — 2026-05-31
 
 ### Added

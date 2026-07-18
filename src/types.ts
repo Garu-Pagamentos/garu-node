@@ -28,13 +28,7 @@ export type PaymentMethod = 'pix' | 'credit_card' | 'boleto';
 export type WirePaymentMethodId = 'pix' | 'creditcard' | 'boleto' | 'pix_automatic';
 
 export type ChargeStatus =
-  | 'pending'
-  | 'authorized'
-  | 'paid'
-  | 'failed'
-  | 'refunded'
-  | 'cancelled'
-  | 'expired';
+  'pending' | 'authorized' | 'paid' | 'failed' | 'refunded' | 'cancelled' | 'expired';
 
 export interface Customer {
   /** Full legal name. 3–255 chars. */
@@ -244,13 +238,7 @@ export type ScheduledChargeType = 'one_time' | 'recurring';
 export type ScheduledPaymentMethod = 'pix' | 'boleto' | 'card' | 'pix_automatic';
 
 export type RecurrenceInterval =
-  | 'weekly'
-  | 'biweekly'
-  | 'monthly'
-  | 'bimonthly'
-  | 'quarterly'
-  | 'biannual'
-  | 'yearly';
+  'weekly' | 'biweekly' | 'monthly' | 'bimonthly' | 'quarterly' | 'biannual' | 'yearly';
 
 export interface RecurrenceConfig {
   interval: RecurrenceInterval;
@@ -274,9 +262,7 @@ export type ScheduledChargeEventType =
   | 'd_day_reminder_sent';
 
 export type ScheduledChargeActor =
-  | { type: 'user'; id: number }
-  | { type: 'api_key'; id: number }
-  | { type: 'system' };
+  { type: 'user'; id: number } | { type: 'api_key'; id: number } | { type: 'system' };
 
 export interface ScheduledChargeRecord {
   id: string;
@@ -337,18 +323,10 @@ export type ScheduledChargeList = PaginatedList<ScheduledChargeRecord>;
 
 /** Source of a billing attempt — see SPEC §3.1. */
 export type ScheduledChargeAttemptSource =
-  | 'cycle1_interactive'
-  | 'silent_charge'
-  | 'card_retry'
-  | 'manual_mark_paid'
-  | 'fallback_pix';
+  'cycle1_interactive' | 'silent_charge' | 'card_retry' | 'manual_mark_paid' | 'fallback_pix';
 
 export type ScheduledChargeAttemptStatus =
-  | 'pending'
-  | 'succeeded'
-  | 'declined'
-  | 'canceled'
-  | 'errored';
+  'pending' | 'succeeded' | 'declined' | 'canceled' | 'errored';
 
 export interface ScheduledChargeAttempt {
   id: number;
@@ -504,7 +482,12 @@ export interface ChargeNowResult {
 }
 
 export interface Product {
-  id: number;
+  /**
+   * @deprecated The v1 API no longer returns a numeric id — use `uuid` to
+   * address a product. Present only on legacy `/api/products/*` responses;
+   * `undefined` on v1.
+   */
+  id?: number;
   uuid: string;
   name: string;
   description: string;
@@ -523,7 +506,8 @@ export interface Product {
    * checkout mode reads this flag. See {@link ScheduledPaymentMethod}.
    */
   pixAutomatic: boolean;
-  installments: number[];
+  /** Per-parcela credit-card breakdown (the amount charged per installment). */
+  installments: Installment[];
   tags?: string[];
   isSubscription?: boolean;
   subscriptionType?: string;
@@ -537,14 +521,33 @@ export interface Product {
   [key: string]: unknown;
 }
 
-export type ProductList = PaginatedList<Product>;
+/** One entry in a product's credit-card installment breakdown. */
+export interface Installment {
+  /** Number of parcelas. */
+  quantity: number;
+  /** Amount charged per installment, in reais (BRL), with the fator markup applied. */
+  value: number;
+}
+
+/**
+ * List envelope returned by `products.list()`. Flat (not `{ data, meta }`) —
+ * matches the `/api/v1/products` response.
+ */
+export interface ProductList {
+  data: Product[];
+  /** Items returned on this page. */
+  count: number;
+  /** Total products matching the filter across all pages. */
+  totalCount: number;
+  totalPages: number;
+}
 
 export interface ListProductsParams {
   page?: number;
   limit?: number;
   /** Search by product name. */
   search?: string;
-  /** Backend tab filter (e.g. `active`, `archived`). Backend default is used when omitted. */
+  /** @deprecated Not supported by the v1 API (ignored). `list()` returns the seller's own products. */
   tab?: string;
 }
 
