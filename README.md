@@ -137,7 +137,7 @@ const { data, meta } = await garu.charges.list({ limit: 10 });
 ### Refund a charge
 
 ```ts
-await garu.charges.refund(4472, { amount: 1000 }); // partial refund (R$10.00)
+await garu.charges.refund(4472, { amount: 10.0 }); // partial refund (R$10.00)
 ```
 
 > [!TIP]
@@ -425,7 +425,7 @@ import {
 } from '@garuhq/node';
 
 try {
-  await garu.charges.refund(4472, { amount: 1000 });
+  await garu.charges.refund(4472, { amount: 10.0 });
 } catch (err) {
   if (err instanceof GaruNotFoundError) {
     /* 404 */
