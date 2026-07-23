@@ -116,15 +116,16 @@ export class Charges {
   }
 
   /**
-   * Refund a charge — fully, or partially by passing `amount` in centavos.
+   * Refund a charge — fully, or partially by passing `amount` in
+   * **decimal BRL / reais**, NOT centavos.
    *
    * @example
    * // Full refund
    * await garu.charges.refund(4472);
    *
    * @example
-   * // Partial refund of R$ 10,00
-   * await garu.charges.refund(4472, { amount: 1000, reason: 'customer_request' });
+   * // Partial refund of R$ 10,00 — ten reais, written as 10.00
+   * await garu.charges.refund(4472, { amount: 10.0, reason: 'customer_request' });
    */
   async refund(id: number, params: RefundChargeParams = {}): Promise<Charge> {
     const idempotencyKey = params.idempotencyKey ?? generateIdempotencyKey();

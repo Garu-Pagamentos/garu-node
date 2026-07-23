@@ -103,7 +103,13 @@ export interface Charge {
 }
 
 export interface RefundChargeParams {
-  /** Partial refund in centavos. Omit for full refund. */
+  /**
+   * Partial refund in **decimal BRL / reais** (e.g. `10.00`) — NOT centavos.
+   * Omit for a full refund.
+   *
+   * The API takes reais here, the same as `product.value`. Passing `1000`
+   * meaning "R$ 10,00" asks to refund one thousand reais.
+   */
   amount?: number;
   /** Free-form reason stored on the refund. */
   reason?: string;
