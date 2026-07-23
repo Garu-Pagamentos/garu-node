@@ -17,18 +17,22 @@ export type WireCustomerDto = components['schemas']['CustomerDto'];
 export type WireCardInfoDto = components['schemas']['CardInfoDto'];
 export type WireMetaResponse = components['schemas']['MetaResponse'];
 
-export type PaymentMethod = 'pix' | 'credit_card' | 'boleto';
-
 /**
- * Payment-method identifier as it appears on the wire. `pix_automatic`
- * (Pix Automático auto-debit) surfaces here on transactions/charges read
- * back from Pix Automático recurring cycles. It is never produced by
- * `toWirePaymentMethod`, since one-off charges can't use it.
+ * Stable, friendly charge status. Mirrors what /api/v1/charges returns — the
+ * raw processor statuses (payedPix, pendingBoleto, …) are normalized server-side
+ * and never surface here. Act on `paid`; `authorized` is card money held but not
+ * captured, `refund_pending` is a Pix devolução requested but not yet settled.
  */
-export type WirePaymentMethodId = 'pix' | 'creditcard' | 'boleto' | 'pix_automatic';
-
 export type ChargeStatus =
-  'pending' | 'authorized' | 'paid' | 'failed' | 'refunded' | 'cancelled' | 'expired';
+  | 'pending'
+  | 'authorized'
+  | 'paid'
+  | 'failed'
+  | 'expired'
+  | 'canceled'
+  | 'refund_pending'
+  | 'refunded'
+  | 'chargeback';
 
 export interface Customer {
   /** Full legal name. 3–255 chars. */
@@ -49,84 +53,107 @@ export interface Customer {
   state?: string;
 }
 
-export interface CardInfo {
-  /** 13–19 digits, no spaces or hyphens. */
-  cardNumber: string;
-  /** 3 or 4 digits. */
-  cvv: string;
-  /** `YYYY-MM`. */
-  expirationDate: string;
-  /** As printed on the card. */
+export interface CardInput {
+  /** PAN, 13-19 digits, no spaces. Server-to-server only (PCI scope). */
+  number: string;
+  /** Holder name exactly as printed. */
   holderName: string;
-  /** 1–12. */
+  /** Expiry as `YYYY-MM`. */
+  expirationDate: string;
+  /** 3 or 4 digits. Never stored by Garu. */
+  cvv: string;
+  /** 1-12. */
   installments: number;
 }
 
 export interface CreateChargeParams {
-  /** Customer buying the product. */
-  customer: Customer;
   /** UUID of the product being charged. */
   productId: string;
   /** Payment method. */
-  paymentMethod: PaymentMethod;
-  /** Required when `paymentMethod` is `credit_card`. */
-  cardInfo?: CardInfo;
+  paymentMethod: ChargePaymentMethod;
+  /** Customer buying the product. */
+  customer: Customer;
+  /**
+   * Required when `paymentMethod` is `creditCard`. This is a raw PAN + CVV, so
+   * call the SDK only from your server, never a browser or app — it puts you in
+   * PCI DSS scope.
+   */
+  card?: CardInput;
+  /** Optional pre-created checkout session token, for attribution. */
+  checkoutSessionToken?: string;
   /** Free-form metadata attached to the charge. */
   additionalInfo?: string;
-  /** Original checkout link, if any. */
-  link?: string | null;
-  /** Associated affiliate ID, if any. */
-  affiliateId?: number | null;
-  /** Subscription price ID (`price_*`), for subscription charges only. */
-  priceId?: string | null;
-  /** Optional pre-created checkout session token. */
-  checkoutSessionToken?: string;
-  /**
-   * Idempotency key. If omitted, the SDK generates a UUIDv4.
-   * Keys are valid for 24h on the backend.
-   */
+  /** Idempotency key. If omitted, the SDK generates a UUIDv4. Valid 24h. */
   idempotencyKey?: string;
 }
 
+export type ChargePaymentMethod = 'pix' | 'boleto' | 'creditCard';
+
 export interface Charge {
-  id: number;
+  /** Public identifier. Use this everywhere; there is no numeric id. */
+  uuid: string;
   status: ChargeStatus;
+  paymentMethod: ChargePaymentMethod;
+  /** Product base price, in decimal BRL / reais. */
   amount: number;
-  paymentMethodId: WirePaymentMethodId;
+  /**
+   * What the customer is actually charged, in reais. Equals `amount` for PIX,
+   * boleto and 1x card; higher for installment card sales (fator markup). Use
+   * this to reconcile, not `amount`.
+   */
+  chargedTotal: number;
+  installments: number;
+  product: { uuid: string; name: string } | null;
+  /** `document` is partially masked. */
+  customer: { name: string; email: string; document: string } | null;
+  /** Present for PIX: the copy-paste EMV code to render as a QR. */
+  pix: { code: string } | null;
+  /** Present for boleto: the barcode line and a Garu-hosted PDF URL. */
+  boleto: { barcodeLine: string; pdfUrl: string } | null;
+  /** Present for card: only brand, last4 and the authorization code. */
+  card: { brand: string | null; last4: string | null; authorizationCode: string | null } | null;
+  /** Set once refunded. `refundedAt` is null while a Pix devolução is unsettled. */
+  refund: { amount: number; reason: string | null; refundedAt: string | null } | null;
   /** ISO-8601. */
-  date: string;
-  /** ISO-8601. */
-  deadline?: string;
-  /** Product this charge belongs to. */
-  product?: { id: number; uuid?: string; name?: string };
-  [key: string]: unknown;
+  createdAt: string;
+  /** ISO-8601. Only set for boleto (due date); null for PIX and card. */
+  expiresAt: string | null;
 }
 
 export interface RefundChargeParams {
   /**
    * Partial refund in **decimal BRL / reais** (e.g. `10.00`) — NOT centavos.
-   * Omit for a full refund.
+   * Omit for a full refund. Passing `1000` for "R$ 10,00" refunds a thousand
+   * reais.
    *
-   * The API takes reais here, the same as `product.value`. Passing `1000`
-   * meaning "R$ 10,00" asks to refund one thousand reais.
+   * For a Pix Automático charge this starts an asynchronous devolução: the
+   * charge moves to `refund_pending` and only reaches `refunded` once the
+   * transfer settles.
    */
   amount?: number;
   /** Free-form reason stored on the refund. */
   reason?: string;
-  idempotencyKey?: string;
 }
 
 export interface ListChargesParams {
   /** Page number (1-based). Default: 1. */
   page?: number;
-  /** Items per page (1–100). Default: 20. */
+  /** Items per page (1-100). Default: 20. */
   limit?: number;
-  /** Filter by status (e.g. `paid`, `pending`). */
-  status?: string;
+  /** Filter by friendly status (e.g. `paid`, `pending`). */
+  status?: ChargeStatus;
+  /** Filter by payment method. */
+  paymentMethod?: ChargePaymentMethod;
+  /** Filter by product UUID. */
+  productId?: string;
+  /** Charges created at or after this ISO-8601 instant. */
+  createdAfter?: string;
+  /** Charges created at or before this ISO-8601 instant. */
+  createdBefore?: string;
   /** Search by customer name, email, or document. */
   search?: string;
-  /** Filter by payment method (`pix`, `creditcard`, `boleto`). */
-  paymentMethod?: string;
+  /** Sort order. Default `-createdAt` (newest first). */
+  sort?: 'createdAt' | '-createdAt' | 'amount' | '-amount';
 }
 
 export interface PaginatedList<T> {
@@ -139,7 +166,19 @@ export interface PaginatedList<T> {
   };
 }
 
-export type ChargeList = PaginatedList<Charge>;
+export interface ChargeList {
+  data: Charge[];
+  /** Items on this page. */
+  count: number;
+  /** Total matches across all pages. */
+  totalCount: number;
+  totalPages: number;
+}
+
+/** Result of cancelling a charge. */
+export interface CancelChargeResult {
+  canceled: boolean;
+}
 
 export interface CustomerRecord {
   id: number;
@@ -632,11 +671,6 @@ export interface MetaResponse {
   docs_url: string;
   dashboard_url: string;
   support_email: string;
-}
-
-/** Map the SDK's friendly `PaymentMethod` to the backend's wire value. */
-export function toWirePaymentMethod(pm: PaymentMethod): WirePaymentMethodId {
-  return pm === 'credit_card' ? 'creditcard' : pm;
 }
 
 // ============================================================

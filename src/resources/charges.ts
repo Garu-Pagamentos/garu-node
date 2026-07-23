@@ -1,39 +1,36 @@
-import type { HttpClient } from '../http.js';
-import type { components } from '../generated/schema.js';
+import type { HttpClient, OpenapiCallResult } from '../http.js';
 import { generateIdempotencyKey } from '../idempotency.js';
-import {
-  toWirePaymentMethod,
-  type Charge,
-  type ChargeList,
-  type CreateChargeParams,
-  type ListChargesParams,
-  type RefundChargeParams
+import type {
+  CancelChargeResult,
+  Charge,
+  ChargeList,
+  CreateChargeParams,
+  ListChargesParams,
+  RefundChargeParams
 } from '../types.js';
 
-type CreateTransactionBody = components['schemas']['CreateTransactionRequest'];
-
 /**
- * Charges — the core of the Garu API.
+ * Charges — create and manage payments against a product.
  *
- * A charge represents a single payment attempt against a product. The SDK
- * surfaces charges under `garu.charges` even though the backend route is
- * `/api/transactions` — this matches Stripe convention and is the name every
- * other Garu surface (MCP, CLI, docs) uses.
+ * Backed by `/api/v1/charges`, the versioned public contract. A charge is keyed
+ * by `uuid`; there is no numeric id. Create returns everything needed to render
+ * a transparent checkout: the PIX EMV (`pix.code`), the boleto line and a
+ * Garu-hosted PDF (`boleto`), or the card authorization (`card`).
  */
 export class Charges {
   constructor(private readonly http: HttpClient) {}
 
   /**
-   * Create a charge (PIX, credit card, or boleto).
+   * Create a charge (PIX, boleto, or credit card).
    *
-   * Automatically attaches an `X-Idempotency-Key` header — if you don't pass
-   * `idempotencyKey`, the SDK generates a UUIDv4. Safe to retry: the backend
-   * caches the first response for 24h.
+   * Attaches an `X-Idempotency-Key` header automatically — if you don't pass
+   * `idempotencyKey`, the SDK generates a UUIDv4. Safe to retry: the same key
+   * returns the original charge for 24h.
    *
    * @example
-   * // PIX charge
+   * // PIX — render charge.pix.code as a QR in your own checkout
    * const charge = await garu.charges.create({
-   *   productId: 'b3f2c1e8-6e4a-4b9f-9d1c-2a1f6c3d4e5f',
+   *   productId: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
    *   paymentMethod: 'pix',
    *   customer: {
    *     name: 'Maria Silva',
@@ -42,122 +39,123 @@ export class Charges {
    *     phone: '11987654321'
    *   }
    * });
-   * // charge.id, charge.status
+   * console.log(charge.uuid, charge.pix?.code);
    *
    * @example
-   * // Credit card charge, 3 installments
+   * // Credit card, 2 installments. Server-to-server only (PCI scope).
    * const charge = await garu.charges.create({
-   *   productId: 'b3f2c1e8-6e4a-4b9f-9d1c-2a1f6c3d4e5f',
-   *   paymentMethod: 'credit_card',
+   *   productId: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+   *   paymentMethod: 'creditCard',
    *   customer: { name: 'Maria Silva', email: 'maria@exemplo.com.br', document: '12345678909', phone: '11987654321' },
-   *   cardInfo: {
-   *     cardNumber: '4111111111111111',
-   *     cvv: '123',
-   *     expirationDate: '2030-12',
+   *   card: {
+   *     number: '4111111111111111',
    *     holderName: 'MARIA SILVA',
-   *     installments: 3
+   *     expirationDate: '2030-12',
+   *     cvv: '123',
+   *     installments: 2
    *   }
    * });
+   * // charge.amount is the base price; charge.chargedTotal is what was charged.
    */
   async create(params: CreateChargeParams): Promise<Charge> {
     const idempotencyKey = params.idempotencyKey ?? generateIdempotencyKey();
-    const body = this.buildCreateBody(params);
+    const body: Record<string, unknown> = {
+      productId: params.productId,
+      paymentMethod: params.paymentMethod,
+      customer: params.customer
+    };
+    if (params.card) body.card = params.card;
+    if (params.checkoutSessionToken) body.checkoutSessionToken = params.checkoutSessionToken;
+    if (params.additionalInfo !== undefined) body.additionalInfo = params.additionalInfo;
 
-    return this.http.call<Charge>(
-      (signal) =>
-        this.http.client.POST('/api/transactions', {
-          body,
-          headers: { 'X-Idempotency-Key': idempotencyKey },
-          signal
-        }) as Promise<{ data?: Charge; error?: unknown; response: Response }>
-    );
+    return this.post<Charge>('/api/v1/charges', body, { 'X-Idempotency-Key': idempotencyKey });
   }
 
   /**
-   * List charges for the authenticated seller, with pagination and filters.
+   * Retrieve a charge by uuid.
    *
    * @example
-   * const { data, meta } = await garu.charges.list({ status: 'paid', limit: 10 });
-   * // meta.total paid charges
+   * const charge = await garu.charges.retrieve('6f1c9b2e-4a7d-4f0b-9a3e-1d2c3b4a5e6f');
+   * if (charge.status === 'paid') fulfil(charge);
+   */
+  async retrieve(uuid: string): Promise<Charge> {
+    return this.get<Charge>(`/api/v1/charges/${encodeURIComponent(uuid)}`);
+  }
+
+  /**
+   * List charges for the authenticated account, newest first by default.
+   *
+   * @example
+   * const { data, totalCount } = await garu.charges.list({ status: 'paid', limit: 50 });
+   * console.log(`${data.length} of ${totalCount} paid charges`);
    */
   async list(params: ListChargesParams = {}): Promise<ChargeList> {
     const query: Record<string, string> = {};
     if (params.page !== undefined) query.page = String(params.page);
     if (params.limit !== undefined) query.limit = String(params.limit);
     if (params.status) query.status = params.status;
-    if (params.search) query.search = params.search;
     if (params.paymentMethod) query.paymentMethod = params.paymentMethod;
+    if (params.productId) query.productId = params.productId;
+    if (params.createdAfter) query.createdAfter = params.createdAfter;
+    if (params.createdBefore) query.createdBefore = params.createdBefore;
+    if (params.search) query.search = params.search;
+    if (params.sort) query.sort = params.sort;
 
     const qs = new URLSearchParams(query).toString();
-    const url = `/api/transactions${qs ? `?${qs}` : ''}`;
-
-    return this.http.call<ChargeList>((signal) =>
-      (this.http.client.GET as Function)(url, { signal }).then(
-        (r: { data?: ChargeList; error?: unknown; response: Response }) => r
-      )
-    );
+    return this.get<ChargeList>(`/api/v1/charges${qs ? `?${qs}` : ''}`);
   }
 
   /**
-   * Fetch a single charge by numeric ID.
+   * Refund a charge, fully or partially. `amount` is in reais.
+   *
+   * For a Pix Automático charge the refund is a devolução: it returns with the
+   * charge in `refund_pending`, reaching `refunded` only once the transfer
+   * settles.
    *
    * @example
-   * const charge = await garu.charges.get(4472);
-   * if (charge.status === 'paid') { ... }
+   * await garu.charges.refund('6f1c9b2e-...');                       // full
+   * await garu.charges.refund('6f1c9b2e-...', { amount: 10.0 });     // R$10,00
    */
-  async get(id: number): Promise<Charge> {
-    return this.http.call<Charge>(
-      (signal) =>
-        this.http.client.GET('/api/transactions/{id}', {
-          params: { path: { id } },
-          signal
-        }) as Promise<{ data?: Charge; error?: unknown; response: Response }>
-    );
-  }
-
-  /**
-   * Refund a charge — fully, or partially by passing `amount` in
-   * **decimal BRL / reais**, NOT centavos.
-   *
-   * @example
-   * // Full refund
-   * await garu.charges.refund(4472);
-   *
-   * @example
-   * // Partial refund of R$ 10,00 — ten reais, written as 10.00
-   * await garu.charges.refund(4472, { amount: 10.0, reason: 'customer_request' });
-   */
-  async refund(id: number, params: RefundChargeParams = {}): Promise<Charge> {
-    const idempotencyKey = params.idempotencyKey ?? generateIdempotencyKey();
+  async refund(uuid: string, params: RefundChargeParams = {}): Promise<Charge> {
     const body: Record<string, unknown> = {};
     if (params.amount !== undefined) body.amount = params.amount;
     if (params.reason !== undefined) body.reason = params.reason;
 
-    return this.http.call<Charge>(
+    return this.post<Charge>(`/api/v1/charges/${encodeURIComponent(uuid)}/refund`, body);
+  }
+
+  /**
+   * Cancel an unpaid charge.
+   *
+   * @example
+   * const { canceled } = await garu.charges.cancel('6f1c9b2e-...');
+   */
+  async cancel(uuid: string): Promise<CancelChargeResult> {
+    return this.http.call<CancelChargeResult>(
       (signal) =>
-        this.http.client.POST('/api/transactions/{id}/refund', {
-          params: { path: { id } },
-          body: body as never,
-          headers: { 'X-Idempotency-Key': idempotencyKey },
-          signal
-        }) as Promise<{ data?: Charge; error?: unknown; response: Response }>
+        (this.http.client.DELETE as CallableFunction)(
+          `/api/v1/charges/${encodeURIComponent(uuid)}`,
+          { signal }
+        ) as OpenapiCallResult<CancelChargeResult>
     );
   }
 
-  private buildCreateBody(params: CreateChargeParams): CreateTransactionBody {
-    const body: Record<string, unknown> = {
-      customer: params.customer,
-      productId: params.productId,
-      paymentMethodId: toWirePaymentMethod(params.paymentMethod),
-      link: params.link ?? null,
-      affiliateId: params.affiliateId ?? null
-    };
-    if (params.additionalInfo !== undefined) body.additionalInfo = params.additionalInfo;
-    if (params.priceId !== undefined) body.priceId = params.priceId;
-    if (params.checkoutSessionToken !== undefined) {
-      body.checkoutSessionToken = params.checkoutSessionToken;
-    }
-    if (params.cardInfo) body.CardInfo = params.cardInfo;
-    return body as unknown as CreateTransactionBody;
+  // v1 charge routes are not in the generated OpenAPI schema (it is regenerated
+  // from a live deploy), so these use the client's untyped path.
+  private get<T>(url: string): Promise<T> {
+    return this.http.call<T>(
+      (signal) => (this.http.client.GET as CallableFunction)(url, { signal }) as OpenapiCallResult<T>
+    );
+  }
+
+  private post<T>(
+    url: string,
+    body: Record<string, unknown>,
+    headers?: Record<string, string>
+  ): Promise<T> {
+    return this.http.call<T>(
+      (signal) =>
+        (this.http.client.POST as CallableFunction)(url, { body, headers, signal }) as OpenapiCallResult<T>
+    );
   }
 }
