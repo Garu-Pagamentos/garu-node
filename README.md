@@ -58,7 +58,7 @@ const charge = await garu.charges.create({
   }
 });
 
-console.log(charge.id, charge.status);
+console.log(charge.uuid, charge.pix?.code);
 ```
 
 ## Setup
@@ -84,12 +84,13 @@ const garu = new Garu({
 
 ## Charges
 
-| Method                | Description                                  |
-| --------------------- | -------------------------------------------- |
-| `create(params)`      | Create a PIX, credit-card, or boleto charge. |
-| `list(params?)`       | List charges with pagination and filters.    |
-| `get(id)`             | Fetch a single charge by ID.                 |
-| `refund(id, params?)` | Refund a charge fully or partially.          |
+| Method                  | Description                                   |
+| ----------------------- | --------------------------------------------- |
+| `create(params)`        | Create a PIX, credit-card, or boleto charge.  |
+| `retrieve(uuid)`        | Fetch a single charge by uuid.                |
+| `list(params?)`         | List charges with pagination and filters.     |
+| `refund(uuid, params?)` | Refund a charge fully or partially (reais).   |
+| `cancel(uuid)`          | Cancel an unpaid charge.                       |
 
 ### Create a PIX charge
 
@@ -111,13 +112,13 @@ const charge = await garu.charges.create({
 ```ts
 const charge = await garu.charges.create({
   productId: 'b3f2c1e8-6e4a-4b9f-9d1c-2a1f6c3d4e5f',
-  paymentMethod: 'credit_card',
+  paymentMethod: 'creditCard',
   card: {
     number: '4111111111111111',
     holderName: 'MARIA SILVA',
-    expirationMonth: '12',
-    expirationYear: '2028',
-    cvv: '123'
+    expirationDate: '2030-12',
+    cvv: '123',
+    installments: 2
   },
   customer: {
     name: 'Maria Silva',
@@ -131,13 +132,13 @@ const charge = await garu.charges.create({
 ### List charges
 
 ```ts
-const { data, meta } = await garu.charges.list({ limit: 10 });
+const { data, totalCount } = await garu.charges.list({ status: 'paid', limit: 10 });
 ```
 
 ### Refund a charge
 
 ```ts
-await garu.charges.refund(4472, { amount: 1000 }); // partial refund (R$10.00)
+await garu.charges.refund('6f1c9b2e-…', { amount: 10.0 }); // partial refund (R$10,00, reais)
 ```
 
 > [!TIP]
@@ -425,7 +426,7 @@ import {
 } from '@garuhq/node';
 
 try {
-  await garu.charges.refund(4472, { amount: 1000 });
+  await garu.charges.refund('6f1c9b2e-…', { amount: 10.0 });
 } catch (err) {
   if (err instanceof GaruNotFoundError) {
     /* 404 */

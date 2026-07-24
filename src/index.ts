@@ -17,8 +17,10 @@ export type {
   CancelAtPeriodEndScheduledChargeParams,
   CancelRecurrenceScheduledChargeParams,
   ChangePaymentMethodScheduledChargeParams,
+  CancelChargeResult,
   Charge,
   ChargeList,
+  ChargePaymentMethod,
   ChargeNowOutcome,
   ChargeNowReason,
   ChargeNowResult,
@@ -30,7 +32,7 @@ export type {
   Customer,
   CustomerList,
   CustomerRecord,
-  CardInfo,
+  CardInput,
   // v0.8.0 — failure codes + per-product portal config + new webhook payloads
   FailurePayload,
   GaruFailureCode,
@@ -44,7 +46,6 @@ export type {
   MetaResponse,
   PaginatedList,
   PauseScheduledChargeParams,
-  PaymentMethod,
   PaymentMethodExpiredPayload,
   PaymentMethodExpiringPayload,
   PostponeScheduledChargeParams,
@@ -77,5 +78,4 @@ export type {
   WebhookEventList,
   WebhookEventStatus,
   ListWebhookEventsParams,
-  WirePaymentMethodId
 } from './types.js';

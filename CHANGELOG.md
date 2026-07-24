@@ -3,6 +3,76 @@
 All notable changes to `@garuhq/node` are documented in this file. Format:
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [SemVer](https://semver.org/).
 
+## [1.0.0] — 2026-07-23
+
+First stable release. **Breaking:** `charges` now targets the versioned public
+API `/api/v1/charges`, keyed on `uuid`. If you use `garu.charges.*`, read the
+migration below. Nothing else (products, customers, scheduled-charges,
+webhook-events) changed.
+
+### Breaking
+
+- **`charges` moved to `/api/v1/charges`** and a charge is keyed by **`uuid`**,
+  not a numeric `id`.
+  - `charges.get(id: number)` → **`charges.retrieve(uuid: string)`**.
+  - `charge.id` → **`charge.uuid`**.
+- **`create` takes a v1 body.** `paymentMethod` uses `'creditCard'` (was
+  `'credit_card'`); card data goes under **`card`** (was `cardInfo`) as
+  `{ number, holderName, expirationDate, cvv, installments }` (was `cardNumber`).
+  Removed the unused `link`, `affiliateId`, `priceId` params.
+- **New response shape** (`Charge`), mirroring the API:
+  - `amount` is now the product **base price**; the amount actually charged is
+    the new **`chargedTotal`** (they differ on installment card sales). Reconcile
+    on `chargedTotal`.
+  - `date`/`deadline` → **`createdAt`/`expiresAt`** (`expiresAt` is null for PIX
+    and card, set only for boleto).
+  - `paymentMethodId` → **`paymentMethod`** (`'pix' | 'boleto' | 'creditCard'`).
+  - New method blocks: `pix.code`, `boleto.{barcodeLine,pdfUrl}`,
+    `card.{brand,last4,authorizationCode}`, `refund.{amount,reason,refundedAt}`.
+- **`status` is a friendly, stable set:** `pending`, `authorized`, `paid`,
+  `failed`, `expired`, `canceled`, `refund_pending`, `refunded`, `chargeback`.
+  The raw processor values (`payedPix`, `captured`, …) are gone. Note the
+  spelling `canceled` (one `l`).
+- **`list` returns `{ data, count, totalCount, totalPages }`** (was
+  `{ data, meta }`), and gains `productId`, `createdAfter`, `createdBefore`,
+  `sort` filters.
+- **`refund` amount is in reais**, not centavos, and no longer takes an
+  `idempotencyKey`. New **`charges.cancel(uuid)`** for unpaid charges.
+- Removed the now-unused exports `PaymentMethod`, `WirePaymentMethodId`,
+  `CardInfo`, `toWirePaymentMethod`. Use `ChargePaymentMethod` and `CardInput`.
+
+### Fixed
+
+- `charges.create()` now returns a usable charge. It previously read the raw
+  `/api/transactions` envelope, leaving `charge.id` undefined.
+- Refund amount is reais across code, types and the README (a `1000`-for-R$10,00
+  example is gone). Carried over from the 0.16.x fix.
+
+### Migration
+
+```ts
+// before (0.16.x)
+const c = await garu.charges.create({
+  productId, paymentMethod: 'credit_card', customer,
+  cardInfo: { cardNumber: '4111…', cvv, expirationDate, holderName, installments: 2 }
+});
+c.id;                 // number
+c.paymentMethodId;    // 'creditcard'
+const one = await garu.charges.get(c.id);
+await garu.charges.refund(c.id, { amount: 1000 }); // "R$10,00" (bug: reais)
+
+// after (1.0.0)
+const c = await garu.charges.create({
+  productId, paymentMethod: 'creditCard', customer,
+  card: { number: '4111…', cvv, expirationDate, holderName, installments: 2 }
+});
+c.uuid;               // string
+c.paymentMethod;      // 'creditCard'
+c.chargedTotal;       // what was actually charged
+const one = await garu.charges.retrieve(c.uuid);
+await garu.charges.refund(c.uuid, { amount: 10.0 }); // R$10,00
+```
+
 ## [0.16.0] — 2026-07-18
 
 ### Changed
