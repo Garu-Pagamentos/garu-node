@@ -1,5 +1,7 @@
 import { HttpClient } from './http.js';
 import { Charges } from './resources/charges.js';
+import { InstallmentPlans } from './resources/installment-plans.js';
+import { RefundRequests } from './resources/refund-requests.js';
 import { Customers } from './resources/customers.js';
 import { Meta } from './resources/meta.js';
 import { Products } from './resources/products.js';
@@ -49,6 +51,10 @@ const SDK_VERSION = '0.11.1';
  */
 export class Garu {
   public readonly charges: Charges;
+  /** Boleto parcelado (carnê): one product sold as N monthly bank slips. */
+  public readonly installmentPlans: InstallmentPlans;
+  /** Refunds Garu has been asked to make and cannot make for you. */
+  public readonly refundRequests: RefundRequests;
   public readonly customers: Customers;
   public readonly meta: Meta;
   public readonly products: Products;
@@ -72,6 +78,8 @@ export class Garu {
       fetch: options.fetch
     });
     this.charges = new Charges(http);
+    this.installmentPlans = new InstallmentPlans(http);
+    this.refundRequests = new RefundRequests(http);
     this.customers = new Customers(http);
     this.meta = new Meta(http);
     this.products = new Products(http);

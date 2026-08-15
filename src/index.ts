@@ -77,5 +77,23 @@ export type {
   WebhookEventList,
   WebhookEventStatus,
   ListWebhookEventsParams,
-  WirePaymentMethodId
+  WirePaymentMethodId,
+  // Boleto parcelado (carnê)
+  InstallmentPlan,
+  InstallmentPlanList,
+  InstallmentPlanStatus,
+  Installment,
+  InstallmentStatus,
+  CreateInstallmentPlanParams,
+  ListInstallmentPlansParams,
+  PostponeInstallmentParams,
+  ReissueInstallmentResult,
+  CancelInstallmentPlanParams,
+  RequestPlanRefundParams,
+  // Refund requests
+  RefundRequest,
+  RefundRequestList,
+  RefundRequestStatus,
+  ListRefundRequestsParams,
+  ResolveRefundRequestParams
 } from './types.js';
