@@ -867,3 +867,176 @@ export interface SetProductPortalConfigParams {
   customCancellationMessage?: string | null;
   customWelcomeText?: string | null;
 }
+
+// ---------------------------------------------------------------------------
+// Boleto parcelado (carnê) — one product sold as N monthly bank slips
+// ---------------------------------------------------------------------------
+
+export type InstallmentPlanStatus =
+  | 'pending_activation'
+  | 'active'
+  | 'completed'
+  | 'defaulted'
+  | 'canceled'
+  | 'refunded';
+
+export type InstallmentStatus =
+  | 'scheduled'
+  | 'due_today'
+  | 'processing'
+  | 'paid'
+  | 'overdue'
+  | 'failed'
+  | 'canceled';
+
+/** One monthly slip of a carnê. */
+export interface Installment {
+  /** 1-based position in the plan. */
+  number: number;
+  amount: number;
+  /** YYYY-MM-DD in São Paulo time. */
+  dueDate: string;
+  status: InstallmentStatus;
+  paidAt: string | null;
+  /**
+   * Null until the slip is registered. Parcelas 2..N are emitted month by
+   * month, so most of a fresh plan has no barcode yet.
+   */
+  boleto: { barcodeLine: string; pdfUrl: string } | null;
+  reissueCount: number;
+}
+
+export interface InstallmentPlan {
+  uuid: string;
+  status: InstallmentPlanStatus;
+  installments: number;
+  installmentsPaid: number;
+  /** The cash price the buyer would have paid in one go. */
+  baseValue: number;
+  /** Interest multiplier snapshotted at sale time; never recomputed. */
+  fator: number;
+  installmentAmount: number;
+  /** `installmentAmount × installments` — what the carnê bills in total. */
+  totalScheduled: number;
+  /**
+   * What has actually cleared. May exceed `totalScheduled` once a bank adds
+   * multa or mora, which is why the two are separate fields.
+   */
+  totalCollected: number;
+  firstDueDate: string;
+  graceDays: number | null;
+  cancelReason: string | null;
+  product: { uuid: string; name: string } | null;
+  customer: { name: string; email: string; document: string } | null;
+  activatedAt: string | null;
+  completedAt: string | null;
+  canceledAt: string | null;
+  createdAt: string;
+  /** Present on retrieve and create; omitted from list responses. */
+  installmentsDetail?: Installment[];
+}
+
+export interface InstallmentPlanList {
+  data: InstallmentPlan[];
+  count: number;
+  totalCount: number;
+  totalPages: number;
+}
+
+export interface CreateInstallmentPlanParams {
+  /** Public uuid of a product with carnê enabled. */
+  productId: string;
+  /** Numeric customer id, as returned by `garu.customers.create`. */
+  customerId: number;
+  /** 2..12. One parcela is not a carnê. */
+  installments: number;
+  /** YYYY-MM-DD. Defaults to today; must be within 90 days. */
+  firstDueDate?: string;
+  /**
+   * The affiliate who made this sale. Fixed at sale time: every later parcela
+   * inherits it, so omitting it pays that affiliate nothing for the whole
+   * carnê.
+   */
+  affiliateId?: number;
+  /** Auto-generated when omitted. */
+  idempotencyKey?: string;
+}
+
+export interface ListInstallmentPlansParams {
+  page?: number;
+  limit?: number;
+  status?: InstallmentPlanStatus | InstallmentPlanStatus[];
+  customerId?: number;
+  productId?: string;
+  /** Filters on the FIRST parcela's due date, which identifies the plan. */
+  dueFrom?: string;
+  dueTo?: string;
+}
+
+export interface PostponeInstallmentParams {
+  /** YYYY-MM-DD. Moves this parcela only; its siblings keep their dates. */
+  newDueDate: string;
+}
+
+export interface ReissueInstallmentResult {
+  status: string;
+  reason: string | null;
+  installment: Installment | null;
+}
+
+export interface CancelInstallmentPlanParams {
+  note?: string;
+}
+
+// --- Refund requests -------------------------------------------------------
+
+export type RefundRequestStatus = 'pending' | 'confirmed' | 'rejected';
+
+/**
+ * A refund Garu has been ASKED to make and has not made. Garu never moves this
+ * money: a boleto cannot be reversed and Celcoin exposes no Pix devolução, so
+ * the funds already settled to the seller and the return is a bank transfer
+ * only they can make.
+ */
+export interface RefundRequest {
+  uuid: string;
+  status: RefundRequestStatus;
+  /** Amount the seller is being asked to return, in reais. */
+  amount: number;
+  reason: string | null;
+  /** Exactly one of these is set. */
+  installmentPlanId: string | null;
+  chargeId: string | null;
+  requestedBy: { type: string; id?: number | string | null };
+  resolvedBy: { type: string; id?: number | string | null } | null;
+  sellerNote: string | null;
+  resolvedAt: string | null;
+  createdAt: string;
+}
+
+export interface RefundRequestList {
+  data: RefundRequest[];
+  count: number;
+  totalCount: number;
+  totalPages: number;
+}
+
+export interface RequestPlanRefundParams {
+  /** Defaults to everything the carnê has collected. */
+  amount?: number;
+  reason?: string;
+}
+
+export interface ListRefundRequestsParams {
+  page?: number;
+  limit?: number;
+  status?: RefundRequestStatus | RefundRequestStatus[];
+  /** Filter by carnê uuid. */
+  planId?: string;
+  /** Filter by charge uuid (Pix and boleto requests). */
+  chargeId?: string;
+}
+
+export interface ResolveRefundRequestParams {
+  note?: string;
+}

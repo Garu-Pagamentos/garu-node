@@ -3,6 +3,35 @@
 All notable changes to `@garuhq/node` are documented in this file. Format:
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [SemVer](https://semver.org/).
 
+## [1.1.0] — 2026-08-15
+
+
+### Added
+
+- **`garu.installmentPlans` — boleto parcelado (carnê).** One product sold as N
+  monthly bank slips. This is seller-financed consumer credit, not a card
+  instalment: nobody guarantees a boleto, so a buyer who stops at parcela 4
+  leaves the seller with four parcelas and no recourse through Garu. Only the
+  first slip is registered at creation; the rest are emitted month by month and
+  the sale activates when parcela 1 compensates.
+  - `create` (auto-attaches `X-Idempotency-Key`, which matters more here than
+    anywhere else in the API — the call registers a real boleto, so a blind
+    retry hands one buyer two payable barcodes), `list`, `get`,
+    `reissueInstallment`, `postponeInstallment`, `markInstallmentPaid`,
+    `cancel`, `requestRefund`.
+  - `create` takes an optional `affiliateId`. It is fixed at sale time and every
+    later parcela inherits it, so omitting it pays that affiliate nothing for
+    the whole carnê.
+  - Read `totalCollected` against `totalScheduled`: they differ once a bank adds
+    multa or mora, and `totalCollected` can legitimately exceed what was billed.
+
+- **`garu.refundRequests` — refunds Garu cannot make for you.** A boleto cannot
+  be reversed and Celcoin exposes no Pix devolução, so the funds already settled
+  to you and the return is a bank transfer only you can make. `list`, `get`,
+  `confirm`, `reject`. Confirming records that you _assert_ the money went back;
+  Garu never observes the transfer. Card and Woovi Pix are unaffected and keep
+  their real automated reversals via `garu.charges.refund`.
+
 ## [1.0.0] — 2026-07-23
 
 First stable release. **Breaking:** `charges` now targets the versioned public
