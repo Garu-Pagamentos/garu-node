@@ -3,6 +3,9 @@ import { describe, expect, it } from 'vitest';
 import { Garu, GaruNotFoundError, GaruPermissionError, type WebhookEvent } from '../src/index.js';
 import { mockFetch } from './helpers.js';
 
+const EVENT_UUID = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890';
+const CLONE_UUID = 'f9e8d7c6-b5a4-3210-9876-543210fedcba';
+
 const fakeEndpoint = {
   id: 7,
   url: 'https://example.com/hooks/garu',
@@ -12,11 +15,10 @@ const fakeEndpoint = {
 };
 
 const fakeEvent: WebhookEvent = {
-  id: 42,
-  endpointId: 7,
+  uuid: EVENT_UUID,
   webhookEndpoint: fakeEndpoint,
   eventType: 'transaction.payment.paid',
-  payload: { transactionId: 1234, amount: 9900 },
+  payload: { id: 'evt_1a2b3c', transactionId: 1234, amount: 9900 },
   status: 'failed',
   attempts: 5,
   lastAttemptAt: '2026-05-19T12:00:00Z',
@@ -31,47 +33,36 @@ const newClient = (fetchImpl: typeof fetch): Garu =>
   new Garu({ apiKey: 'sk_test_abc', fetch: fetchImpl, maxRetries: 0 });
 
 describe('webhookEvents.list', () => {
-  // The legacy `/api/webhook-events` endpoint returns a flat `{ events, total, page, limit, pages }`
-  // shape — the SDK normalizes it to the standard `{ data, meta }` pagination shape used by
-  // every other resource. These tests mock the real backend shape, then assert on the
-  // SDK-facing normalized shape.
-  it('lists with no filters and default pagination, normalizing the legacy shape', async () => {
-    const backendBody = {
-      events: [fakeEvent],
-      total: 1,
-      page: 1,
-      limit: 50,
-      pages: 1
-    };
-    const { fetch, calls } = mockFetch([{ status: 200, body: backendBody }]);
+  it('lists with no filters and default pagination', async () => {
+    const listBody = { data: [fakeEvent], count: 1, totalCount: 1, totalPages: 1 };
+    const { fetch, calls } = mockFetch([{ status: 200, body: listBody }]);
     const garu = newClient(fetch);
 
     const result = await garu.webhookEvents.list();
 
     expect(result.data).toHaveLength(1);
-    expect(result.data[0]!.id).toBe(42);
-    expect(result.meta).toEqual({ page: 1, limit: 50, total: 1, totalPages: 1 });
-    expect(calls[0]!.url).toBe('https://garu.com.br/api/webhook-events');
+    expect(result.data[0]!.uuid).toBe(EVENT_UUID);
+    expect(result.totalCount).toBe(1);
+    expect(calls[0]!.url).toBe('https://garu.com.br/api/v1/webhook-events');
     expect(calls[0]!.method).toBe('GET');
   });
 
   it('forwards status + pagination filters', async () => {
     const { fetch, calls } = mockFetch([
-      { status: 200, body: { events: [], total: 0, page: 2, limit: 25, pages: 0 } }
+      { status: 200, body: { data: [], count: 0, totalCount: 0, totalPages: 0 } }
     ]);
     const garu = newClient(fetch);
 
-    const result = await garu.webhookEvents.list({ status: 'failed', page: 2, limit: 25 });
+    await garu.webhookEvents.list({ status: 'failed', page: 2, limit: 25 });
 
     expect(calls[0]!.url).toBe(
-      'https://garu.com.br/api/webhook-events?page=2&limit=25&status=failed'
+      'https://garu.com.br/api/v1/webhook-events?page=2&limit=25&status=failed'
     );
-    expect(result.meta).toEqual({ page: 2, limit: 25, total: 0, totalPages: 0 });
   });
 
-  it('renames eventType → event_type and endpointId → endpoint_id on the wire', async () => {
+  it('forwards eventType and endpointId as camelCase query params', async () => {
     const { fetch, calls } = mockFetch([
-      { status: 200, body: { events: [], total: 0, page: 1, limit: 50, pages: 0 } }
+      { status: 200, body: { data: [], count: 0, totalCount: 0, totalPages: 0 } }
     ]);
     const garu = newClient(fetch);
 
@@ -80,10 +71,8 @@ describe('webhookEvents.list', () => {
       endpointId: 7
     });
 
-    expect(calls[0]!.url).toContain('event_type=transaction.payment.paid');
-    expect(calls[0]!.url).toContain('endpoint_id=7');
-    expect(calls[0]!.url).not.toContain('eventType');
-    expect(calls[0]!.url).not.toContain('endpointId');
+    expect(calls[0]!.url).toContain('eventType=transaction.payment.paid');
+    expect(calls[0]!.url).toContain('endpointId=7');
   });
 
   it('maps 403 to GaruPermissionError', async () => {
@@ -95,16 +84,16 @@ describe('webhookEvents.list', () => {
 });
 
 describe('webhookEvents.get', () => {
-  it('fetches a single event by id', async () => {
+  it('fetches a single event by uuid', async () => {
     const { fetch, calls } = mockFetch([{ status: 200, body: fakeEvent }]);
     const garu = newClient(fetch);
 
-    const result = await garu.webhookEvents.get(42);
+    const result = await garu.webhookEvents.get(EVENT_UUID);
 
-    expect(result.id).toBe(42);
+    expect(result.uuid).toBe(EVENT_UUID);
     expect(result.status).toBe('failed');
     expect(result.webhookEndpoint.url).toBe(fakeEndpoint.url);
-    expect(calls[0]!.url).toBe('https://garu.com.br/api/webhook-events/42');
+    expect(calls[0]!.url).toBe(`https://garu.com.br/api/v1/webhook-events/${EVENT_UUID}`);
     expect(calls[0]!.method).toBe('GET');
   });
 
@@ -112,7 +101,9 @@ describe('webhookEvents.get', () => {
     const { fetch } = mockFetch([{ status: 404, body: { message: 'Webhook event not found.' } }]);
     const garu = newClient(fetch);
 
-    await expect(garu.webhookEvents.get(999)).rejects.toBeInstanceOf(GaruNotFoundError);
+    await expect(
+      garu.webhookEvents.get('00000000-0000-0000-0000-000000000000')
+    ).rejects.toBeInstanceOf(GaruNotFoundError);
   });
 });
 
@@ -127,11 +118,11 @@ describe('webhookEvents.retry', () => {
     const { fetch, calls } = mockFetch([{ status: 201, body: resetEvent }]);
     const garu = newClient(fetch);
 
-    const result = await garu.webhookEvents.retry(42);
+    const result = await garu.webhookEvents.retry(EVENT_UUID);
 
     expect(result.status).toBe('pending');
     expect(result.attempts).toBe(0);
-    expect(calls[0]!.url).toBe('https://garu.com.br/api/webhook-events/42/retry');
+    expect(calls[0]!.url).toBe(`https://garu.com.br/api/v1/webhook-events/${EVENT_UUID}/retry`);
     expect(calls[0]!.method).toBe('POST');
     // openapi-fetch unconditionally sets `Content-Type: application/json`, so the
     // backend body-parser rejects `Content-Type: json` + empty body. Send `{}`.
@@ -142,26 +133,28 @@ describe('webhookEvents.retry', () => {
     const { fetch } = mockFetch([{ status: 404, body: { message: 'Webhook event not found.' } }]);
     const garu = newClient(fetch);
 
-    await expect(garu.webhookEvents.retry(999)).rejects.toBeInstanceOf(GaruNotFoundError);
+    await expect(
+      garu.webhookEvents.retry('00000000-0000-0000-0000-000000000000')
+    ).rejects.toBeInstanceOf(GaruNotFoundError);
   });
 });
 
 describe('webhookEvents.resend', () => {
-  // Clone-on-resend: the backend returns a *new* event (new numeric id) that
+  // Clone-on-resend: the backend returns a *new* event (new uuid) that
   // points back at the source via `manualResendOf`. The original event is
   // untouched server-side, so the historical record of the prior failure
   // (status, response status/body, attempts) survives. These tests assert
   // the SDK returns the clone shape, not the source row.
   const cloneEvent: WebhookEvent = {
     ...fakeEvent,
-    id: 99,
+    uuid: CLONE_UUID,
     status: 'pending',
     attempts: 0,
     lastAttemptAt: null,
     nextRetryAt: null,
     responseStatus: null,
     responseBody: null,
-    manualResendOf: 42,
+    manualResendOf: EVENT_UUID,
     createdAt: '2026-05-19T13:00:00Z'
   };
 
@@ -169,13 +162,13 @@ describe('webhookEvents.resend', () => {
     const { fetch, calls } = mockFetch([{ status: 201, body: cloneEvent }]);
     const garu = newClient(fetch);
 
-    const result = await garu.webhookEvents.resend(42);
+    const result = await garu.webhookEvents.resend(EVENT_UUID);
 
-    expect(result.id).toBe(99);
-    expect(result.manualResendOf).toBe(42);
+    expect(result.uuid).toBe(CLONE_UUID);
+    expect(result.manualResendOf).toBe(EVENT_UUID);
     expect(result.status).toBe('pending');
     expect(result.attempts).toBe(0);
-    expect(calls[0]!.url).toBe('https://garu.com.br/api/webhook-events/42/resend');
+    expect(calls[0]!.url).toBe(`https://garu.com.br/api/v1/webhook-events/${EVENT_UUID}/resend`);
     expect(calls[0]!.method).toBe('POST');
     // Same empty-body-mutation contract as retry: openapi-fetch sets
     // `Content-Type: application/json` unconditionally, so the body-parser
@@ -187,7 +180,7 @@ describe('webhookEvents.resend', () => {
     const { fetch, calls } = mockFetch([{ status: 201, body: cloneEvent }]);
     const garu = newClient(fetch);
 
-    await garu.webhookEvents.resend(42);
+    await garu.webhookEvents.resend(EVENT_UUID);
 
     expect(calls[0]!.headers['x-idempotency-key']).toMatch(
       /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/
@@ -198,50 +191,55 @@ describe('webhookEvents.resend', () => {
     const { fetch, calls } = mockFetch([{ status: 201, body: cloneEvent }]);
     const garu = newClient(fetch);
 
-    await garu.webhookEvents.resend(42, { idempotencyKey: 'my-stable-key' });
+    await garu.webhookEvents.resend(EVENT_UUID, { idempotencyKey: 'my-stable-key' });
 
     expect(calls[0]!.headers['x-idempotency-key']).toBe('my-stable-key');
     expect(calls[0]!.body).toEqual({});
   });
 
   it('works on any source status — `success` source returns a fresh pending clone', async () => {
+    const otherEventUuid = '11111111-1111-1111-1111-111111111111';
     const successSourceClone: WebhookEvent = {
       ...cloneEvent,
-      id: 100,
-      manualResendOf: 7
+      uuid: '22222222-2222-2222-2222-222222222222',
+      manualResendOf: otherEventUuid
     };
     const { fetch, calls } = mockFetch([{ status: 201, body: successSourceClone }]);
     const garu = newClient(fetch);
 
-    const result = await garu.webhookEvents.resend(7);
+    const result = await garu.webhookEvents.resend(otherEventUuid);
 
-    expect(result.id).toBe(100);
-    expect(result.manualResendOf).toBe(7);
+    expect(result.uuid).toBe('22222222-2222-2222-2222-222222222222');
+    expect(result.manualResendOf).toBe(otherEventUuid);
     expect(result.status).toBe('pending');
-    expect(calls[0]!.url).toBe('https://garu.com.br/api/webhook-events/7/resend');
+    expect(calls[0]!.url).toBe(
+      `https://garu.com.br/api/v1/webhook-events/${otherEventUuid}/resend`
+    );
   });
 
-  it('does not mutate the original event server-side — returned id differs from input id', async () => {
+  it('does not mutate the original event server-side — returned uuid differs from input uuid', async () => {
     const { fetch } = mockFetch([{ status: 201, body: cloneEvent }]);
     const garu = newClient(fetch);
 
-    const result = await garu.webhookEvents.resend(42);
+    const result = await garu.webhookEvents.resend(EVENT_UUID);
 
-    expect(result.id).not.toBe(42);
-    expect(result.manualResendOf).toBe(42);
+    expect(result.uuid).not.toBe(EVENT_UUID);
+    expect(result.manualResendOf).toBe(EVENT_UUID);
   });
 
   it('maps 404 to GaruNotFoundError', async () => {
     const { fetch } = mockFetch([{ status: 404, body: { message: 'Webhook event not found.' } }]);
     const garu = newClient(fetch);
 
-    await expect(garu.webhookEvents.resend(999)).rejects.toBeInstanceOf(GaruNotFoundError);
+    await expect(
+      garu.webhookEvents.resend('00000000-0000-0000-0000-000000000000')
+    ).rejects.toBeInstanceOf(GaruNotFoundError);
   });
 
   it('maps 403 to GaruPermissionError when the event belongs to another seller', async () => {
     const { fetch } = mockFetch([{ status: 403, body: { message: 'Forbidden' } }]);
     const garu = newClient(fetch);
 
-    await expect(garu.webhookEvents.resend(42)).rejects.toBeInstanceOf(GaruPermissionError);
+    await expect(garu.webhookEvents.resend(EVENT_UUID)).rejects.toBeInstanceOf(GaruPermissionError);
   });
 });

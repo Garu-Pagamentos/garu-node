@@ -3,6 +3,49 @@
 All notable changes to `@garuhq/node` are documented in this file. Format:
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [SemVer](https://semver.org/).
 
+## [3.0.0] — 2026-08-22
+
+**Breaking:** `webhookEvents` now targets the versioned public API
+`/api/v1/webhook-events`, keyed on `uuid`. If you use `garu.webhookEvents.*`,
+read the migration below.
+
+### Breaking
+
+- **`webhookEvents` moved to `/api/v1/webhook-events`** and an event is
+  keyed by **`uuid`**, not a numeric `id`.
+  - `webhookEvents.get(id: number)` → **`webhookEvents.get(uuid: string)`**.
+  - `webhookEvents.retry(id)` / `webhookEvents.resend(id, params?)` — same
+    signature shape, but the id argument is now the `uuid`.
+  - `WebhookEvent.id` is **removed**; there is no numeric id in the public
+    shape. Use `WebhookEvent.uuid` everywhere. `WebhookEvent.endpointId` is
+    also removed — read `webhookEndpoint.id` instead (endpoint configuration
+    stays numeric; it did not move to `/api/v1`).
+  - `WebhookEvent.manualResendOf` is now a **`uuid` string** (was a numeric
+    id), pointing at the source event's `uuid`.
+  - **`webhookEvents.list()` returns `{ data, count, totalCount, totalPages }`**
+    (was `{ data, meta }`).
+  - The gateway's outbound `Idempotency-Key` for `/resend` clones is now
+    `resend_<uuid>` (was `resend_<numeric id>`), to match the public
+    identifier the SDK/CLI/MCP now expose.
+
+### Migration
+
+```ts
+// before (0.x – 2.x)
+const failed = await garu.webhookEvents.list({ status: 'failed', limit: 5 });
+const event = failed.data[0];
+event.id;                                // number
+const clone = await garu.webhookEvents.resend(event.id);
+clone.manualResendOf === event.id;       // true
+
+// after (3.0.0)
+const failed = await garu.webhookEvents.list({ status: 'failed', limit: 5 });
+const event = failed.data[0];
+event.uuid;                              // string
+const clone = await garu.webhookEvents.resend(event.uuid);
+clone.manualResendOf === event.uuid;     // true
+```
+
 ## [2.0.0] — 2026-08-22
 
 **Breaking:** `customers` now targets the versioned public API `/api/v1/customers`,

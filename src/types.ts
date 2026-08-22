@@ -774,9 +774,14 @@ export interface WebhookEventEndpoint {
   [key: string]: unknown;
 }
 
+/**
+ * Public API v1 webhook-event representation. Keyed on `uuid` — there is no
+ * numeric id in this shape. `webhookEndpoint.id` stays numeric: endpoint
+ * *configuration* (create/update/delete) is still dashboard-only and did
+ * not move to `/api/v1`.
+ */
 export interface WebhookEvent {
-  id: number;
-  endpointId: number;
+  uuid: string;
   /** Eager-loaded endpoint snapshot. */
   webhookEndpoint: WebhookEventEndpoint;
   /** Garu event type, e.g. `transaction.payment.paid`. */
@@ -795,18 +800,25 @@ export interface WebhookEvent {
   /** Response body from the most recent attempt, truncated by the gateway. */
   responseBody: string | null;
   /**
-   * When this row is a clone produced by `webhookEvents.resend(id)`, this is
-   * the numeric id of the original event the clone was forked from. `null`
-   * on every originally-fired event (and on events resurrected via the
-   * legacy `webhookEvents.retry(id)` mutation, which mutates in place
-   * instead of cloning).
+   * When this row is a clone produced by `webhookEvents.resend(uuid)`, this
+   * is the uuid of the original event the clone was forked from. `null` on
+   * every originally-fired event (and on events resurrected via the legacy
+   * `webhookEvents.retry(uuid)` mutation, which mutates in place instead of
+   * cloning).
    */
-  manualResendOf: number | null;
+  manualResendOf: string | null;
   createdAt: string;
   [key: string]: unknown;
 }
 
-export type WebhookEventList = PaginatedList<WebhookEvent>;
+export interface WebhookEventList {
+  data: WebhookEvent[];
+  /** Items on this page. */
+  count: number;
+  /** Total matches across all pages. */
+  totalCount: number;
+  totalPages: number;
+}
 
 export interface ListWebhookEventsParams {
   page?: number;

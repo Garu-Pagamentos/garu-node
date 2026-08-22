@@ -8,23 +8,10 @@ import type {
 } from '../types.js';
 
 /**
- * Legacy backend shape for `GET /api/webhook-events`. Predates the
- * `{ data, meta }` convention used by newer resources (customers,
- * scheduled-charges). Normalized to {@link WebhookEventList} at the
- * SDK boundary so callers see one consistent paginated shape.
- */
-interface BackendWebhookEventList {
-  events: WebhookEvent[];
-  total: number;
-  page: number;
-  limit: number;
-  pages: number;
-}
-
-/**
  * Webhook events — the seller-facing delivery log for outbound webhooks.
  *
- * Every time the gateway fires a webhook (e.g. `transaction.payment.paid`,
+ * Backed by `/api/v1/webhook-events`, keyed on `uuid`. Every time the
+ * gateway fires a webhook (e.g. `transaction.payment.paid`,
  * `scheduled_charge.cycle_failed`), it persists one row per destination
  * endpoint with the full payload, the HTTP outcome, and the retry schedule.
  * Use this resource to audit deliveries from the seller's API key — the
@@ -32,6 +19,7 @@ interface BackendWebhookEventList {
  *
  * Webhook endpoint *configuration* (URL, subscribed events, secret) is still
  * dashboard-only — this resource only covers the event log + manual retries.
+ * `webhookEndpoint.id` on every event stays a numeric id for that reason.
  */
 export class WebhookEvents {
   constructor(private readonly http: HttpClient) {}
@@ -53,45 +41,34 @@ export class WebhookEvents {
    * });
    */
   async list(params: ListWebhookEventsParams = {}): Promise<WebhookEventList> {
-    const qs = new URLSearchParams();
-    if (params.page !== undefined) qs.set('page', String(params.page));
-    if (params.limit !== undefined) qs.set('limit', String(params.limit));
-    if (params.status) qs.set('status', params.status);
-    if (params.eventType) qs.set('event_type', params.eventType);
-    if (params.endpointId !== undefined) qs.set('endpoint_id', String(params.endpointId));
-    const query = qs.toString();
-    const url = `/api/webhook-events${query ? `?${query}` : ''}`;
+    const query: Record<string, string> = {};
+    if (params.page !== undefined) query.page = String(params.page);
+    if (params.limit !== undefined) query.limit = String(params.limit);
+    if (params.status) query.status = params.status;
+    if (params.eventType) query.eventType = params.eventType;
+    if (params.endpointId !== undefined) query.endpointId = String(params.endpointId);
 
-    const raw = await this.http.call<BackendWebhookEventList>((signal) =>
+    const qs = new URLSearchParams(query).toString();
+    const url = `/api/v1/webhook-events${qs ? `?${qs}` : ''}`;
+
+    return this.http.call<WebhookEventList>((signal) =>
       (this.http.client.GET as Function)(url, { signal }).then(
-        (r: { data?: BackendWebhookEventList; error?: unknown; response: Response }) => r
+        (r: { data?: WebhookEventList; error?: unknown; response: Response }) => r
       )
     );
-
-    return {
-      data: raw.events,
-      meta: {
-        page: raw.page,
-        limit: raw.limit,
-        total: raw.total,
-        totalPages: raw.pages
-      }
-    };
   }
 
   /**
-   * Fetch one webhook event by numeric ID — includes the full payload, the
+   * Fetch one webhook event by uuid — includes the full payload, the
    * embedded endpoint snapshot, and the most recent response status/body.
    *
    * @example
-   * const event = await garu.webhookEvents.get(42);
-   * if (event.status === 'failed') {
-   *   console.log(event.responseStatus, event.responseBody);
-   * }
+   * const event = await garu.webhookEvents.get('a1b2c3d4-e5f6-7890-abcd-ef1234567890');
+   * event.status === 'failed' && event.responseStatus;
    */
-  async get(id: number): Promise<WebhookEvent> {
+  async get(uuid: string): Promise<WebhookEvent> {
     return this.http.call<WebhookEvent>((signal) =>
-      (this.http.client.GET as Function)(`/api/webhook-events/${id}`, { signal }).then(
+      (this.http.client.GET as Function)(`/api/v1/webhook-events/${uuid}`, { signal }).then(
         (r: { data?: WebhookEvent; error?: unknown; response: Response }) => r
       )
     );
@@ -105,19 +82,19 @@ export class WebhookEvents {
    * explicitly want the legacy in-place semantics (and for backwards
    * compatibility with older CLI / MCP releases).
    *
-   * Re-deliver a webhook event by ID. Resets it to `pending`, clears the
+   * Re-deliver a webhook event by uuid. Resets it to `pending`, clears the
    * retry schedule, and triggers an immediate delivery attempt. Works on
    * any status (`success`, `failed`, `pending`).
    *
    * @example
    * const failed = await garu.webhookEvents.list({ status: 'failed', limit: 5 });
    * for (const event of failed.data) {
-   *   await garu.webhookEvents.retry(event.id);
+   *   await garu.webhookEvents.retry(event.uuid);
    * }
    */
-  async retry(id: number): Promise<WebhookEvent> {
+  async retry(uuid: string): Promise<WebhookEvent> {
     return this.http.call<WebhookEvent>((signal) =>
-      (this.http.client.POST as Function)(`/api/webhook-events/${id}/retry`, {
+      (this.http.client.POST as Function)(`/api/v1/webhook-events/${uuid}/retry`, {
         body: {},
         signal
       }).then((r: { data?: WebhookEvent; error?: unknown; response: Response }) => r)
@@ -125,9 +102,9 @@ export class WebhookEvents {
   }
 
   /**
-   * Re-deliver a webhook event by ID, audit-trail preserving. Unlike
+   * Re-deliver a webhook event by uuid, audit-trail preserving. Unlike
    * {@link retry}, this does *not* mutate the original row — it inserts a
-   * fresh event (new numeric id) that points back at the source via
+   * fresh event (new uuid) that points back at the source via
    * `manualResendOf`, then dispatches that clone. The original row is
    * untouched, so the historical record of the prior failure (and its
    * response status / body) is preserved.
@@ -138,30 +115,30 @@ export class WebhookEvents {
    * delivery's outcome to remain on the record.
    *
    * **Outbound delivery semantics**: the gateway POSTs the clone with
-   * `Idempotency-Key: resend_<originalId>` (where `<originalId>` is the id
-   * of the source event, not the clone). Recipient handlers that key off
+   * `Idempotency-Key: resend_<cloneUuid>`. Recipient handlers that key off
    * `Idempotency-Key` will see this as a distinct delivery from the
    * original — distinguishable both by the `resend_` prefix and by reading
    * the response payload's `manualResendOf` field.
    *
-   * **SDK→gateway dedup**: the SDK auto-attaches `X-Idempotency-Key`
-   * (UUIDv4 unless you pass `idempotencyKey`) so transient transport
-   * retries (5xx → SDK backoff) cannot create duplicate clones — the
-   * backend returns the original clone on the second call within 24h.
+   * The SDK also attaches an `X-Idempotency-Key` header (UUIDv4 unless you
+   * pass `idempotencyKey`); the gateway does not currently deduplicate
+   * `/resend` calls against it, so retrying this call from your own code
+   * after a network failure can create more than one clone — pair it with
+   * your own retry-suppression if that matters for your integration.
    *
-   * Returns the *clone* event (new id), not the original. The original is
+   * Returns the *clone* event (new uuid), not the original. The original is
    * unchanged on the server.
    *
    * @example
-   * const event = await garu.webhookEvents.get(42);
-   * const clone = await garu.webhookEvents.resend(42);
-   * clone.id !== event.id;            // true — clone has its own id
-   * clone.manualResendOf === event.id; // true — points back at the source
+   * const event = await garu.webhookEvents.get('a1b2c3d4-e5f6-7890-abcd-ef1234567890');
+   * const clone = await garu.webhookEvents.resend(event.uuid);
+   * clone.uuid !== event.uuid;            // true — clone has its own uuid
+   * clone.manualResendOf === event.uuid; // true — points back at the source
    */
-  async resend(id: number, params: ResendWebhookEventParams = {}): Promise<WebhookEvent> {
+  async resend(uuid: string, params: ResendWebhookEventParams = {}): Promise<WebhookEvent> {
     const idempotencyKey = params.idempotencyKey ?? generateIdempotencyKey();
     return this.http.call<WebhookEvent>((signal) =>
-      (this.http.client.POST as Function)(`/api/webhook-events/${id}/resend`, {
+      (this.http.client.POST as Function)(`/api/v1/webhook-events/${uuid}/resend`, {
         body: {},
         headers: { 'X-Idempotency-Key': idempotencyKey },
         signal

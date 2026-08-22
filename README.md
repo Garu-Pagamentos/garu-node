@@ -397,18 +397,19 @@ The seller-facing delivery log for outbound webhooks. Use it to audit deliveries
 const failed = await garu.webhookEvents.list({ status: 'failed', limit: 50 });
 
 // Inspect one event end-to-end
-const event = await garu.webhookEvents.get(42);
-console.log(event.responseStatus, event.responseBody);
+const event = await garu.webhookEvents.get('a1b2c3d4-e5f6-7890-abcd-ef1234567890');
+event.responseStatus;
+event.responseBody;
 
 // Audit-trail-preserving replay (recommended)
-const clone = await garu.webhookEvents.resend(42);
-clone.id !== event.id; // true — fresh row with its own id
-clone.manualResendOf === event.id; // true — points back at the source
+const clone = await garu.webhookEvents.resend(event.uuid);
+clone.uuid !== event.uuid; // true — fresh row with its own uuid
+clone.manualResendOf === event.uuid; // true — points back at the source
 ```
 
-`resend(id)` is the audit-preserving counterpart to `retry(id)` — the backend inserts a fresh event whose `manualResendOf` points back at the source, then dispatches that clone. The original row stays exactly as it was, so the historical record of the prior failure (status, response status/body, attempts) survives. Works on any source status (`success` / `failed` / `pending`).
+`resend(uuid)` is the audit-preserving counterpart to `retry(uuid)` — the backend inserts a fresh event whose `manualResendOf` points back at the source, then dispatches that clone. The original row stays exactly as it was, so the historical record of the prior failure (status, response status/body, attempts) survives. Works on any source status (`success` / `failed` / `pending`).
 
-Outbound deliveries of a resent event carry `Idempotency-Key: resend_<originalId>`, so recipient handlers can distinguish a resend from a fresh delivery both by the header prefix and by reading the response payload's `manualResendOf` field.
+Outbound deliveries of a resent event carry `Idempotency-Key: resend_<cloneUuid>`, so recipient handlers can distinguish a resend from a fresh delivery both by the header prefix and by reading the response payload's `manualResendOf` field.
 
 > [!NOTE]
 > The SDK auto-attaches `X-Idempotency-Key` (UUIDv4) on `resend()` so transient transport retries can't create duplicate clones. Pass `{ idempotencyKey }` to dedupe across your own retry layer.
