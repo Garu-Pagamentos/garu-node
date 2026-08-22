@@ -180,8 +180,15 @@ export interface CancelChargeResult {
   canceled: boolean;
 }
 
+/**
+ * Public API v1 customer representation. Keyed on `uuid` — there is no
+ * numeric id in this shape. `installmentPlans.create` and
+ * `scheduledCharges.create` still link customers by the internal numeric id
+ * (unmigrated resources); fetch that id from the dashboard or the internal
+ * `/api/customers` endpoint until they move to `/api/v1` too.
+ */
 export interface CustomerRecord {
-  id: number;
+  uuid: string;
   name: string;
   email: string;
   document: string;
@@ -200,10 +207,9 @@ export interface CustomerRecord {
    * Resolved billing email used for outbound seller→customer emails:
    * `billingEmailOverride ?? per-seller email ?? customer.email`.
    */
-  billingEmail?: string;
+  billingEmail: string;
   /** True when a sticky `billingEmailOverride` is set for this seller. */
-  hasBillingEmailOverride?: boolean;
-  [key: string]: unknown;
+  hasBillingEmailOverride: boolean;
 }
 
 export interface SetBillingEmailOverrideParams {
@@ -214,7 +220,14 @@ export interface SetBillingEmailOverrideParams {
   billingEmailOverride: string | null;
 }
 
-export type CustomerList = PaginatedList<CustomerRecord>;
+export interface CustomerList {
+  data: CustomerRecord[];
+  /** Items on this page. */
+  count: number;
+  /** Total matches across all pages. */
+  totalCount: number;
+  totalPages: number;
+}
 
 export interface CreateCustomerParams {
   name: string;
@@ -873,21 +886,10 @@ export interface SetProductPortalConfigParams {
 // ---------------------------------------------------------------------------
 
 export type InstallmentPlanStatus =
-  | 'pending_activation'
-  | 'active'
-  | 'completed'
-  | 'defaulted'
-  | 'canceled'
-  | 'refunded';
+  'pending_activation' | 'active' | 'completed' | 'defaulted' | 'canceled' | 'refunded';
 
 export type InstallmentStatus =
-  | 'scheduled'
-  | 'due_today'
-  | 'processing'
-  | 'paid'
-  | 'overdue'
-  | 'failed'
-  | 'canceled';
+  'scheduled' | 'due_today' | 'processing' | 'paid' | 'overdue' | 'failed' | 'canceled';
 
 /** One monthly slip of a carnê. */
 export interface Installment {

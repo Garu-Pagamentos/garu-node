@@ -3,6 +3,51 @@
 All notable changes to `@garuhq/node` are documented in this file. Format:
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [SemVer](https://semver.org/).
 
+## [2.0.0] — 2026-08-22
+
+**Breaking:** `customers` now targets the versioned public API `/api/v1/customers`,
+keyed on `uuid`. If you use `garu.customers.*`, read the migration below.
+
+### Breaking
+
+- **`customers` moved to `/api/v1/customers`** and a customer is keyed by
+  **`uuid`**, not a numeric `id`.
+  - `customers.get(id: number)` → **`customers.get(uuid: string)`** (name
+    unchanged, param type changed).
+  - `customers.update(id, params)` — same signature shape, but the id
+    argument is now the `uuid`, and the request now goes out as `PATCH`
+    (was `PUT`).
+  - `customers.setBillingEmailOverride(id, params)` / `customers.delete(id)`
+    — same, `id` → `uuid`.
+  - `CustomerRecord.id` is **removed**; there is no numeric id in the public
+    shape. Use `CustomerRecord.uuid` everywhere.
+  - **`customers.delete()` now resolves `{ removed: boolean }`** (was `void`).
+  - **`customers.list()` returns `{ data, count, totalCount, totalPages }`**
+    (was `{ data, meta }`).
+- `installmentPlans.create` and `scheduledCharges.create` are **not**
+  migrated yet — they still take a numeric `customerId`. Fetch that id from
+  the dashboard or the internal `/api/customers` endpoint until those two
+  resources move to `/api/v1` too (tracked in `SPEC-public-api-v1.md` §9
+  Phase 4 on the `gateway` repo).
+
+### Migration
+
+```ts
+// before (1.x)
+const c = await garu.customers.create({ name, email, document, phone, personType });
+c.id;                    // number
+const one = await garu.customers.get(c.id);
+await garu.customers.update(c.id, { name: 'Maria Santos' });
+await garu.customers.delete(c.id);
+
+// after (2.0.0)
+const c = await garu.customers.create({ name, email, document, phone, personType });
+c.uuid;                   // string
+const one = await garu.customers.get(c.uuid);
+await garu.customers.update(c.uuid, { name: 'Maria Santos' });
+const { removed } = await garu.customers.delete(c.uuid);
+```
+
 ## [1.1.0] — 2026-08-15
 
 

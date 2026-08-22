@@ -11,9 +11,11 @@ import type {
 /**
  * Customers — manage your customer base.
  *
- * Customers are scoped to the seller identified by the API key. The backend
- * uses a junction table (`customer_seller_profile`) so the same person can
- * exist across multiple sellers without duplication.
+ * Backed by `/api/v1/customers`, keyed on `uuid`. Customers are scoped to the
+ * seller identified by the API key. The backend uses a junction table
+ * (`customer_seller_profile`) so the same person can exist across multiple
+ * sellers without duplication — creating a customer whose `document` already
+ * exists globally attaches your own profile to it instead of erroring.
  */
 export class Customers {
   constructor(private readonly http: HttpClient) {}
@@ -29,10 +31,11 @@ export class Customers {
    *   phone: '11987654321',
    *   personType: 'fisica'
    * });
+   * customer.uuid;
    */
   async create(params: CreateCustomerParams): Promise<CustomerRecord> {
     return this.http.call<CustomerRecord>((signal) =>
-      (this.http.client.POST as Function)('/api/customers', {
+      (this.http.client.POST as Function)('/api/v1/customers', {
         body: params,
         signal
       }).then((r: { data?: CustomerRecord; error?: unknown; response: Response }) => r)
@@ -43,7 +46,11 @@ export class Customers {
    * List customers for the authenticated seller, with pagination and search.
    *
    * @example
-   * const { data, meta } = await garu.customers.list({ search: 'maria', limit: 10 });
+   * const { data, totalCount } = await garu.customers.list({ search: 'maria', limit: 10 });
+   *
+   * @example
+   * // Customers with at least one overdue scheduled charge (carnê included).
+   * const atRisk = await garu.customers.list({ status: 'overdue' });
    */
   async list(params: ListCustomersParams = {}): Promise<CustomerList> {
     const query: Record<string, string> = {};
@@ -53,7 +60,7 @@ export class Customers {
     if (params.status) query.status = params.status;
 
     const qs = new URLSearchParams(query).toString();
-    const url = `/api/customers${qs ? `?${qs}` : ''}`;
+    const url = `/api/v1/customers${qs ? `?${qs}` : ''}`;
 
     return this.http.call<CustomerList>((signal) =>
       (this.http.client.GET as Function)(url, { signal }).then(
@@ -63,28 +70,29 @@ export class Customers {
   }
 
   /**
-   * Fetch a single customer by numeric ID.
+   * Fetch a single customer by uuid.
    *
    * @example
-   * const customer = await garu.customers.get(42);
+   * const customer = await garu.customers.get('a1b2c3d4-e5f6-7890-abcd-ef1234567890');
    */
-  async get(id: number): Promise<CustomerRecord> {
+  async get(uuid: string): Promise<CustomerRecord> {
     return this.http.call<CustomerRecord>((signal) =>
-      (this.http.client.GET as Function)(`/api/customers/${id}`, { signal }).then(
+      (this.http.client.GET as Function)(`/api/v1/customers/${uuid}`, { signal }).then(
         (r: { data?: CustomerRecord; error?: unknown; response: Response }) => r
       )
     );
   }
 
   /**
-   * Update a customer's profile for the current seller.
+   * Update a customer's profile for the current seller. Partial — only the
+   * fields you pass change.
    *
    * @example
-   * const updated = await garu.customers.update(42, { name: 'Maria Santos' });
+   * const updated = await garu.customers.update('a1b2c3d4-...', { name: 'Maria Santos' });
    */
-  async update(id: number, params: UpdateCustomerParams): Promise<CustomerRecord> {
+  async update(uuid: string, params: UpdateCustomerParams): Promise<CustomerRecord> {
     return this.http.call<CustomerRecord>((signal) =>
-      (this.http.client.PUT as Function)(`/api/customers/${id}`, {
+      (this.http.client.PATCH as Function)(`/api/v1/customers/${uuid}`, {
         body: params,
         signal
       }).then((r: { data?: CustomerRecord; error?: unknown; response: Response }) => r)
@@ -100,19 +108,19 @@ export class Customers {
    *
    * @example
    * // Set
-   * await garu.customers.setBillingEmailOverride(42, {
+   * await garu.customers.setBillingEmailOverride('a1b2c3d4-...', {
    *   billingEmailOverride: 'cobrancas@empresa.com.br'
    * });
    *
    * // Clear and fall back to the last-used email
-   * await garu.customers.setBillingEmailOverride(42, { billingEmailOverride: null });
+   * await garu.customers.setBillingEmailOverride('a1b2c3d4-...', { billingEmailOverride: null });
    */
   async setBillingEmailOverride(
-    id: number,
+    uuid: string,
     params: SetBillingEmailOverrideParams
   ): Promise<CustomerRecord> {
     return this.http.call<CustomerRecord>((signal) =>
-      (this.http.client.PATCH as Function)(`/api/customers/${id}/billing-email-override`, {
+      (this.http.client.PATCH as Function)(`/api/v1/customers/${uuid}/billing-email-override`, {
         body: params,
         signal
       }).then((r: { data?: CustomerRecord; error?: unknown; response: Response }) => r)
@@ -120,17 +128,18 @@ export class Customers {
   }
 
   /**
-   * Remove a customer from the current seller.
+   * Remove a customer from the current seller (unlinks your profile — the
+   * global customer and other sellers' profiles are untouched).
    *
    * @example
-   * await garu.customers.delete(42);
+   * await garu.customers.delete('a1b2c3d4-e5f6-7890-abcd-ef1234567890');
    */
-  async delete(id: number): Promise<void> {
-    await this.http.call<unknown>((signal) =>
-      (this.http.client.DELETE as Function)(`/api/customers/${id}`, {
+  async delete(uuid: string): Promise<{ removed: boolean }> {
+    return this.http.call<{ removed: boolean }>((signal) =>
+      (this.http.client.DELETE as Function)(`/api/v1/customers/${uuid}`, {
         body: {},
         signal
-      }).then((r: { data?: unknown; error?: unknown; response: Response }) => r)
+      }).then((r: { data?: { removed: boolean }; error?: unknown; response: Response }) => r)
     );
   }
 }

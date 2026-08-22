@@ -70,6 +70,7 @@ export type {
   ScheduledChargeStatus,
   ScheduledChargeType,
   ScheduledPaymentMethod,
+  SetBillingEmailOverrideParams,
   SetProductPortalConfigParams,
   UpdateCustomerParams,
   UpdateProductParams,

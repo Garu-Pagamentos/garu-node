@@ -84,13 +84,13 @@ const garu = new Garu({
 
 ## Charges
 
-| Method                  | Description                                   |
-| ----------------------- | --------------------------------------------- |
-| `create(params)`        | Create a PIX, credit-card, or boleto charge.  |
-| `retrieve(uuid)`        | Fetch a single charge by uuid.                |
-| `list(params?)`         | List charges with pagination and filters.     |
-| `refund(uuid, params?)` | Refund a charge fully or partially (reais).   |
-| `cancel(uuid)`          | Cancel an unpaid charge.                       |
+| Method                  | Description                                  |
+| ----------------------- | -------------------------------------------- |
+| `create(params)`        | Create a PIX, credit-card, or boleto charge. |
+| `retrieve(uuid)`        | Fetch a single charge by uuid.               |
+| `list(params?)`         | List charges with pagination and filters.    |
+| `refund(uuid, params?)` | Refund a charge fully or partially (reais).  |
+| `cancel(uuid)`          | Cancel an unpaid charge.                     |
 
 ### Create a PIX charge
 
@@ -146,13 +146,20 @@ await garu.charges.refund('6f1c9b2e-…', { amount: 10.0 }); // partial refund (
 
 ## Customers
 
-| Method               | Description                                |
-| -------------------- | ------------------------------------------ |
-| `create(params)`     | Create a new customer.                     |
-| `list(params?)`      | List customers with pagination and search. |
-| `get(id)`            | Fetch a single customer by ID.             |
-| `update(id, params)` | Update a customer's profile.               |
-| `delete(id)`         | Delete a customer.                         |
+Backed by `/api/v1/customers`, keyed on `uuid` — there is no numeric id in
+this shape. `installmentPlans.create` and `scheduledCharges.create` still
+link customers by the internal numeric id (unmigrated resources); fetch that
+id from the dashboard or the internal `/api/customers` endpoint until they
+move to `/api/v1` too.
+
+| Method                                  | Description                                     |
+| --------------------------------------- | ----------------------------------------------- |
+| `create(params)`                        | Register a customer for the current seller.     |
+| `list(params?)`                         | List customers with pagination and search.      |
+| `get(uuid)`                             | Fetch a single customer by uuid.                |
+| `update(uuid, params)`                  | Partially update a customer's profile.          |
+| `setBillingEmailOverride(uuid, params)` | Set or clear the sticky billing-email override. |
+| `delete(uuid)`                          | Remove a customer from the current seller.      |
 
 ```ts
 const customer = await garu.customers.create({
@@ -163,7 +170,7 @@ const customer = await garu.customers.create({
   personType: 'fisica'
 });
 
-const { data, meta } = await garu.customers.list({ search: 'maria', limit: 10 });
+const { data, totalCount } = await garu.customers.list({ search: 'maria', limit: 10 });
 ```
 
 ## Products

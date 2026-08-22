@@ -11,17 +11,26 @@ const fakeCustomer = {
   personType: 'fisica' as const
 };
 
+const CUSTOMER_UUID = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890';
+
 describe('customers.create', () => {
   it('creates a customer', async () => {
-    const saved = { id: 1, ...fakeCustomer, createdAt: '2026-01-01', updatedAt: '2026-01-01' };
+    const saved = {
+      uuid: CUSTOMER_UUID,
+      ...fakeCustomer,
+      billingEmail: fakeCustomer.email,
+      hasBillingEmailOverride: false,
+      createdAt: '2026-01-01',
+      updatedAt: '2026-01-01'
+    };
     const { fetch, calls } = mockFetch([{ status: 201, body: saved }]);
     const garu = new Garu({ apiKey: 'sk_test_abc', fetch, maxRetries: 0 });
 
     const result = await garu.customers.create(fakeCustomer);
 
-    expect(result.id).toBe(1);
+    expect(result.uuid).toBe(CUSTOMER_UUID);
     expect(result.name).toBe('Maria Silva');
-    expect(calls[0]!.url).toBe('https://garu.com.br/api/customers');
+    expect(calls[0]!.url).toBe('https://garu.com.br/api/v1/customers');
     expect(calls[0]!.method).toBe('POST');
     expect(calls[0]!.body).toMatchObject(fakeCustomer);
   });
@@ -30,8 +39,10 @@ describe('customers.create', () => {
 describe('customers.list', () => {
   it('lists customers with defaults', async () => {
     const listBody = {
-      data: [{ id: 1, name: 'Maria' }],
-      meta: { page: 1, limit: 20, total: 1, totalPages: 1 }
+      data: [{ uuid: CUSTOMER_UUID, name: 'Maria' }],
+      count: 1,
+      totalCount: 1,
+      totalPages: 1
     };
     const { fetch, calls } = mockFetch([{ status: 200, body: listBody }]);
     const garu = new Garu({ apiKey: 'sk_test_abc', fetch, maxRetries: 0 });
@@ -39,12 +50,13 @@ describe('customers.list', () => {
     const result = await garu.customers.list();
 
     expect(result.data).toHaveLength(1);
-    expect(calls[0]!.url).toBe('https://garu.com.br/api/customers');
+    expect(result.totalCount).toBe(1);
+    expect(calls[0]!.url).toBe('https://garu.com.br/api/v1/customers');
     expect(calls[0]!.method).toBe('GET');
   });
 
   it('passes search and pagination', async () => {
-    const listBody = { data: [], meta: { page: 2, limit: 5, total: 0, totalPages: 0 } };
+    const listBody = { data: [], count: 0, totalCount: 0, totalPages: 0 };
     const { fetch, calls } = mockFetch([{ status: 200, body: listBody }]);
     const garu = new Garu({ apiKey: 'sk_test_abc', fetch, maxRetries: 0 });
 
@@ -55,53 +67,97 @@ describe('customers.list', () => {
     expect(url).toContain('limit=5');
     expect(url).toContain('search=maria');
   });
+
+  it('passes the overdue status filter', async () => {
+    const listBody = { data: [], count: 0, totalCount: 0, totalPages: 0 };
+    const { fetch, calls } = mockFetch([{ status: 200, body: listBody }]);
+    const garu = new Garu({ apiKey: 'sk_test_abc', fetch, maxRetries: 0 });
+
+    await garu.customers.list({ status: 'overdue' });
+
+    expect(calls[0]!.url).toContain('status=overdue');
+  });
 });
 
 describe('customers.get', () => {
-  it('fetches a single customer', async () => {
-    const customer = { id: 42, name: 'João', email: 'joao@test.com' };
+  it('fetches a single customer by uuid', async () => {
+    const customer = { uuid: CUSTOMER_UUID, name: 'João', email: 'joao@test.com' };
     const { fetch, calls } = mockFetch([{ status: 200, body: customer }]);
     const garu = new Garu({ apiKey: 'sk_test_abc', fetch, maxRetries: 0 });
 
-    const result = await garu.customers.get(42);
+    const result = await garu.customers.get(CUSTOMER_UUID);
 
-    expect(result.id).toBe(42);
-    expect(calls[0]!.url).toBe('https://garu.com.br/api/customers/42');
+    expect(result.uuid).toBe(CUSTOMER_UUID);
+    expect(calls[0]!.url).toBe(`https://garu.com.br/api/v1/customers/${CUSTOMER_UUID}`);
   });
 
   it('maps 404 to GaruNotFoundError', async () => {
     const { fetch } = mockFetch([{ status: 404, body: { message: 'Customer not found' } }]);
     const garu = new Garu({ apiKey: 'sk_test_abc', fetch, maxRetries: 0 });
 
-    await expect(garu.customers.get(999)).rejects.toBeInstanceOf(GaruNotFoundError);
+    await expect(garu.customers.get('00000000-0000-0000-0000-000000000000')).rejects.toBeInstanceOf(
+      GaruNotFoundError
+    );
   });
 });
 
 describe('customers.update', () => {
-  it('updates a customer', async () => {
-    const updated = { id: 42, name: 'Maria Santos', email: 'maria@test.com' };
+  it('partially updates a customer via PATCH', async () => {
+    const updated = { uuid: CUSTOMER_UUID, name: 'Maria Santos', email: 'maria@test.com' };
     const { fetch, calls } = mockFetch([{ status: 200, body: updated }]);
     const garu = new Garu({ apiKey: 'sk_test_abc', fetch, maxRetries: 0 });
 
-    const result = await garu.customers.update(42, { name: 'Maria Santos' });
+    const result = await garu.customers.update(CUSTOMER_UUID, { name: 'Maria Santos' });
 
     expect(result.name).toBe('Maria Santos');
-    expect(calls[0]!.url).toBe('https://garu.com.br/api/customers/42');
-    expect(calls[0]!.method).toBe('PUT');
+    expect(calls[0]!.url).toBe(`https://garu.com.br/api/v1/customers/${CUSTOMER_UUID}`);
+    expect(calls[0]!.method).toBe('PATCH');
     expect(calls[0]!.body).toEqual({ name: 'Maria Santos' });
   });
 });
 
-describe('customers.delete', () => {
-  it('deletes a customer', async () => {
-    const { fetch, calls } = mockFetch([
-      { status: 200, body: { message: 'Customer removed from seller' } }
-    ]);
+describe('customers.setBillingEmailOverride', () => {
+  it('sets the override', async () => {
+    const updated = {
+      uuid: CUSTOMER_UUID,
+      billingEmail: 'cobrancas@empresa.com.br',
+      hasBillingEmailOverride: true
+    };
+    const { fetch, calls } = mockFetch([{ status: 200, body: updated }]);
     const garu = new Garu({ apiKey: 'sk_test_abc', fetch, maxRetries: 0 });
 
-    await garu.customers.delete(42);
+    const result = await garu.customers.setBillingEmailOverride(CUSTOMER_UUID, {
+      billingEmailOverride: 'cobrancas@empresa.com.br'
+    });
 
-    expect(calls[0]!.url).toBe('https://garu.com.br/api/customers/42');
+    expect(result.hasBillingEmailOverride).toBe(true);
+    expect(calls[0]!.url).toBe(
+      `https://garu.com.br/api/v1/customers/${CUSTOMER_UUID}/billing-email-override`
+    );
+    expect(calls[0]!.method).toBe('PATCH');
+    expect(calls[0]!.body).toEqual({ billingEmailOverride: 'cobrancas@empresa.com.br' });
+  });
+
+  it('clears the override with null', async () => {
+    const updated = { uuid: CUSTOMER_UUID, hasBillingEmailOverride: false };
+    const { fetch, calls } = mockFetch([{ status: 200, body: updated }]);
+    const garu = new Garu({ apiKey: 'sk_test_abc', fetch, maxRetries: 0 });
+
+    await garu.customers.setBillingEmailOverride(CUSTOMER_UUID, { billingEmailOverride: null });
+
+    expect(calls[0]!.body).toEqual({ billingEmailOverride: null });
+  });
+});
+
+describe('customers.delete', () => {
+  it('deletes a customer by uuid', async () => {
+    const { fetch, calls } = mockFetch([{ status: 200, body: { removed: true } }]);
+    const garu = new Garu({ apiKey: 'sk_test_abc', fetch, maxRetries: 0 });
+
+    const result = await garu.customers.delete(CUSTOMER_UUID);
+
+    expect(result.removed).toBe(true);
+    expect(calls[0]!.url).toBe(`https://garu.com.br/api/v1/customers/${CUSTOMER_UUID}`);
     expect(calls[0]!.method).toBe('DELETE');
   });
 });
