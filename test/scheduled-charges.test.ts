@@ -39,7 +39,7 @@ describe('scheduledCharges.create', () => {
     });
 
     expect(result.id).toBe('sch_abc123');
-    expect(calls[0]!.url).toBe('https://garu.com.br/api/scheduled-charges');
+    expect(calls[0]!.url).toBe('https://garu.com.br/api/v1/scheduled-charges');
     expect(calls[0]!.method).toBe('POST');
     expect(calls[0]!.body).toMatchObject({
       customerId: 42,
@@ -139,7 +139,9 @@ describe('scheduledCharges.list', () => {
   it('lists with no filters and default pagination', async () => {
     const listBody = {
       data: [fakeCharge],
-      meta: { page: 1, limit: 20, total: 1, totalPages: 1 }
+      count: 1,
+      totalCount: 1,
+      totalPages: 1
     };
     const { fetch, calls } = mockFetch([{ status: 200, body: listBody }]);
     const garu = newClient(fetch);
@@ -147,37 +149,40 @@ describe('scheduledCharges.list', () => {
     const result = await garu.scheduledCharges.list();
 
     expect(result.data).toHaveLength(1);
-    expect(calls[0]!.url).toBe('https://garu.com.br/api/scheduled-charges');
+    expect(result.totalCount).toBe(1);
+    expect(calls[0]!.url).toBe('https://garu.com.br/api/v1/scheduled-charges');
     expect(calls[0]!.method).toBe('GET');
   });
 
   it('forwards a single status as one query param', async () => {
     const { fetch, calls } = mockFetch([
-      { status: 200, body: { data: [], meta: { page: 1, limit: 20, total: 0, totalPages: 0 } } }
+      { status: 200, body: { data: [], count: 0, totalCount: 0, totalPages: 0 } }
     ]);
     const garu = newClient(fetch);
 
     await garu.scheduledCharges.list({ status: 'overdue', limit: 50 });
 
-    expect(calls[0]!.url).toBe('https://garu.com.br/api/scheduled-charges?limit=50&status=overdue');
+    expect(calls[0]!.url).toBe(
+      'https://garu.com.br/api/v1/scheduled-charges?limit=50&status=overdue'
+    );
   });
 
   it('forwards multiple statuses as repeated query params', async () => {
     const { fetch, calls } = mockFetch([
-      { status: 200, body: { data: [], meta: { page: 1, limit: 20, total: 0, totalPages: 0 } } }
+      { status: 200, body: { data: [], count: 0, totalCount: 0, totalPages: 0 } }
     ]);
     const garu = newClient(fetch);
 
     await garu.scheduledCharges.list({ status: ['scheduled', 'due_today'] });
 
     expect(calls[0]!.url).toBe(
-      'https://garu.com.br/api/scheduled-charges?status=scheduled&status=due_today'
+      'https://garu.com.br/api/v1/scheduled-charges?status=scheduled&status=due_today'
     );
   });
 
   it('forwards customer + date-range filters', async () => {
     const { fetch, calls } = mockFetch([
-      { status: 200, body: { data: [], meta: { page: 1, limit: 20, total: 0, totalPages: 0 } } }
+      { status: 200, body: { data: [], count: 0, totalCount: 0, totalPages: 0 } }
     ]);
     const garu = newClient(fetch);
 
@@ -221,7 +226,7 @@ describe('scheduledCharges.get', () => {
     expect(result.charge.id).toBe('sch_abc123');
     expect(result.events).toHaveLength(1);
     expect(result.transactions).toHaveLength(0);
-    expect(calls[0]!.url).toBe('https://garu.com.br/api/scheduled-charges/sch_abc123');
+    expect(calls[0]!.url).toBe('https://garu.com.br/api/v1/scheduled-charges/sch_abc123');
     expect(calls[0]!.method).toBe('GET');
   });
 
@@ -250,7 +255,7 @@ describe('scheduledCharges.postpone', () => {
     });
 
     expect(result.dueDate).toBe('2026-07-01');
-    expect(calls[0]!.url).toBe('https://garu.com.br/api/scheduled-charges/sch_abc123/postpone');
+    expect(calls[0]!.url).toBe('https://garu.com.br/api/v1/scheduled-charges/sch_abc123/postpone');
     expect(calls[0]!.method).toBe('POST');
     expect(calls[0]!.body).toEqual({
       newDueDate: '2026-07-01',
@@ -268,7 +273,7 @@ describe('scheduledCharges.pause / resume', () => {
 
     await garu.scheduledCharges.pause('sch_abc123', { reason: 'em negociação' });
 
-    expect(calls[0]!.url).toBe('https://garu.com.br/api/scheduled-charges/sch_abc123/pause');
+    expect(calls[0]!.url).toBe('https://garu.com.br/api/v1/scheduled-charges/sch_abc123/pause');
     expect(calls[0]!.body).toEqual({ reason: 'em negociação' });
   });
 
@@ -291,7 +296,7 @@ describe('scheduledCharges.pause / resume', () => {
 
     await garu.scheduledCharges.resume('sch_abc123');
 
-    expect(calls[0]!.url).toBe('https://garu.com.br/api/scheduled-charges/sch_abc123/resume');
+    expect(calls[0]!.url).toBe('https://garu.com.br/api/v1/scheduled-charges/sch_abc123/resume');
     expect(calls[0]!.method).toBe('POST');
     expect(calls[0]!.body).toEqual({});
   });
@@ -307,7 +312,7 @@ describe('scheduledCharges.markPaid', () => {
       externalReference: 'TED 4472881'
     });
 
-    expect(calls[0]!.url).toBe('https://garu.com.br/api/scheduled-charges/sch_abc123/mark-paid');
+    expect(calls[0]!.url).toBe('https://garu.com.br/api/v1/scheduled-charges/sch_abc123/mark-paid');
     expect(calls[0]!.body).toEqual({
       paymentDate: '2026-06-20',
       externalReference: 'TED 4472881'
@@ -334,7 +339,9 @@ describe('scheduledCharges.chargeNow', () => {
     expect(result.outcome).toBe('dispatched');
     expect(result.cycleNumber).toBe(1);
     expect(result.message).toBe('Cobrança enviada agora.');
-    expect(calls[0]!.url).toBe('https://garu.com.br/api/scheduled-charges/sch_abc123/charge-now');
+    expect(calls[0]!.url).toBe(
+      'https://garu.com.br/api/v1/scheduled-charges/sch_abc123/charge-now'
+    );
     expect(calls[0]!.method).toBe('POST');
     expect(calls[0]!.body).toEqual({});
   });
@@ -358,7 +365,9 @@ describe('scheduledCharges.chargeNow', () => {
 
     await garu.scheduledCharges.chargeNow('sch a/b');
 
-    expect(calls[0]!.url).toBe('https://garu.com.br/api/scheduled-charges/sch%20a%2Fb/charge-now');
+    expect(calls[0]!.url).toBe(
+      'https://garu.com.br/api/v1/scheduled-charges/sch%20a%2Fb/charge-now'
+    );
   });
 
   it('surfaces the already_sent no-op outcome', async () => {
@@ -439,6 +448,145 @@ describe('scheduledCharges.chargeNow', () => {
 
     await expect(garu.scheduledCharges.chargeNow('sch_missing')).rejects.toBeInstanceOf(
       GaruNotFoundError
+    );
+  });
+});
+
+describe('scheduledCharges.cancelRecurrence', () => {
+  it('posts an optional reason to the action endpoint', async () => {
+    const { fetch, calls } = mockFetch([
+      { status: 200, body: { ...fakeCharge, type: 'recurring', status: 'recurrence_canceled' } }
+    ]);
+    const garu = newClient(fetch);
+
+    const result = await garu.scheduledCharges.cancelRecurrence('sch_abc123', {
+      reason: 'cliente cancelou plano'
+    });
+
+    expect(result.status).toBe('recurrence_canceled');
+    expect(calls[0]!.url).toBe(
+      'https://garu.com.br/api/v1/scheduled-charges/sch_abc123/cancel-recurrence'
+    );
+    expect(calls[0]!.body).toEqual({ reason: 'cliente cancelou plano' });
+  });
+
+  it('works with no params', async () => {
+    const { fetch, calls } = mockFetch([
+      { status: 200, body: { ...fakeCharge, type: 'recurring', status: 'recurrence_canceled' } }
+    ]);
+    const garu = newClient(fetch);
+
+    await garu.scheduledCharges.cancelRecurrence('sch_abc123');
+
+    expect(calls[0]!.body).toEqual({});
+  });
+});
+
+describe('scheduledCharges.setCancelAtPeriodEnd', () => {
+  it('posts enabled=true', async () => {
+    const { fetch, calls } = mockFetch([
+      { status: 200, body: { ...fakeCharge, type: 'recurring', cancelAtPeriodEnd: true } }
+    ]);
+    const garu = newClient(fetch);
+
+    const result = await garu.scheduledCharges.setCancelAtPeriodEnd('sch_abc123', {
+      enabled: true
+    });
+
+    expect(result.cancelAtPeriodEnd).toBe(true);
+    expect(calls[0]!.url).toBe(
+      'https://garu.com.br/api/v1/scheduled-charges/sch_abc123/cancel-at-period-end'
+    );
+    expect(calls[0]!.body).toEqual({ enabled: true });
+  });
+
+  it('posts enabled=false to reverse it', async () => {
+    const { fetch, calls } = mockFetch([
+      { status: 200, body: { ...fakeCharge, type: 'recurring', cancelAtPeriodEnd: false } }
+    ]);
+    const garu = newClient(fetch);
+
+    await garu.scheduledCharges.setCancelAtPeriodEnd('sch_abc123', { enabled: false });
+
+    expect(calls[0]!.body).toEqual({ enabled: false });
+  });
+});
+
+describe('scheduledCharges.changePaymentMethod / clearPaymentMethod', () => {
+  it('changePaymentMethod posts the new paymentMethodId', async () => {
+    const { fetch, calls } = mockFetch([
+      { status: 200, body: { ...fakeCharge, type: 'recurring' } }
+    ]);
+    const garu = newClient(fetch);
+
+    await garu.scheduledCharges.changePaymentMethod('sch_abc123', { paymentMethodId: 42 });
+
+    expect(calls[0]!.url).toBe(
+      'https://garu.com.br/api/v1/scheduled-charges/sch_abc123/payment-method'
+    );
+    expect(calls[0]!.method).toBe('POST');
+    expect(calls[0]!.body).toEqual({ paymentMethodId: 42 });
+  });
+
+  it('clearPaymentMethod DELETEs with an empty body', async () => {
+    const { fetch, calls } = mockFetch([
+      { status: 200, body: { ...fakeCharge, type: 'recurring' } }
+    ]);
+    const garu = newClient(fetch);
+
+    await garu.scheduledCharges.clearPaymentMethod('sch_abc123');
+
+    expect(calls[0]!.url).toBe(
+      'https://garu.com.br/api/v1/scheduled-charges/sch_abc123/payment-method'
+    );
+    expect(calls[0]!.method).toBe('DELETE');
+    expect(calls[0]!.body).toEqual({});
+  });
+});
+
+describe('scheduledCharges.listAttempts', () => {
+  it('lists with default pagination', async () => {
+    const attempt = {
+      id: 1,
+      cycleId: 'cyc_1',
+      cycleNumber: 3,
+      attemptNumber: 1,
+      attemptedAt: '2026-05-15T10:00:00Z',
+      source: 'silent_charge',
+      paymentMethod: 'card',
+      paymentMethodId: 11,
+      cardLast4: '4242',
+      cardBrand: 'visa',
+      status: 'succeeded',
+      failureCode: null,
+      failureReason: null,
+      gatewayFailureCode: null,
+      gatewayChargeId: 555,
+      transactionId: 999
+    };
+    const { fetch, calls } = mockFetch([
+      { status: 200, body: { data: [attempt], count: 1, totalCount: 1, totalPages: 1 } }
+    ]);
+    const garu = newClient(fetch);
+
+    const result = await garu.scheduledCharges.listAttempts('sch_abc123');
+
+    expect(result.data).toHaveLength(1);
+    expect(result.data[0]!.cycleNumber).toBe(3);
+    expect(result.totalCount).toBe(1);
+    expect(calls[0]!.url).toBe('https://garu.com.br/api/v1/scheduled-charges/sch_abc123/attempts');
+  });
+
+  it('forwards a cycleNumber filter', async () => {
+    const { fetch, calls } = mockFetch([
+      { status: 200, body: { data: [], count: 0, totalCount: 0, totalPages: 0 } }
+    ]);
+    const garu = newClient(fetch);
+
+    await garu.scheduledCharges.listAttempts('sch_abc123', { cycleNumber: 3, limit: 10 });
+
+    expect(calls[0]!.url).toBe(
+      'https://garu.com.br/api/v1/scheduled-charges/sch_abc123/attempts?limit=10&cycleNumber=3'
     );
   });
 });

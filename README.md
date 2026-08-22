@@ -147,10 +147,13 @@ await garu.charges.refund('6f1c9b2e-…', { amount: 10.0 }); // partial refund (
 ## Customers
 
 Backed by `/api/v1/customers`, keyed on `uuid` — there is no numeric id in
-this shape. `installmentPlans.create` and `scheduledCharges.create` still
-link customers by the internal numeric id (unmigrated resources); fetch that
-id from the dashboard or the internal `/api/customers` endpoint until they
-move to `/api/v1` too.
+this shape. `installmentPlans.create` still links customers by the internal
+numeric id (unmigrated resource); fetch that id from the dashboard or the
+internal `/api/customers` endpoint until it moves to `/api/v1` too.
+`scheduledCharges.create` also takes the internal numeric `customerId` —
+customers and scheduled charges are on separate `/api/v1` resources, and
+neither exposes a cross-reference between a customer's `uuid` and their
+numeric id yet.
 
 | Method                                  | Description                                     |
 | --------------------------------------- | ----------------------------------------------- |
@@ -206,20 +209,25 @@ await garu.products.portalConfig.patch('b3f2c1e8-6e4a-4b9f-9d1c-2a1f6c3d4e5f', {
 
 Bill an existing customer on a future date — one-time or recurring with card tokenization. The Garu drives email reminders, dunning, retries, and the lifecycle state machine.
 
-| Method                               | Description                                                                 |
-| ------------------------------------ | --------------------------------------------------------------------------- |
-| `create(params)`                     | Create one-time or recurring schedule. Auto-attaches `X-Idempotency-Key`.   |
-| `list(params?)`                      | Paginated list with status / type / dueFrom / dueTo / customerId filters.   |
-| `get(id)`                            | Detail bundle: charge + event timeline + linked transactions.               |
-| `chargeNow(id)`                      | Force-bill the current cycle now instead of waiting for the due date.       |
-| `markPaid(id, params)`               | Mark cycle paid (off-Garu reconciliation).                                  |
-| `postpone(id, params)`               | Move the next cycle's due date forward.                                     |
-| `pause(id, params?)` / `resume(id)`  | Suspend / re-enable a series.                                               |
-| `cancelRecurrence(id, params?)`      | Hard-stop future cycles (recurring only).                                   |
-| `cancelAtPeriodEnd(id, { enabled })` | Stripe-style soft-cancel; reversible.                                       |
-| `changePaymentMethod(id, params)`    | Swap the saved card.                                                        |
-| `clearPaymentMethod(id)`             | Remove the saved card; future cycles email-with-link.                       |
-| `listAttempts(id, params?)`          | Per-attempt billing log — every silent-charge / retry / mark-paid (v0.8.2). |
+Backed by `/api/v1/scheduled-charges`. Unlike products/customers/webhook-events,
+`id` here was already a stable, non-enumerable string (`sch_...`) before this
+move — there is no separate uuid and no id change, only the path and the list
+envelope (`totalCount`/`totalPages`, not `meta.total`/`meta.totalPages`).
+
+| Method                                  | Description                                                               |
+| --------------------------------------- | ------------------------------------------------------------------------- |
+| `create(params)`                        | Create one-time or recurring schedule.                                    |
+| `list(params?)`                         | Paginated list with status / type / dueFrom / dueTo / customerId filters. |
+| `get(id)`                               | Detail bundle: charge + event timeline + linked transactions.             |
+| `chargeNow(id)`                         | Force-bill the current cycle now instead of waiting for the due date.     |
+| `markPaid(id, params)`                  | Mark cycle paid (off-Garu reconciliation).                                |
+| `postpone(id, params)`                  | Move the next cycle's due date forward.                                   |
+| `pause(id, params?)` / `resume(id)`     | Suspend / re-enable a series.                                             |
+| `cancelRecurrence(id, params?)`         | Hard-stop future cycles (recurring only).                                 |
+| `setCancelAtPeriodEnd(id, { enabled })` | Stripe-style soft-cancel; reversible.                                     |
+| `changePaymentMethod(id, params)`       | Swap the saved card.                                                      |
+| `clearPaymentMethod(id)`                | Remove the saved card; future cycles email-with-link.                     |
+| `listAttempts(id, params?)`             | Per-attempt billing log — every silent-charge / retry / mark-paid.        |
 
 ```ts
 // Recurring with 7-day trial. `maxRecoveryDays` caps how long past the due
@@ -240,11 +248,10 @@ const series = await garu.scheduledCharges.create({
 // Idempotent: a cycle already dispatched today reports `already_sent`.
 const result = await garu.scheduledCharges.chargeNow(series.id);
 if (result.outcome === 'failed') {
-  // result.reason is e.g. 'card_expired' or a gateway decline code
-  console.error(`${result.message} (${result.reason})`);
+  result.reason; // e.g. 'card_expired' or a gateway decline code
 }
 
-// Audit why cycle 3 failed (v0.8.2)
+// Audit why cycle 3 failed
 const { data } = await garu.scheduledCharges.listAttempts(series.id, {
   cycleNumber: 3
 });
@@ -308,7 +315,7 @@ const series = await garu.scheduledCharges.create({
 });
 ```
 
-Cancel and the rest of the lifecycle use the **same methods** as card-backed series — `cancelRecurrence(id)`, `cancelAtPeriodEnd(id, { enabled })`, `pause(id)` / `resume(id)`. The customer can also revoke the authorization directly in their bank app; Garu surfaces that as a `subscription.cancelled` event.
+Cancel and the rest of the lifecycle use the **same methods** as card-backed series — `cancelRecurrence(id)`, `setCancelAtPeriodEnd(id, { enabled })`, `pause(id)` / `resume(id)`. The customer can also revoke the authorization directly in their bank app; Garu surfaces that as a `subscription.cancelled` event.
 
 ### 3. Handle the webhooks
 

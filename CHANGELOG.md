@@ -3,6 +3,54 @@
 All notable changes to `@garuhq/node` are documented in this file. Format:
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [SemVer](https://semver.org/).
 
+## [4.0.0] — 2026-08-22
+
+**Breaking:** `scheduledCharges` now targets the versioned public API
+`/api/v1/scheduled-charges`. `id` was already a stable, non-enumerable
+string (`sch_...`) — no identifier change — but the list envelope shape
+changed. If you use `garu.scheduledCharges.*`, read the migration below.
+
+### Breaking
+
+- **`scheduledCharges` moved to `/api/v1/scheduled-charges`.**
+  - **`scheduledCharges.list()` and `.listAttempts()` now return
+    `{ data, count, totalCount, totalPages }`** (was `{ data, meta }`).
+  - No method signatures changed — every method already took/returned the
+    same shapes, since `id` was never a numeric internal id here.
+
+### Added
+
+- `ScheduledChargeRecord` now explicitly types `recurrence`,
+  `cancelAtPeriodEnd`, `trialEndsAt`, and `subscriptionId` (previously only
+  reachable via the type's index signature, untyped).
+- Test coverage for `cancelRecurrence`, `setCancelAtPeriodEnd`,
+  `changePaymentMethod`, `clearPaymentMethod`, and `listAttempts` — none of
+  these five methods had a single test before this release.
+
+### Fixed
+
+- `ScheduledChargeLinkedTransaction.value`'s docstring claimed centavos;
+  `/api/v1/charges`' own mapper treats the same `transaction.value` column
+  as decimal reais with no conversion. Corrected to match reality — this is
+  a documentation fix, not a behavior or wire-format change.
+- `scheduledCharges.create()`'s docstring claimed the SDK's
+  `X-Idempotency-Key` prevents duplicate creates on retry. The gateway does
+  not deduplicate `/scheduled-charges` creates against it (same pre-existing
+  gap as `webhookEvents.resend()` had). Corrected the docstring; the header
+  is still sent (harmless) in case the gateway adds this later.
+
+### Migration
+
+```ts
+// before (≤ 3.x)
+const { data, meta } = await garu.scheduledCharges.list({ status: 'overdue' });
+meta.total; // number
+
+// after (4.0.0)
+const { data, totalCount } = await garu.scheduledCharges.list({ status: 'overdue' });
+totalCount; // number
+```
+
 ## [3.0.0] — 2026-08-22
 
 **Breaking:** `webhookEvents` now targets the versioned public API
@@ -34,16 +82,16 @@ read the migration below.
 // before (0.x – 2.x)
 const failed = await garu.webhookEvents.list({ status: 'failed', limit: 5 });
 const event = failed.data[0];
-event.id;                                // number
+event.id; // number
 const clone = await garu.webhookEvents.resend(event.id);
-clone.manualResendOf === event.id;       // true
+clone.manualResendOf === event.id; // true
 
 // after (3.0.0)
 const failed = await garu.webhookEvents.list({ status: 'failed', limit: 5 });
 const event = failed.data[0];
-event.uuid;                              // string
+event.uuid; // string
 const clone = await garu.webhookEvents.resend(event.uuid);
-clone.manualResendOf === event.uuid;     // true
+clone.manualResendOf === event.uuid; // true
 ```
 
 ## [2.0.0] — 2026-08-22
@@ -78,21 +126,20 @@ keyed on `uuid`. If you use `garu.customers.*`, read the migration below.
 ```ts
 // before (1.x)
 const c = await garu.customers.create({ name, email, document, phone, personType });
-c.id;                    // number
+c.id; // number
 const one = await garu.customers.get(c.id);
 await garu.customers.update(c.id, { name: 'Maria Santos' });
 await garu.customers.delete(c.id);
 
 // after (2.0.0)
 const c = await garu.customers.create({ name, email, document, phone, personType });
-c.uuid;                   // string
+c.uuid; // string
 const one = await garu.customers.get(c.uuid);
 await garu.customers.update(c.uuid, { name: 'Maria Santos' });
 const { removed } = await garu.customers.delete(c.uuid);
 ```
 
 ## [1.1.0] — 2026-08-15
-
 
 ### Added
 
@@ -170,22 +217,26 @@ webhook-events) changed.
 ```ts
 // before (0.16.x)
 const c = await garu.charges.create({
-  productId, paymentMethod: 'credit_card', customer,
+  productId,
+  paymentMethod: 'credit_card',
+  customer,
   cardInfo: { cardNumber: '4111…', cvv, expirationDate, holderName, installments: 2 }
 });
-c.id;                 // number
-c.paymentMethodId;    // 'creditcard'
+c.id; // number
+c.paymentMethodId; // 'creditcard'
 const one = await garu.charges.get(c.id);
 await garu.charges.refund(c.id, { amount: 1000 }); // "R$10,00" (bug: reais)
 
 // after (1.0.0)
 const c = await garu.charges.create({
-  productId, paymentMethod: 'creditCard', customer,
+  productId,
+  paymentMethod: 'creditCard',
+  customer,
   card: { number: '4111…', cvv, expirationDate, holderName, installments: 2 }
 });
-c.uuid;               // string
-c.paymentMethod;      // 'creditCard'
-c.chargedTotal;       // what was actually charged
+c.uuid; // string
+c.paymentMethod; // 'creditCard'
+c.chargedTotal; // what was actually charged
 const one = await garu.charges.retrieve(c.uuid);
 await garu.charges.refund(c.uuid, { amount: 10.0 }); // R$10,00
 ```

@@ -334,7 +334,13 @@ export interface ScheduledChargeRecord {
   /** YYYY-MM-DD in São Paulo time. */
   dueDate: string;
   methods: ScheduledPaymentMethod[];
+  recurrence: RecurrenceConfig | null;
   status: ScheduledChargeStatus;
+  subscriptionId: number | null;
+  /** ISO-8601. Set only when the series was created with `trialDays`. */
+  trialEndsAt: string | null;
+  /** Recurring only. Toggle with `setCancelAtPeriodEnd`. */
+  cancelAtPeriodEnd: boolean;
   externalReference: string | null;
   /**
    * Max days past `dueDate` the daily recovery sweep will still auto-bill a
@@ -362,7 +368,7 @@ export interface ScheduledChargeEvent {
 
 export interface ScheduledChargeLinkedTransaction {
   id: number;
-  /** Centavos (BRL × 100), matching `garu.charges.*` value semantics. */
+  /** Decimal BRL (e.g. `297.50`), never centavos. */
   value: number;
   paymentMethod: string;
   status: string;
@@ -377,7 +383,14 @@ export interface ScheduledChargeDetail {
   transactions: ScheduledChargeLinkedTransaction[];
 }
 
-export type ScheduledChargeList = PaginatedList<ScheduledChargeRecord>;
+export interface ScheduledChargeList {
+  data: ScheduledChargeRecord[];
+  /** Items on this page. */
+  count: number;
+  /** Total matches across all pages. */
+  totalCount: number;
+  totalPages: number;
+}
 
 /** Source of a billing attempt — see SPEC §3.1. */
 export type ScheduledChargeAttemptSource =
@@ -405,7 +418,14 @@ export interface ScheduledChargeAttempt {
   transactionId: number | null;
 }
 
-export type ScheduledChargeAttemptList = PaginatedList<ScheduledChargeAttempt>;
+export interface ScheduledChargeAttemptList {
+  data: ScheduledChargeAttempt[];
+  /** Items on this page. */
+  count: number;
+  /** Total matches across all pages. */
+  totalCount: number;
+  totalPages: number;
+}
 
 export interface ListScheduledChargeAttemptsParams {
   page?: number;
