@@ -39,7 +39,7 @@ export class Charges {
    *     phone: '11987654321'
    *   }
    * });
-   * console.log(charge.uuid, charge.pix?.code);
+   * // charge.uuid, charge.pix?.code
    *
    * @example
    * // Credit card, 2 installments. Server-to-server only (PCI scope).
@@ -87,7 +87,7 @@ export class Charges {
    *
    * @example
    * const { data, totalCount } = await garu.charges.list({ status: 'paid', limit: 50 });
-   * console.log(`${data.length} of ${totalCount} paid charges`);
+   * // data.length of totalCount paid charges
    */
   async list(params: ListChargesParams = {}): Promise<ChargeList> {
     const query: Record<string, string> = {};
@@ -112,16 +112,25 @@ export class Charges {
    * charge in `refund_pending`, reaching `refunded` only once the transfer
    * settles.
    *
+   * For Pix/boleto (which open a refund request instead of an automated
+   * reversal), attaches an `X-Idempotency-Key` header automatically — if you
+   * don't pass `idempotencyKey`, the SDK generates a UUIDv4. Ignored for
+   * card, which reverses automatically and has no manual request to
+   * duplicate.
+   *
    * @example
    * await garu.charges.refund('6f1c9b2e-...');                       // full
    * await garu.charges.refund('6f1c9b2e-...', { amount: 10.0 });     // R$10,00
    */
   async refund(uuid: string, params: RefundChargeParams = {}): Promise<Charge> {
+    const idempotencyKey = params.idempotencyKey ?? generateIdempotencyKey();
     const body: Record<string, unknown> = {};
     if (params.amount !== undefined) body.amount = params.amount;
     if (params.reason !== undefined) body.reason = params.reason;
 
-    return this.post<Charge>(`/api/v1/charges/${encodeURIComponent(uuid)}/refund`, body);
+    return this.post<Charge>(`/api/v1/charges/${encodeURIComponent(uuid)}/refund`, body, {
+      'X-Idempotency-Key': idempotencyKey
+    });
   }
 
   /**
@@ -144,7 +153,8 @@ export class Charges {
   // from a live deploy), so these use the client's untyped path.
   private get<T>(url: string): Promise<T> {
     return this.http.call<T>(
-      (signal) => (this.http.client.GET as CallableFunction)(url, { signal }) as OpenapiCallResult<T>
+      (signal) =>
+        (this.http.client.GET as CallableFunction)(url, { signal }) as OpenapiCallResult<T>
     );
   }
 
@@ -155,7 +165,11 @@ export class Charges {
   ): Promise<T> {
     return this.http.call<T>(
       (signal) =>
-        (this.http.client.POST as CallableFunction)(url, { body, headers, signal }) as OpenapiCallResult<T>
+        (this.http.client.POST as CallableFunction)(url, {
+          body,
+          headers,
+          signal
+        }) as OpenapiCallResult<T>
     );
   }
 }

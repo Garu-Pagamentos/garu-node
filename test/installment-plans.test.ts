@@ -162,5 +162,31 @@ describe('installmentPlans actions', () => {
     // Pending, not refunded: Garu records the ask, the seller moves the money.
     expect(request.status).toBe('pending');
     expect(request.installmentPlanId).toBe(PLAN_UUID);
+    expect(calls[0]!.body).not.toHaveProperty('idempotencyKey');
+    expect(calls[0]!.headers['x-idempotency-key']).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/
+    );
+  });
+
+  it('respects a caller-supplied idempotency key on requestRefund', async () => {
+    const requestBody = {
+      uuid: 'a1b2c3d4-0000-4000-8000-000000000001',
+      status: 'pending',
+      amount: 390,
+      reason: null,
+      installmentPlanId: PLAN_UUID,
+      chargeId: null,
+      requestedBy: { type: 'api_key', id: 'key-1' },
+      resolvedBy: null,
+      sellerNote: null,
+      resolvedAt: null,
+      createdAt: '2026-09-01T09:00:00.000Z'
+    };
+    const { fetch, calls } = mockFetch([{ status: 202, body: requestBody }]);
+    const garu = new Garu({ apiKey: 'sk_test_abc', fetch, maxRetries: 0 });
+
+    await garu.installmentPlans.requestRefund(PLAN_UUID, { idempotencyKey: 'refund-key-1' });
+
+    expect(calls[0]!.headers['x-idempotency-key']).toBe('refund-key-1');
   });
 });

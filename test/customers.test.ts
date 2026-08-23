@@ -33,6 +33,27 @@ describe('customers.create', () => {
     expect(calls[0]!.url).toBe('https://garu.com.br/api/v1/customers');
     expect(calls[0]!.method).toBe('POST');
     expect(calls[0]!.body).toMatchObject(fakeCustomer);
+    expect(calls[0]!.body).not.toHaveProperty('idempotencyKey');
+    expect(calls[0]!.headers['x-idempotency-key']).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/
+    );
+  });
+
+  it('respects a caller-supplied idempotency key', async () => {
+    const saved = {
+      uuid: CUSTOMER_UUID,
+      ...fakeCustomer,
+      billingEmail: fakeCustomer.email,
+      hasBillingEmailOverride: false,
+      createdAt: '2026-01-01',
+      updatedAt: '2026-01-01'
+    };
+    const { fetch, calls } = mockFetch([{ status: 201, body: saved }]);
+    const garu = new Garu({ apiKey: 'sk_test_abc', fetch, maxRetries: 0 });
+
+    await garu.customers.create({ ...fakeCustomer, idempotencyKey: 'idem-key-1' });
+
+    expect(calls[0]!.headers['x-idempotency-key']).toBe('idem-key-1');
   });
 });
 

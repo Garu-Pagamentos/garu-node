@@ -182,6 +182,21 @@ describe('charges.refund', () => {
     expect(calls[0]!.method).toBe('POST');
     // Reais, not centavos — 10.0 must travel as 10, never 1000.
     expect(calls[0]!.body).toEqual({ amount: 10.0, reason: 'Cliente desistiu' });
+    expect(calls[0]!.headers['x-idempotency-key']).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/
+    );
+  });
+
+  it('respects a caller-supplied idempotency key on refund', async () => {
+    const { fetch, calls } = mockFetch([
+      { status: 200, body: { ...pixCharge, status: 'refunded' } }
+    ]);
+    const garu = new Garu({ apiKey: 'sk_test_abc', fetch, maxRetries: 0 });
+
+    await garu.charges.refund(CHARGE_UUID, { idempotencyKey: 'refund-key-1' });
+
+    expect(calls[0]!.headers['x-idempotency-key']).toBe('refund-key-1');
+    expect(calls[0]!.body).not.toHaveProperty('idempotencyKey');
   });
 
   it('reports a Pix refund still settling as refund_pending', async () => {

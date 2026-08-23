@@ -133,6 +133,13 @@ export interface RefundChargeParams {
   amount?: number;
   /** Free-form reason stored on the refund. */
   reason?: string;
+  /**
+   * Optional idempotency key for safe retries. The SDK auto-generates a
+   * UUIDv4 when omitted and forwards it as `X-Idempotency-Key`. Only used
+   * for Pix/boleto, which open a refund request instead of an automated
+   * reversal — ignored for card, which has no manual request to duplicate.
+   */
+  idempotencyKey?: string;
 }
 
 export interface ListChargesParams {
@@ -246,6 +253,13 @@ export interface CreateCustomerParams {
   city?: string;
   /** 2-letter uppercase state code, e.g. `SP`. */
   state?: string;
+  /**
+   * Optional idempotency key for safe retries. The SDK auto-generates a
+   * UUIDv4 when omitted and forwards it as `X-Idempotency-Key`. Document
+   * uniqueness already merges a retried create into the same customer, so
+   * this mainly protects registrations with no document set.
+   */
+  idempotencyKey?: string;
 }
 
 export interface UpdateCustomerParams {
@@ -1059,6 +1073,13 @@ export interface RequestPlanRefundParams {
   /** Defaults to everything the carnê has collected. */
   amount?: number;
   reason?: string;
+  /**
+   * Optional idempotency key for safe retries. The SDK auto-generates a
+   * UUIDv4 when omitted and forwards it as `X-Idempotency-Key`. The backend
+   * already dedupes a second pending request for the same carnê, so this is
+   * mainly defense-in-depth for the request-in-flight window.
+   */
+  idempotencyKey?: string;
 }
 
 export interface ListRefundRequestsParams {

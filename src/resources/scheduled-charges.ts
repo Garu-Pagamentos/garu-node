@@ -35,13 +35,10 @@ export class ScheduledCharges {
   constructor(private readonly http: HttpClient) {}
 
   /**
-   * Create a new scheduled charge. The SDK attaches an `X-Idempotency-Key`
-   * header (UUIDv4 unless you pass `idempotencyKey`), but the gateway does
-   * not currently deduplicate `/scheduled-charges` creates against it — a
-   * retry after a network failure can create more than one series. Pair
-   * this with your own retry-suppression (e.g. check `list` for an existing
-   * series with the same `externalReference`) if that matters for your
-   * integration.
+   * Create a new scheduled charge. Attaches an `X-Idempotency-Key` header
+   * automatically — if you don't pass `idempotencyKey`, the SDK generates a
+   * UUIDv4. Safe to retry: the same key returns the originally-created
+   * series for 24h instead of double-booking recurring billing.
    *
    * @example
    * const charge = await garu.scheduledCharges.create({

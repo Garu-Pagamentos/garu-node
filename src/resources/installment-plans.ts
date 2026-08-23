@@ -218,6 +218,11 @@ export class InstallmentPlans {
    * team. Transfer the money to the buyer yourself, then close it with
    * `garu.refundRequests.confirm`.
    *
+   * Attaches an `X-Idempotency-Key` header automatically — if you don't pass
+   * `idempotencyKey`, the SDK generates a UUIDv4. The backend already dedupes
+   * a second pending request for the same carnê, so this is mainly
+   * defense-in-depth for the request-in-flight window.
+   *
    * @example
    * const request = await garu.installmentPlans.requestRefund(uuid, {
    *   reason: 'Produto não entregue'
@@ -226,9 +231,12 @@ export class InstallmentPlans {
    * request.amount;  // defaults to everything the carnê collected
    */
   async requestRefund(uuid: string, params: RequestPlanRefundParams = {}): Promise<RefundRequest> {
+    const idempotencyKey = params.idempotencyKey ?? generateIdempotencyKey();
+    const { idempotencyKey: _omit, ...body } = params;
     return this.http.call<RefundRequest>((signal) =>
       (this.http.client.POST as Function)(`/api/v1/installment-plans/${uuid}/refund-requests`, {
-        body: params,
+        body,
+        headers: { 'X-Idempotency-Key': idempotencyKey },
         signal
       }).then((r: { data?: RefundRequest; error?: unknown; response: Response }) => r)
     );

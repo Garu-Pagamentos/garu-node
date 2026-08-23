@@ -3,6 +3,24 @@
 All notable changes to `@garuhq/node` are documented in this file. Format:
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [SemVer](https://semver.org/).
 
+## [4.1.0] — 2026-08-22
+
+### Added
+
+- `customers.create()`, `charges.refund()`, and
+  `installmentPlans.requestRefund()` now attach an `X-Idempotency-Key`
+  header automatically (UUIDv4 unless you pass `idempotencyKey`). The
+  gateway now caches and replays the first response for 24h, so a network
+  retry can no longer register a duplicate customer, open a second refund
+  request, or (via `scheduledCharges.create()` — see Fixed below)
+  double-book recurring billing.
+
+### Fixed
+
+- `scheduledCharges.create()`'s docstring dropped the "the gateway does not
+  currently deduplicate" caveat — the backend now enforces it, so a retried
+  create is safe by default.
+
 ## [4.0.0] — 2026-08-22
 
 **Breaking:** `scheduledCharges` now targets the versioned public API
