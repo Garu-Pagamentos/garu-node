@@ -1,5 +1,5 @@
 import type { HttpClient } from '../http.js';
-import { generateIdempotencyKey } from '../idempotency.js';
+import { idempotencyHeaders } from '../idempotency.js';
 import type {
   CreateCustomerParams,
   CustomerList,
@@ -24,9 +24,11 @@ export class Customers {
   /**
    * Register a customer for the current seller.
    *
-   * Attaches an `X-Idempotency-Key` header automatically — if you don't pass
-   * `idempotencyKey`, the SDK generates a UUIDv4. Safe to retry: the same key
-   * returns the originally-created/matched customer for 24h.
+   * Pass `idempotencyKey` to make this safe to retry: the same key returns the
+   * original customer for 24h. Derive it from something stable in your own
+   * domain (an order id, a booking id) so a retry reproduces it. Omit it and
+   * no key is sent — the SDK does NOT invent one, because a key generated per
+   * call is different every time and protects nothing.
    *
    * @example
    * const customer = await garu.customers.create({
@@ -39,12 +41,11 @@ export class Customers {
    * customer.uuid;
    */
   async create(params: CreateCustomerParams): Promise<CustomerRecord> {
-    const idempotencyKey = params.idempotencyKey ?? generateIdempotencyKey();
     const { idempotencyKey: _omit, ...body } = params;
     return this.http.call<CustomerRecord>((signal) =>
       (this.http.client.POST as Function)('/api/v1/customers', {
         body,
-        headers: { 'X-Idempotency-Key': idempotencyKey },
+        headers: idempotencyHeaders(params.idempotencyKey),
         signal
       }).then((r: { data?: CustomerRecord; error?: unknown; response: Response }) => r)
     );

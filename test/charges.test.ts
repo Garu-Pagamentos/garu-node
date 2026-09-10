@@ -30,7 +30,7 @@ const pixCharge = {
 };
 
 describe('charges.create', () => {
-  it('posts to /api/v1/charges with an auto-generated idempotency key', async () => {
+  it('posts to /api/v1/charges and sends no idempotency key unless asked', async () => {
     const { fetch, calls } = mockFetch([{ status: 201, body: pixCharge }]);
     const garu = new Garu({ apiKey: 'sk_test_abc', fetch, maxRetries: 0 });
 
@@ -46,9 +46,7 @@ describe('charges.create', () => {
     expect(call!.url).toBe('https://garu.com.br/api/v1/charges');
     expect(call!.method).toBe('POST');
     expect(call!.headers.authorization).toBe('Bearer sk_test_abc');
-    expect(call!.headers['x-idempotency-key']).toMatch(
-      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/
-    );
+    expect(call!.headers).not.toHaveProperty('x-idempotency-key');
     expect(call!.body).toMatchObject({
       productId: 'prod-uuid',
       paymentMethod: 'pix',
@@ -80,6 +78,30 @@ describe('charges.create', () => {
       card: { number: '4111111111111111', installments: 2 }
     });
     expect(calls[0]!.body).not.toHaveProperty('cardInfo');
+  });
+
+  // The property the key exists for: every attempt of ONE create() must carry
+  // the SAME key, so a transient 503 cannot become a second charge. The key is
+  // read once, outside the retry loop — this test is what keeps it there.
+  it('reuses the caller key across the transport retries of one create', async () => {
+    const { fetch, calls } = mockFetch([
+      { status: 503, body: { message: 'unavailable' } },
+      { status: 201, body: pixCharge }
+    ]);
+    const garu = new Garu({ apiKey: 'sk_test_abc', fetch, maxRetries: 1 });
+
+    await garu.charges.create({
+      productId: 'prod-uuid',
+      paymentMethod: 'pix',
+      customer: fakeCustomer,
+      idempotencyKey: 'booking:5521:charge'
+    });
+
+    expect(calls).toHaveLength(2);
+    expect(calls.map((c) => c.headers['x-idempotency-key'])).toEqual([
+      'booking:5521:charge',
+      'booking:5521:charge'
+    ]);
   });
 
   it('respects a caller-supplied idempotency key', async () => {
@@ -182,9 +204,7 @@ describe('charges.refund', () => {
     expect(calls[0]!.method).toBe('POST');
     // Reais, not centavos — 10.0 must travel as 10, never 1000.
     expect(calls[0]!.body).toEqual({ amount: 10.0, reason: 'Cliente desistiu' });
-    expect(calls[0]!.headers['x-idempotency-key']).toMatch(
-      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/
-    );
+    expect(calls[0]!.headers).not.toHaveProperty('x-idempotency-key');
   });
 
   it('respects a caller-supplied idempotency key on refund', async () => {

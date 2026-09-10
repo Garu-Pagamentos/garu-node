@@ -34,9 +34,7 @@ describe('customers.create', () => {
     expect(calls[0]!.method).toBe('POST');
     expect(calls[0]!.body).toMatchObject(fakeCustomer);
     expect(calls[0]!.body).not.toHaveProperty('idempotencyKey');
-    expect(calls[0]!.headers['x-idempotency-key']).toMatch(
-      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/
-    );
+    expect(calls[0]!.headers).not.toHaveProperty('x-idempotency-key');
   });
 
   it('respects a caller-supplied idempotency key', async () => {

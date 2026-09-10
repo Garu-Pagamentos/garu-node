@@ -1,5 +1,5 @@
 import type { HttpClient } from '../http.js';
-import { generateIdempotencyKey } from '../idempotency.js';
+import { idempotencyHeaders } from '../idempotency.js';
 import type {
   CancelAtPeriodEndScheduledChargeParams,
   CancelRecurrenceScheduledChargeParams,
@@ -35,10 +35,15 @@ export class ScheduledCharges {
   constructor(private readonly http: HttpClient) {}
 
   /**
-   * Create a new scheduled charge. Attaches an `X-Idempotency-Key` header
-   * automatically — if you don't pass `idempotencyKey`, the SDK generates a
-   * UUIDv4. Safe to retry: the same key returns the originally-created
-   * series for 24h instead of double-booking recurring billing.
+   * Create a new scheduled charge.
+   *
+   * Pass `idempotencyKey` to make this safe to retry: the same key returns the
+   * original series for 24h. Derive it from something stable in your own
+   * domain (an order id, a booking id) so a retry reproduces it. Omit it and
+   * no key is sent — the SDK does NOT invent one, because a key generated per
+   * call is different every time and protects nothing.
+   * Worth the effort here: without a key, a retry double-books recurring
+   * billing for the same customer.
    *
    * @example
    * const charge = await garu.scheduledCharges.create({
@@ -65,12 +70,11 @@ export class ScheduledCharges {
    * });
    */
   async create(params: CreateScheduledChargeParams): Promise<ScheduledChargeRecord> {
-    const idempotencyKey = params.idempotencyKey ?? generateIdempotencyKey();
     const { idempotencyKey: _omit, ...body } = params;
     return this.http.call<ScheduledChargeRecord>((signal) =>
       (this.http.client.POST as Function)('/api/v1/scheduled-charges', {
         body,
-        headers: { 'X-Idempotency-Key': idempotencyKey },
+        headers: idempotencyHeaders(params.idempotencyKey),
         signal
       }).then((r: { data?: ScheduledChargeRecord; error?: unknown; response: Response }) => r)
     );

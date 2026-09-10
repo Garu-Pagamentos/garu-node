@@ -167,15 +167,13 @@ describe('products.create', () => {
     });
   });
 
-  it('auto-generates an X-Idempotency-Key header', async () => {
+  it('sends no X-Idempotency-Key when the caller omits one', async () => {
     const { fetch, calls } = mockFetch([{ status: 201, body: { uuid: 'u', name: 'Curso' } }]);
     const garu = new Garu({ apiKey: 'sk_test_abc', fetch, maxRetries: 0 });
 
     await garu.products.create({ name: 'Curso' });
 
-    expect(calls[0]!.headers['x-idempotency-key']).toMatch(
-      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/
-    );
+    expect(calls[0]!.headers).not.toHaveProperty('x-idempotency-key');
   });
 
   it('respects a caller-supplied idempotencyKey and omits it from the body', async () => {

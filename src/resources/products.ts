@@ -1,5 +1,5 @@
 import type { HttpClient } from '../http.js';
-import { generateIdempotencyKey } from '../idempotency.js';
+import { idempotencyHeaders } from '../idempotency.js';
 import type {
   CreateProductParams,
   ListProductsParams,
@@ -163,10 +163,11 @@ export class Products {
    * product (HTTP 201). Only `name` is required; everything else falls back
    * to seller/server defaults.
    *
-   * Automatically attaches an `X-Idempotency-Key` header — if you don't pass
-   * `idempotencyKey`, the SDK generates a UUIDv4. This makes the built-in
-   * retry on transient failures safe: a retried POST returns the original
-   * product instead of creating a duplicate.
+   * Pass `idempotencyKey` to make this safe to retry: the same key returns the
+   * original product for 24h. Derive it from something stable in your own
+   * domain (an order id, a booking id) so a retry reproduces it. Omit it and
+   * no key is sent — the SDK does NOT invent one, because a key generated per
+   * call is different every time and protects nothing.
    *
    * @example
    * const product = await garu.products.create({
@@ -182,12 +183,11 @@ export class Products {
    */
   async create(params: CreateProductParams): Promise<Product> {
     const { idempotencyKey, ...body } = params;
-    const key = idempotencyKey ?? generateIdempotencyKey();
 
     return this.http.call<Product>((signal) =>
       (this.http.client.POST as Function)('/api/v1/products', {
         body,
-        headers: { 'X-Idempotency-Key': key },
+        headers: idempotencyHeaders(idempotencyKey),
         signal
       }).then((r: { data?: Product; error?: unknown; response: Response }) => r)
     );

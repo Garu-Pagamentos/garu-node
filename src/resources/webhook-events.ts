@@ -1,5 +1,5 @@
 import type { HttpClient } from '../http.js';
-import { generateIdempotencyKey } from '../idempotency.js';
+import { idempotencyHeaders } from '../idempotency.js';
 import type {
   ListWebhookEventsParams,
   ResendWebhookEventParams,
@@ -120,11 +120,10 @@ export class WebhookEvents {
    * original — distinguishable both by the `resend_` prefix and by reading
    * the response payload's `manualResendOf` field.
    *
-   * The SDK also attaches an `X-Idempotency-Key` header (UUIDv4 unless you
-   * pass `idempotencyKey`); the gateway does not currently deduplicate
-   * `/resend` calls against it, so retrying this call from your own code
-   * after a network failure can create more than one clone — pair it with
-   * your own retry-suppression if that matters for your integration.
+   * `idempotencyKey` is forwarded when you pass one and omitted when you don't.
+   * Either way the gateway does not currently deduplicate `/resend` calls
+   * against it, so retrying after a network failure can create more than one
+   * clone — pair it with your own retry-suppression if that matters.
    *
    * Returns the *clone* event (new uuid), not the original. The original is
    * unchanged on the server.
@@ -136,11 +135,10 @@ export class WebhookEvents {
    * clone.manualResendOf === event.uuid; // true — points back at the source
    */
   async resend(uuid: string, params: ResendWebhookEventParams = {}): Promise<WebhookEvent> {
-    const idempotencyKey = params.idempotencyKey ?? generateIdempotencyKey();
     return this.http.call<WebhookEvent>((signal) =>
       (this.http.client.POST as Function)(`/api/v1/webhook-events/${uuid}/resend`, {
         body: {},
-        headers: { 'X-Idempotency-Key': idempotencyKey },
+        headers: idempotencyHeaders(params.idempotencyKey),
         signal
       }).then((r: { data?: WebhookEvent; error?: unknown; response: Response }) => r)
     );

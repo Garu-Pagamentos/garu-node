@@ -59,7 +59,7 @@ describe('installmentPlans.create', () => {
     expect(plan.installmentsDetail).toHaveLength(1);
   });
 
-  it('always sends an idempotency key', async () => {
+  it('sends no idempotency key when the caller omits one', async () => {
     // This call registers a REAL boleto. A retry without a key puts two
     // payable barcodes in one buyer's hands, so the SDK never lets the
     // caller forget it.
@@ -72,7 +72,7 @@ describe('installmentPlans.create', () => {
       installments: 12
     });
 
-    expect(calls[0]!.headers['x-idempotency-key']).toMatch(/^[0-9a-f-]{36}$/);
+    expect(calls[0]!.headers).not.toHaveProperty('x-idempotency-key');
   });
 
   it('honours a caller-supplied key and keeps it out of the body', async () => {
@@ -163,9 +163,7 @@ describe('installmentPlans actions', () => {
     expect(request.status).toBe('pending');
     expect(request.installmentPlanId).toBe(PLAN_UUID);
     expect(calls[0]!.body).not.toHaveProperty('idempotencyKey');
-    expect(calls[0]!.headers['x-idempotency-key']).toMatch(
-      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/
-    );
+    expect(calls[0]!.headers).not.toHaveProperty('x-idempotency-key');
   });
 
   it('respects a caller-supplied idempotency key on requestRefund', async () => {

@@ -3,6 +3,55 @@
 All notable changes to `@garuhq/node` are documented in this file. Format:
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [SemVer](https://semver.org/).
 
+## [5.0.0] — 2026-09-09
+
+**Breaking:** requests that omit `idempotencyKey` no longer carry an
+`X-Idempotency-Key` header. No API contract changed and no gateway endpoint
+requires the header, so most integrations need no code change — but if you were
+relying on a key always being present, you must now pass one, which is the only
+way it ever gave you real protection. See below.
+
+### Fixed
+
+- **The SDK no longer invents an idempotency key.** Every write that takes
+  `idempotencyKey` (`charges.create`, `charges.refund`, `customers.create`,
+  `products.create`, `scheduledCharges.create`, `installmentPlans.create`,
+  `installmentPlans.requestRefund`, `webhookEvents.resend`) used to generate a
+  fresh UUIDv4 when you omitted one. That protected nothing: an idempotency key
+  only works if the SAME key comes back on a retry, and a key invented per call
+  is different every time. The header is now sent only when you pass a key.
+
+  This was not theoretical. On 2026-09-08 an integrator's HTTP client timed out
+  at 30s on a card charge that was still being created, retried, drew a fresh
+  UUIDv4, and charged a real buyer twice.
+
+  Docstrings that promised "Safe to retry: the same key returns the original
+  charge for 24h" were describing a guarantee the code did not provide. They now
+  say what actually happens.
+
+### Changed
+
+- Behaviour change, no API change: requests where you omit `idempotencyKey` now
+  carry no `X-Idempotency-Key` header. Nothing rejects a missing key — the header
+  is optional on every gateway endpoint — and the gateway also gained a duplicate
+  guard that replays the original charge when the same buyer, product, rail and
+  instalment count arrive again within 60 seconds.
+
+  **To get real protection, pass a key derived from your own domain** so a retry
+  reproduces it:
+
+  ```ts
+  await garu.charges.create({
+    productId,
+    paymentMethod: 'creditCard',
+    customer,
+    idempotencyKey: `booking:${booking.id}:charge`
+  });
+  ```
+
+- `generateIdempotencyKey()` is still exported and unchanged. It is only useful
+  if you store the result and reuse it across retries of the same operation.
+
 ## [4.1.0] — 2026-08-22
 
 ### Added

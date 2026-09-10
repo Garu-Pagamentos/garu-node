@@ -1,5 +1,5 @@
 import type { HttpClient } from '../http.js';
-import { generateIdempotencyKey } from '../idempotency.js';
+import { idempotencyHeaders } from '../idempotency.js';
 import type {
   CancelInstallmentPlanParams,
   CreateInstallmentPlanParams,
@@ -29,10 +29,16 @@ export class InstallmentPlans {
   constructor(private readonly http: HttpClient) {}
 
   /**
-   * Sell a product as a carnê. Auto-attaches `X-Idempotency-Key` (UUIDv4 if
-   * you don't pass `idempotencyKey`), which matters more here than anywhere
-   * else in the API: this call registers a REAL boleto at the bank, so a
-   * blind retry can put two payable barcodes in one buyer's hands.
+   * Sell a product as a carnê.
+   *
+   * Pass `idempotencyKey` to make this safe to retry: the same key returns the
+   * original plan for 24h. Derive it from something stable in your own
+   * domain (an order id, a booking id) so a retry reproduces it. Omit it and
+   * no key is sent — the SDK does NOT invent one, because a key generated per
+   * call is different every time and protects nothing.
+   * This matters more here than anywhere else in the API: the call registers a
+   * REAL boleto at the bank, so a retry without a key can put two payable
+   * barcodes in one buyer's hands.
    *
    * @example
    * const carne = await garu.installmentPlans.create({
@@ -58,12 +64,11 @@ export class InstallmentPlans {
    * });
    */
   async create(params: CreateInstallmentPlanParams): Promise<InstallmentPlan> {
-    const idempotencyKey = params.idempotencyKey ?? generateIdempotencyKey();
     const { idempotencyKey: _omit, ...body } = params;
     return this.http.call<InstallmentPlan>((signal) =>
       (this.http.client.POST as Function)('/api/v1/installment-plans', {
         body,
-        headers: { 'X-Idempotency-Key': idempotencyKey },
+        headers: idempotencyHeaders(params.idempotencyKey),
         signal
       }).then((r: { data?: InstallmentPlan; error?: unknown; response: Response }) => r)
     );
@@ -218,10 +223,9 @@ export class InstallmentPlans {
    * team. Transfer the money to the buyer yourself, then close it with
    * `garu.refundRequests.confirm`.
    *
-   * Attaches an `X-Idempotency-Key` header automatically — if you don't pass
-   * `idempotencyKey`, the SDK generates a UUIDv4. The backend already dedupes
-   * a second pending request for the same carnê, so this is mainly
-   * defense-in-depth for the request-in-flight window.
+   * Pass `idempotencyKey` to cover the request-in-flight window; omit it and no
+   * key is sent. The backend already dedupes a second pending request for the
+   * same carnê, so this is defense-in-depth rather than the main guard.
    *
    * @example
    * const request = await garu.installmentPlans.requestRefund(uuid, {
@@ -231,12 +235,11 @@ export class InstallmentPlans {
    * request.amount;  // defaults to everything the carnê collected
    */
   async requestRefund(uuid: string, params: RequestPlanRefundParams = {}): Promise<RefundRequest> {
-    const idempotencyKey = params.idempotencyKey ?? generateIdempotencyKey();
     const { idempotencyKey: _omit, ...body } = params;
     return this.http.call<RefundRequest>((signal) =>
       (this.http.client.POST as Function)(`/api/v1/installment-plans/${uuid}/refund-requests`, {
         body,
-        headers: { 'X-Idempotency-Key': idempotencyKey },
+        headers: idempotencyHeaders(params.idempotencyKey),
         signal
       }).then((r: { data?: RefundRequest; error?: unknown; response: Response }) => r)
     );

@@ -1,5 +1,5 @@
 import type { HttpClient, OpenapiCallResult } from '../http.js';
-import { generateIdempotencyKey } from '../idempotency.js';
+import { idempotencyHeaders } from '../idempotency.js';
 import type {
   CancelChargeResult,
   Charge,
@@ -23,9 +23,11 @@ export class Charges {
   /**
    * Create a charge (PIX, boleto, or credit card).
    *
-   * Attaches an `X-Idempotency-Key` header automatically — if you don't pass
-   * `idempotencyKey`, the SDK generates a UUIDv4. Safe to retry: the same key
-   * returns the original charge for 24h.
+   * Pass `idempotencyKey` to make this safe to retry: the same key returns the
+   * original charge for 24h. Derive it from something stable in your own
+   * domain (an order id, a booking id) so a retry reproduces it. Omit it and
+   * no key is sent — the SDK does NOT invent one, because a key generated per
+   * call is different every time and protects nothing.
    *
    * @example
    * // PIX — render charge.pix.code as a QR in your own checkout
@@ -58,7 +60,6 @@ export class Charges {
    * // charge.amount is the base price; charge.chargedTotal is what was charged.
    */
   async create(params: CreateChargeParams): Promise<Charge> {
-    const idempotencyKey = params.idempotencyKey ?? generateIdempotencyKey();
     const body: Record<string, unknown> = {
       productId: params.productId,
       paymentMethod: params.paymentMethod,
@@ -68,7 +69,7 @@ export class Charges {
     if (params.checkoutSessionToken) body.checkoutSessionToken = params.checkoutSessionToken;
     if (params.additionalInfo !== undefined) body.additionalInfo = params.additionalInfo;
 
-    return this.post<Charge>('/api/v1/charges', body, { 'X-Idempotency-Key': idempotencyKey });
+    return this.post<Charge>('/api/v1/charges', body, idempotencyHeaders(params.idempotencyKey));
   }
 
   /**
@@ -113,24 +114,21 @@ export class Charges {
    * settles.
    *
    * For Pix/boleto (which open a refund request instead of an automated
-   * reversal), attaches an `X-Idempotency-Key` header automatically — if you
-   * don't pass `idempotencyKey`, the SDK generates a UUIDv4. Ignored for
-   * card, which reverses automatically and has no manual request to
-   * duplicate.
+   * reversal), pass `idempotencyKey` to make a retry return the original
+   * request rather than opening a second one; omit it and no key is sent.
+   * Ignored for card, which reverses automatically and has no manual request
+   * to duplicate.
    *
    * @example
    * await garu.charges.refund('6f1c9b2e-...');                       // full
    * await garu.charges.refund('6f1c9b2e-...', { amount: 10.0 });     // R$10,00
    */
   async refund(uuid: string, params: RefundChargeParams = {}): Promise<Charge> {
-    const idempotencyKey = params.idempotencyKey ?? generateIdempotencyKey();
     const body: Record<string, unknown> = {};
     if (params.amount !== undefined) body.amount = params.amount;
     if (params.reason !== undefined) body.reason = params.reason;
 
-    return this.post<Charge>(`/api/v1/charges/${encodeURIComponent(uuid)}/refund`, body, {
-      'X-Idempotency-Key': idempotencyKey
-    });
+    return this.post<Charge>(`/api/v1/charges/${encodeURIComponent(uuid)}/refund`, body, idempotencyHeaders(params.idempotencyKey));
   }
 
   /**

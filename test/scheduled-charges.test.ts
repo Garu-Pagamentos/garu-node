@@ -50,7 +50,7 @@ describe('scheduledCharges.create', () => {
     });
   });
 
-  it('auto-attaches an X-Idempotency-Key (UUIDv4) when caller omits one', async () => {
+  it('sends no X-Idempotency-Key when the caller omits one', async () => {
     const { fetch, calls } = mockFetch([{ status: 201, body: fakeCharge }]);
     const garu = newClient(fetch);
 
@@ -62,9 +62,7 @@ describe('scheduledCharges.create', () => {
       methods: ['pix']
     });
 
-    expect(calls[0]!.headers['x-idempotency-key']).toMatch(
-      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/
-    );
+    expect(calls[0]!.headers).not.toHaveProperty('x-idempotency-key');
     // The idempotency key must NOT leak into the request body.
     expect(calls[0]!.body).not.toHaveProperty('idempotencyKey');
   });

@@ -176,15 +176,13 @@ describe('webhookEvents.resend', () => {
     expect(calls[0]!.body).toEqual({});
   });
 
-  it("auto-attaches an X-Idempotency-Key (UUIDv4) so transient SDK retries can't duplicate clones", async () => {
+  it('sends no X-Idempotency-Key when the caller omits one', async () => {
     const { fetch, calls } = mockFetch([{ status: 201, body: cloneEvent }]);
     const garu = newClient(fetch);
 
     await garu.webhookEvents.resend(EVENT_UUID);
 
-    expect(calls[0]!.headers['x-idempotency-key']).toMatch(
-      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/
-    );
+    expect(calls[0]!.headers).not.toHaveProperty('x-idempotency-key');
   });
 
   it('forwards a caller-supplied idempotencyKey verbatim and does not leak it into the body', async () => {
