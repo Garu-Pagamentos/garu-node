@@ -12,6 +12,8 @@ export type GaruErrorCode =
   | 'not_found'
   | 'validation_error'
   | 'rate_limited'
+  | 'charge_in_progress'
+  | 'charge_already_processed'
   | 'server_error'
   | 'api_error'
   | 'connection_error'
@@ -106,6 +108,51 @@ export class GaruRateLimitError extends GaruAPIError {
   }
 }
 
+/**
+ * A charge identical to this one — same buyer, product, rail, amount and
+ * instalment count — is already being processed, or already went through inside
+ * the gateway's duplicate window.
+ *
+ * **This is not a failure.** The buyer's money is either on its way or already
+ * taken. Wait `retryAfterSec` and send the same request again: the retry is
+ * answered with the ORIGINAL charge rather than creating a second one.
+ *
+ * The SDK does not retry this for you. Re-POSTing to a money endpoint on your
+ * behalf is exactly the kind of hidden behaviour 5.0.0 removed, and if your own
+ * client also retries, the two stack.
+ *
+ * The real fix is upstream: pass `idempotencyKey` derived from something stable
+ * in your domain, so a retry reproduces it. This error is the backstop for when
+ * that has not happened.
+ *
+ * @example
+ * try {
+ *   await garu.charges.create({ productId, paymentMethod: 'creditCard', customer });
+ * } catch (err) {
+ *   if (err instanceof GaruDuplicateChargeError) {
+ *     await new Promise((r) => setTimeout(r, err.retryAfterSec * 1000));
+ *     // Sending it again returns the original charge.
+ *   }
+ * }
+ */
+export class GaruDuplicateChargeError extends GaruAPIError {
+  /** How long to wait before sending the same request again. */
+  public readonly retryAfterSec: number;
+
+  constructor(
+    code: 'charge_in_progress' | 'charge_already_processed',
+    message: string,
+    status: number,
+    requestId: string | null,
+    body: unknown,
+    retryAfterSec: number
+  ) {
+    super(code, message, status, requestId, body);
+    this.name = 'GaruDuplicateChargeError';
+    this.retryAfterSec = retryAfterSec;
+  }
+}
+
 export class GaruServerError extends GaruAPIError {
   constructor(message: string, status: number, requestId: string | null, body: unknown) {
     super('server_error', message, status, requestId, body);
@@ -133,6 +180,15 @@ export function mapApiError(
   if (status === 429) {
     return new GaruRateLimitError(message, status, requestId, body, retryAfterSec);
   }
+  if (status === 409) {
+    const code = readDuplicateChargeCode(body);
+    if (code) {
+      // `Retry-After` is authoritative when present; the body carries the same
+      // number for clients that cannot read headers.
+      const wait = retryAfterSec ?? readRetryAfterFromBody(body) ?? DEFAULT_DUPLICATE_RETRY_SEC;
+      return new GaruDuplicateChargeError(code, message, status, requestId, body, wait);
+    }
+  }
   if (status >= 500) return new GaruServerError(message, status, requestId, body);
   return new GaruAPIError('api_error', message, status, requestId, body);
 }
@@ -145,4 +201,24 @@ function extractMessage(body: unknown): string | null {
     if (Array.isArray(m) && m.every((x) => typeof x === 'string')) return m.join('; ');
   }
   return null;
+}
+
+const DEFAULT_DUPLICATE_RETRY_SEC = 5;
+
+/**
+ * Only a 409 the gateway raised for a duplicate charge maps to
+ * {@link GaruDuplicateChargeError}. Any other conflict stays a generic
+ * `GaruAPIError`, so a future 409 on some unrelated endpoint is not silently
+ * described as a duplicate charge.
+ */
+function readDuplicateChargeCode(
+  body: unknown
+): 'charge_in_progress' | 'charge_already_processed' | null {
+  const code = (body as { error?: unknown } | null)?.error;
+  return code === 'charge_in_progress' || code === 'charge_already_processed' ? code : null;
+}
+
+function readRetryAfterFromBody(body: unknown): number | null {
+  const value = (body as { retryAfter?: unknown } | null)?.retryAfter;
+  return typeof value === 'number' && Number.isFinite(value) && value > 0 ? value : null;
 }

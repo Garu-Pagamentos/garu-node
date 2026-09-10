@@ -7,6 +7,7 @@ export {
   GaruPermissionError,
   GaruNotFoundError,
   GaruValidationError,
+  GaruDuplicateChargeError,
   GaruRateLimitError,
   GaruServerError,
   GaruConnectionError,

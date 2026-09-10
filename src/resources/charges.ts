@@ -58,6 +58,20 @@ export class Charges {
    *   }
    * });
    * // charge.amount is the base price; charge.chargedTotal is what was charged.
+   *
+   * @example
+   * // Handling a duplicate. A 409 means an identical charge is already being
+   * // processed, or already went through — NOT that this one failed. Send the
+   * // same request again after the wait and you get the ORIGINAL charge back.
+   * // The SDK will not retry it for you.
+   * try {
+   *   await garu.charges.create({ productId, paymentMethod: 'creditCard', customer, card });
+   * } catch (err) {
+   *   if (err instanceof GaruDuplicateChargeError) {
+   *     await new Promise((r) => setTimeout(r, err.retryAfterSec * 1000));
+   *     // retry the same call
+   *   }
+   * }
    */
   async create(params: CreateChargeParams): Promise<Charge> {
     const body: Record<string, unknown> = {
@@ -128,7 +142,11 @@ export class Charges {
     if (params.amount !== undefined) body.amount = params.amount;
     if (params.reason !== undefined) body.reason = params.reason;
 
-    return this.post<Charge>(`/api/v1/charges/${encodeURIComponent(uuid)}/refund`, body, idempotencyHeaders(params.idempotencyKey));
+    return this.post<Charge>(
+      `/api/v1/charges/${encodeURIComponent(uuid)}/refund`,
+      body,
+      idempotencyHeaders(params.idempotencyKey)
+    );
   }
 
   /**
