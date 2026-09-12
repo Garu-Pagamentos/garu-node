@@ -4,6 +4,7 @@ import { InstallmentPlans } from './resources/installment-plans.js';
 import { RefundRequests } from './resources/refund-requests.js';
 import { Customers } from './resources/customers.js';
 import { Meta } from './resources/meta.js';
+import { Offers } from './resources/offers.js';
 import { Products } from './resources/products.js';
 import { ScheduledCharges } from './resources/scheduled-charges.js';
 import { WebhookEvents } from './resources/webhook-events.js';
@@ -58,6 +59,8 @@ export class Garu {
   public readonly customers: Customers;
   public readonly meta: Meta;
   public readonly products: Products;
+  /** Named prices on a product, each behind its own link (v0.23.0). */
+  public readonly offers: Offers;
   public readonly scheduledCharges: ScheduledCharges;
   public readonly webhookEvents: WebhookEvents;
 
@@ -83,6 +86,7 @@ export class Garu {
     this.customers = new Customers(http);
     this.meta = new Meta(http);
     this.products = new Products(http);
+    this.offers = new Offers(http);
     this.scheduledCharges = new ScheduledCharges(http);
     this.webhookEvents = new WebhookEvents(http);
   }

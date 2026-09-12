@@ -69,6 +69,14 @@ export interface CardInput {
 export interface CreateChargeParams {
   /** UUID of the product being charged. */
   productId: string;
+  /**
+   * Charge this product's OFFER price instead of its default — the slug
+   * (`black-friday`) or the offer id (`offer_...`). See {@link Offer}.
+   *
+   * Answers 409 if the offer was deactivated, and 400 on a subscription
+   * product. Omit it and the product's own price is charged.
+   */
+  offer?: string;
   /** Payment method. */
   paymentMethod: ChargePaymentMethod;
   /** Customer buying the product. */
@@ -625,6 +633,48 @@ export interface Installment {
  * List envelope returned by `products.list()`. Flat (not `{ data, meta }`) —
  * matches the `/api/v1/products` response.
  */
+/**
+ * A named price on a product, reachable at `/pay/{productUuid}?offer={slug or id}`.
+ * Overrides the price and nothing else (Garu v0.23.0).
+ */
+export interface Offer {
+  id: string;
+  productUuid: string;
+  /** Your own label. Never shown to the buyer. */
+  name: string;
+  /** Public and guessable. Null means the link carries the id instead. */
+  slug: string | null;
+  /** Reais (decimal BRL), same unit as `Product.value` — not centavos. */
+  value: number;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface OfferList {
+  data: Offer[];
+  totalCount: number;
+  totalPages: number;
+}
+
+export interface ListOffersParams {
+  /** `true` (default) for active only, `false` for deactivated, `all` for both. */
+  active?: 'true' | 'false' | 'all';
+  page?: number;
+  limit?: number;
+}
+
+export interface CreateOfferParams {
+  name: string;
+  /** Reais (decimal BRL), NOT centavos. Must be greater than zero. */
+  value: number;
+  /** Optional, lowercase/digits/hyphens, 3-40 chars, unique per product. */
+  slug?: string | null;
+  isActive?: boolean;
+}
+
+export type UpdateOfferParams = Partial<CreateOfferParams>;
+
 export interface ProductList {
   data: Product[];
   /** Items returned on this page. */

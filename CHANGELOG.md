@@ -3,6 +3,21 @@
 All notable changes to `@garuhq/node` are documented in this file. Format:
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [SemVer](https://semver.org/).
 
+## [5.2.0] — 2026-09-12
+
+Adds `offers` — sell the same product at more than one price, each behind its
+own link (Garu v0.23.0). An offer overrides the price and nothing else.
+
+- `garu.offers.list / get / create / update / del`
+- `charges.create({ offer })` charges an offer's price instead of the
+  product's. The server resolves it; the amount never comes from the caller.
+- New types: `Offer`, `OfferList`, `CreateOfferParams`, `UpdateOfferParams`,
+  `ListOffersParams`.
+
+A 409 from an offer endpoint stays a generic `GaruAPIError` — only a duplicate
+charge maps to `GaruDuplicateChargeError`, and that mapping is kept narrow on
+purpose. Distinguish the cases by `status` and `message`.
+
 ## [5.0.0] — 2026-09-09
 
 **Breaking:** requests that omit `idempotencyKey` no longer carry an

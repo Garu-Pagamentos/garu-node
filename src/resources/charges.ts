@@ -79,6 +79,10 @@ export class Charges {
       paymentMethod: params.paymentMethod,
       customer: params.customer
     };
+    // Sent as the slug or the offer id. The SERVER resolves the price from it
+    // — nothing about the amount comes from here, so an offer cannot be used
+    // to charge an arbitrary value.
+    if (params.offer) body.offer = params.offer;
     if (params.card) body.card = params.card;
     if (params.checkoutSessionToken) body.checkoutSessionToken = params.checkoutSessionToken;
     if (params.additionalInfo !== undefined) body.additionalInfo = params.additionalInfo;

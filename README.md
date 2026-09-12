@@ -205,6 +205,54 @@ await garu.products.portalConfig.patch('b3f2c1e8-6e4a-4b9f-9d1c-2a1f6c3d4e5f', {
 });
 ```
 
+## Offers
+
+Sell the same product at more than one price, each behind its own link (Garu v0.23.0).
+
+An offer overrides the **price and nothing else** — payment methods, the installment ceiling, carnê, name, description and image all stay on the product. A bare product link keeps charging `product.value`, so nothing you already published changes when you add one.
+
+| Method                        | Description                                                         |
+| ----------------------------- | ------------------------------------------------------------------- |
+| `list(productUuid, params?)`  | Paginated offers. Active only by default; `active: 'all'` for both. |
+| `get(offerId)`                | Fetch one offer.                                                    |
+| `create(productUuid, params)` | Create an offer. `value` in **reais**, not centavos.                |
+| `update(offerId, params)`     | Partial update — reprice, rename, activate/deactivate.              |
+| `del(offerId)`                | Delete, but only while it has never sold (409 otherwise).           |
+
+```ts
+const offer = await garu.offers.create('b3f2c1e8-6e4a-4b9f-9d1c-2a1f6c3d4e5f', {
+  name: 'Black Friday',
+  value: 97.0, // R$ 97,00 in reais (decimal BRL), NOT centavos
+  slug: 'black-friday'
+});
+
+// Two ways to sell through it:
+// 1. hand out the hosted link
+`https://garu.com.br/pay/b3f2c1e8-6e4a-4b9f-9d1c-2a1f6c3d4e5f?offer=${offer.slug}`;
+
+// 2. charge it directly — the SERVER resolves the price from the offer
+await garu.charges.create({
+  productId: 'b3f2c1e8-6e4a-4b9f-9d1c-2a1f6c3d4e5f',
+  offer: 'black-friday',
+  paymentMethod: 'pix',
+  customer
+});
+```
+
+### The slug is public
+
+`?offer=black-friday` is easy to guess from a product link. Someone can try `?offer=promo`, `?offer=desconto` and find pricing you meant for one list.
+
+That is why `slug` is optional: omit it and the link carries the unguessable id instead (`?offer=offer_1Hv7j4EGexuTiOU5BlLNGGuL`). Deactivating an offer closes it immediately either way.
+
+### Ending a promo
+
+Prefer `update(id, { isActive: false })` over deleting. A deactivated link falls back to the product's price and tells the buyer the offer ended — the sale still completes.
+
+Note that if you instead **reprice** an active offer while a buyer has the page open, their charge is refused with **409** rather than silently collecting the new amount. Re-read the product and show the current price.
+
+`create` and `update` answer **409** when the product has fixed-share co-producers the price could not cover, and **400** on a subscription product, which selects its price with `priceId` instead.
+
 ## Scheduled charges
 
 Bill an existing customer on a future date — one-time or recurring with card tokenization. The Garu drives email reminders, dunning, retries, and the lifecycle state machine.
