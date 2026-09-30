@@ -182,14 +182,41 @@ Discover products and customize the per-product portal experience (B2B2C).
 
 `portalConfig.*` methods accept `productId` as either the product UUID (preferred — same identifier returned by `list()` and webhook payloads) or the legacy numeric id (Garu v0.10.0+).
 
-| Method                             | Description                                                     |
-| ---------------------------------- | --------------------------------------------------------------- |
-| `list(params?)`                    | Paginated list of products for the seller.                      |
-| `get(uuid)`                        | Fetch a single product by UUID — same id used by charges.       |
-| `portalConfig.get(productId)`      | Read per-product portal customization. Returns `null` if unset. |
-| `portalConfig.set(productId, p)`   | Upsert with merge — only fields present are written.            |
-| `portalConfig.patch(productId, p)` | Same merge semantics as `set` — alias for HTTP-PATCH callers.   |
-| `portalConfig.clear(productId)`    | Remove the customization; product falls back to seller config.  |
+| Method                             | Description                                                      |
+| ---------------------------------- | ---------------------------------------------------------------- |
+| `list(params?)`                    | Paginated list of products for the seller.                       |
+| `get(uuid)`                        | Fetch a single product by UUID — same id used by charges.        |
+| `create(params)`                   | Create a product. `value` in **reais**, `0` or at least R$ 5,00. |
+| `update(id, params)`               | Partial update. Omit `value` to keep the current price.          |
+| `portalConfig.get(productId)`      | Read per-product portal customization. Returns `null` if unset.  |
+| `portalConfig.set(productId, p)`   | Upsert with merge — only fields present are written.             |
+| `portalConfig.patch(productId, p)` | Same merge semantics as `set` — alias for HTTP-PATCH callers.    |
+| `portalConfig.clear(productId)`    | Remove the customization; product falls back to seller config.   |
+
+```ts
+const product = await garu.products.create({
+  name: 'Curso de Fotografia',
+  image: 'https://cdn.exemplo.com/produtos/fotografia.png',
+  value: 297.5, // R$ 297,50 in reais (decimal BRL), NOT centavos
+  pix: true,
+  creditCard: true
+});
+
+await garu.products.update(product.uuid, { value: 247.5 }); // reprice
+await garu.products.update(product.uuid, { name: 'Curso de Fotografia 2.0' }); // keeps the price
+```
+
+### Minimum price
+
+A product's `value` must be **`0` or at least R$ 5,00**, the platform minimum price. The API answers **400** (`GaruValidationError`) for a price from `0.01` to `4.99` or a negative one.
+
+- `0` creates a product with **no price**. It is accepted, but it cannot be sold through its payment link. Use it when you bill the product another way, e.g. through scheduled charges.
+- `create` requires `name`, `image` and `value`. On a subscription product (`isSubscription: true`) the product's own `value` is not checked: its price lives on its subscription prices.
+- `update` checks the price only when you send `value` (or turn a subscription product into a one-time one). A product priced below R$ 5,00 before the minimum existed keeps selling, and an update that does not touch its price passes.
+
+Offers have the same R$ 5,00 minimum, but no "no price" option: `0` is refused there.
+
+### Portal customization
 
 ```ts
 // SaaS de coaching: per-coach branding under one Seller account
@@ -215,7 +242,7 @@ An offer overrides the **price and nothing else** — payment methods, the insta
 | ----------------------------- | ------------------------------------------------------------------- |
 | `list(productUuid, params?)`  | Paginated offers. Active only by default; `active: 'all'` for both. |
 | `get(offerId)`                | Fetch one offer.                                                    |
-| `create(productUuid, params)` | Create an offer. `value` in **reais**, not centavos.                |
+| `create(productUuid, params)` | Create an offer. `value` in **reais**, at least R$ 5,00.            |
 | `update(offerId, params)`     | Partial update — reprice, rename, activate/deactivate.              |
 | `del(offerId)`                | Delete, but only while it has never sold (409 otherwise).           |
 
@@ -253,6 +280,8 @@ Note that if you instead **reprice** an active offer while a buyer has the page 
 
 `create` and `update` answer **409** when the product has fixed-share co-producers the price could not cover, and **400** on a subscription product, which selects its price with `priceId` instead.
 
+An offer's `value` must be at least **R$ 5,00**, the platform minimum price; a lower value, `0` included, answers **400**. `update` checks it only when you send `value`, so deactivating or renaming an older offer priced below R$ 5,00 still works.
+
 ## Scheduled charges
 
 Bill an existing customer on a future date — one-time or recurring with card tokenization. The Garu drives email reminders, dunning, retries, and the lifecycle state machine.
@@ -273,7 +302,7 @@ envelope (`totalCount`/`totalPages`, not `meta.total`/`meta.totalPages`).
 | `pause(id, params?)` / `resume(id)`     | Suspend / re-enable a series.                                             |
 | `cancelRecurrence(id, params?)`         | Hard-stop future cycles (recurring only).                                 |
 | `setCancelAtPeriodEnd(id, { enabled })` | Stripe-style soft-cancel; reversible.                                     |
-| `changePaymentMethod(id, params)`       | Swap the saved card.                                                      |
+| `changePaymentMethod(id, params)`       | Swap the saved card. It must already bill one of your charges, else 404.  |
 | `clearPaymentMethod(id)`                | Remove the saved card; future cycles email-with-link.                     |
 | `listAttempts(id, params?)`             | Per-attempt billing log — every silent-charge / retry / mark-paid.        |
 
