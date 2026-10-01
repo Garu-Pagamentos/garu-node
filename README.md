@@ -306,6 +306,8 @@ envelope (`totalCount`/`totalPages`, not `meta.total`/`meta.totalPages`).
 | `clearPaymentMethod(id)`                | Remove the saved card; future cycles email-with-link.                     |
 | `listAttempts(id, params?)`             | Per-attempt billing log — every silent-charge / retry / mark-paid.        |
 
+`amount` is in **reais** and must be at least **R$ 5,00**, the platform minimum per charge, one-time and recurring alike. A lower amount answers **400** (`GaruValidationError`). Charges created before the minimum existed keep their amount and keep billing; no method changes the amount of an existing charge.
+
 ```ts
 // Recurring with 7-day trial. `maxRecoveryDays` caps how long past the due
 // date the daily recovery sweep keeps auto-billing a missed charge (default 14).

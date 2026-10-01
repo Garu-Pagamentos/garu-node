@@ -6,7 +6,7 @@ All notable changes to `@garuhq/node` are documented in this file. Format:
 ## [Unreleased]
 
 Documentation only. No code, type or runtime change. It describes rules the
-gateway enforces since Garu v0.27.0 (2026-09-30).
+gateway enforces since Garu v0.27.0 and v0.27.1 (2026-09-30).
 
 ### Documented
 
@@ -22,6 +22,9 @@ gateway enforces since Garu v0.27.0 (2026-09-30).
   JSDoc said only `name` was required. The TypeScript type still marks `image`
   and `value` optional; making them required is a breaking type change and is
   left for a major release.
+- **`scheduledCharges.create`**: `amount` must be at least R$ 5,00, one-time
+  and recurring alike (Garu v0.27.1); a lower amount answers 400
+  (`GaruValidationError`). Existing charges keep their amount and keep billing.
 - **`scheduledCharges.changePaymentMethod`**: the card must belong to the
   series' customer and already bill one of your charges for that customer (a
   subscription, a scheduled charge or a past attempt). Any other card answers

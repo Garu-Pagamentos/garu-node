@@ -37,6 +37,12 @@ export class ScheduledCharges {
   /**
    * Create a new scheduled charge.
    *
+   * `amount` is in reais (decimal BRL), NOT centavos, and must be at least
+   * R$ 5,00, the platform minimum per charge — one-time and recurring alike.
+   * A lower amount answers 400 (`GaruValidationError`). Charges created
+   * before the minimum existed keep their amount and keep billing; no route
+   * changes the amount of an existing charge.
+   *
    * Pass `idempotencyKey` to make this safe to retry: the same key returns the
    * original series for 24h. Derive it from something stable in your own
    * domain (an order id, a booking id) so a retry reproduces it. Omit it and

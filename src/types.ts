@@ -462,7 +462,10 @@ export interface CreateScheduledChargeParams {
    * scoped per product. Optional otherwise.
    */
   productId?: number;
-  /** Decimal BRL (e.g. `297.50`). */
+  /**
+   * Decimal BRL (e.g. `297.50`), NOT centavos. At least R$ 5,00, the platform
+   * minimum per charge; a lower amount answers 400.
+   */
   amount: number;
   description?: string;
   /** Schedule type. `recurring` requires a `recurrence` block. */
