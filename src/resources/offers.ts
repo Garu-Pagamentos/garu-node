@@ -76,8 +76,11 @@ export class Offers {
    * Create an offer on a product. Returns the created offer (HTTP 201).
    *
    * `value` is in REAIS (decimal BRL), the same unit as `product.value` — not
-   * centavos. It may be higher than the product's price: an offer works as a
-   * premium link just as well as a discount.
+   * centavos. It must be at least R$ 5,00, the platform minimum price; a lower
+   * value, `0` included, answers 400 (`GaruValidationError`). Unlike a
+   * product, an offer cannot be left without a price. It may be higher than
+   * the product's price: an offer works as a premium link just as well as a
+   * discount.
    *
    * `slug` is optional and PUBLIC. Anyone holding the product link can guess
    * `?offer=promo` or `?offer=black-friday`. For pricing that should not
@@ -89,7 +92,7 @@ export class Offers {
    * @example
    * const offer = await garu.offers.create('b3f2c1e8-6e4a-4b9f-9d1c-2a1f6c3d4e5f', {
    *   name: 'Black Friday',
-   *   value: 97.0, // R$ 97,00 in reais, NOT centavos
+   *   value: 97.0, // R$ 97,00 in reais, NOT centavos. Minimum R$ 5,00.
    *   slug: 'black-friday'
    * });
    * // → https://garu.com.br/pay/b3f2c1e8-…?offer=black-friday
@@ -108,6 +111,10 @@ export class Offers {
    *
    * Repricing takes effect on the next sale. It does not rewrite history:
    * past transactions froze the amount they actually collected.
+   *
+   * A new `value` must be at least R$ 5,00, else 400. Omit `value` to keep the
+   * current price: an offer priced below R$ 5,00 before the minimum existed
+   * keeps selling, and deactivating or renaming it passes.
    *
    * @example
    * // End a promo without burning the slug

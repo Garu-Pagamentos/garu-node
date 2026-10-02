@@ -160,8 +160,18 @@ export class Products {
 
   /**
    * Create a product for the authenticated seller. Returns the created
-   * product (HTTP 201). Only `name` is required; everything else falls back
-   * to seller/server defaults.
+   * product (HTTP 201). The API requires `name`, `image` and `value`; the
+   * other fields fall back to seller/server defaults.
+   *
+   * `value` is in reais (decimal BRL), NOT centavos. It must be `0` or at
+   * least R$ 5,00, the platform minimum price:
+   * - `0` creates a product with no price. It is accepted, but it cannot be
+   *   sold through its payment link. Use it when you bill the product another
+   *   way, e.g. through scheduled charges.
+   * - From `0.01` to `4.99`, or a negative value, the API answers 400
+   *   (`GaruValidationError`).
+   * - On a subscription product (`isSubscription: true`) the product's own
+   *   `value` is not checked: its price lives on its subscription prices.
    *
    * Pass `idempotencyKey` to make this safe to retry: the same key returns the
    * original product for 24h. Derive it from something stable in your own
@@ -171,9 +181,20 @@ export class Products {
    *
    * @example
    * const product = await garu.products.create({
+   *   name: 'Curso de Fotografia',
+   *   image: 'https://cdn.exemplo.com/produtos/fotografia.png',
+   *   value: 297.5, // R$ 297,50 in reais (decimal BRL), NOT centavos. Minimum R$ 5,00.
+   *   description: 'Acesso completo às aulas',
+   *   pix: true,
+   *   creditCard: true
+   * });
+   *
+   * @example
+   * // Subscription product: its price lives on the subscription prices.
+   * const plan = await garu.products.create({
    *   name: 'Plano Mensal',
-   *   value: 49.90, // R$ 49,90 in reais (decimal BRL), NOT centavos
-   *   description: 'Acesso completo à plataforma',
+   *   image: 'https://cdn.exemplo.com/produtos/plano.png',
+   *   value: 49.9, // reais
    *   pix: true,
    *   creditCard: true,
    *   isSubscription: true,
@@ -201,9 +222,17 @@ export class Products {
    * both resolve on the `/api/v1/products/:id` path (see
    * {@link ProductPortalConfigResource}).
    *
+   * The price rule of {@link Products.create} applies only when the request
+   * sets a price: `value` must be `0` (no price) or at least R$ 5,00, else
+   * 400. Omit `value` to keep the current price — a product priced below
+   * R$ 5,00 before the minimum existed keeps selling, and an update that only
+   * renames it or toggles a payment method passes. Turning a subscription
+   * product into a one-time product (`isSubscription: false`) counts as
+   * setting its price, so its stored `value` is checked.
+   *
    * @example
    * const updated = await garu.products.update('b3f2c1e8-6e4a-4b9f-9d1c-2a1f6c3d4e5f', {
-   *   value: 59.90, // reais (decimal BRL), NOT centavos
+   *   value: 59.9, // R$ 59,90 in reais (decimal BRL), NOT centavos. 0 or at least R$ 5,00.
    *   pixAutomatic: true // turn on Pix Automático for this product
    * });
    */

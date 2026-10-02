@@ -462,7 +462,10 @@ export interface CreateScheduledChargeParams {
    * scoped per product. Optional otherwise.
    */
   productId?: number;
-  /** Decimal BRL (e.g. `297.50`). */
+  /**
+   * Decimal BRL (e.g. `297.50`), NOT centavos. At least R$ 5,00, the platform
+   * minimum per charge; a lower amount answers 400.
+   */
   amount: number;
   description?: string;
   /** Schedule type. `recurring` requires a `recurrence` block. */
@@ -543,7 +546,11 @@ export interface CancelAtPeriodEndScheduledChargeParams {
 }
 
 export interface ChangePaymentMethodScheduledChargeParams {
-  /** PaymentMethod id to bind. Must belong to the same customerId. */
+  /**
+   * PaymentMethod id to bind. Must belong to the same customerId and already
+   * bill one of your charges for that customer (a subscription, a scheduled
+   * charge or a past attempt); otherwise 404.
+   */
   paymentMethodId: number;
 }
 
@@ -666,7 +673,10 @@ export interface ListOffersParams {
 
 export interface CreateOfferParams {
   name: string;
-  /** Reais (decimal BRL), NOT centavos. Must be greater than zero. */
+  /**
+   * Reais (decimal BRL), NOT centavos. At least R$ 5,00, the platform minimum
+   * price; a lower value, `0` included, answers 400.
+   */
   value: number;
   /** Optional, lowercase/digits/hyphens, 3-40 chars, unique per product. */
   slug?: string | null;
@@ -695,7 +705,13 @@ export interface ListProductsParams {
 
 export interface CreateProductParams {
   name: string;
-  /** Price in decimal BRL / reais (e.g. `297.50`) — NOT centavos. */
+  /**
+   * Price in decimal BRL / reais (e.g. `297.50`) — NOT centavos. The v1 API
+   * requires it on create. `0` is a product with no price: accepted, but it
+   * cannot be sold through its payment link. Any other price must be at least
+   * R$ 5,00, the platform minimum; `0.01`–`4.99` or a negative value answers
+   * 400. Not checked when `isSubscription` is true.
+   */
   value?: number;
   description?: string;
   /** HTTPS URL of the product cover image. */
@@ -720,16 +736,20 @@ export interface CreateProductParams {
   /** Text shown on the buyer's card/bank statement. */
   statementDescriptor?: string;
   /**
-   * Idempotency key for the create request. Defaults to a generated UUIDv4.
-   * Pass your own to make a retry across process restarts safe — the backend
-   * returns the original product instead of creating a duplicate.
+   * Idempotency key for the create request. Omit it and no key is sent. Pass
+   * your own, derived from something stable in your domain, to make a retry
+   * across process restarts safe — the backend returns the original product
+   * instead of creating a duplicate.
    */
   idempotencyKey?: string;
 }
 
 export interface UpdateProductParams {
   name?: string;
-  /** Price in decimal BRL / reais (e.g. `297.50`) — NOT centavos. */
+  /**
+   * Price in decimal BRL / reais (e.g. `297.50`) — NOT centavos. `0` (no
+   * price) or at least R$ 5,00, else 400. Omit it to keep the current price.
+   */
   value?: number;
   description?: string;
   image?: string;

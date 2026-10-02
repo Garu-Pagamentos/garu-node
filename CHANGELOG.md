@@ -3,6 +3,36 @@
 All notable changes to `@garuhq/node` are documented in this file. Format:
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [SemVer](https://semver.org/).
 
+## [Unreleased]
+
+Documentation only. No code, type or runtime change. It describes rules the
+gateway enforces since Garu v0.27.0 and v0.27.1 (2026-09-30).
+
+### Documented
+
+- **Minimum price R$ 5,00.** `products.create` / `products.update`: `value`
+  must be `0` (a product with no price, which cannot be sold through its
+  payment link) or at least R$ 5,00. From `0.01` to `4.99`, or a negative
+  value, the API answers 400 (`GaruValidationError`). `offers.create` /
+  `offers.update`: `value` must be at least R$ 5,00, and `0` is refused. On an
+  update the rule applies only when you send a price; omit `value` to keep the
+  current one. Products, offers and plans already priced below R$ 5,00 keep
+  selling.
+- **`products.create` requires `name`, `image` and `value` on the v1 API.** The
+  JSDoc said only `name` was required. The TypeScript type still marks `image`
+  and `value` optional; making them required is a breaking type change and is
+  left for a major release.
+- **`scheduledCharges.create`**: `amount` must be at least R$ 5,00, one-time
+  and recurring alike (Garu v0.27.1); a lower amount answers 400
+  (`GaruValidationError`). Existing charges keep their amount and keep billing.
+- **`scheduledCharges.changePaymentMethod`**: the card must belong to the
+  series' customer and already bill one of your charges for that customer (a
+  subscription, a scheduled charge or a past attempt). Any other card answers
+  404 (`GaruNotFoundError`); another customer's card used to answer 400.
+- `CreateProductParams.idempotencyKey` no longer claims a key is generated when
+  you omit it. None has been since 5.0.0.
+- README: `products.create` and `products.update` are listed, with an example.
+
 ## [5.2.0] — 2026-09-12
 
 Adds `offers` — sell the same product at more than one price, each behind its

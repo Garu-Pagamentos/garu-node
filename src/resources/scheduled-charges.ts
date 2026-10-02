@@ -37,6 +37,12 @@ export class ScheduledCharges {
   /**
    * Create a new scheduled charge.
    *
+   * `amount` is in reais (decimal BRL), NOT centavos, and must be at least
+   * R$ 5,00, the platform minimum per charge — one-time and recurring alike.
+   * A lower amount answers 400 (`GaruValidationError`). Charges created
+   * before the minimum existed keep their amount and keep billing; no route
+   * changes the amount of an existing charge.
+   *
    * Pass `idempotencyKey` to make this safe to retry: the same key returns the
    * original series for 24h. Derive it from something stable in your own
    * domain (an order id, a booking id) so a retry reproduces it. Omit it and
@@ -324,9 +330,15 @@ export class ScheduledCharges {
   }
 
   /**
-   * Swap the saved card on a recurring series. The new PaymentMethod must
-   * belong to the same customerId. Future cycles silent-charge the new
-   * card; the in-flight cycle is not retroactively rebound.
+   * Swap the saved card on a recurring series. Future cycles silent-charge
+   * the new card; the in-flight cycle is not retroactively rebound.
+   *
+   * The new PaymentMethod must belong to the series' customer AND already
+   * bill one of your charges for that customer: a subscription, a scheduled
+   * charge, or a past attempt on one of your series. A card the customer
+   * saved on your own payment page qualifies. Any other card — another
+   * customer's, or one you never billed — answers 404 (`GaruNotFoundError`),
+   * the same as a card id that does not exist.
    *
    * @example
    * await garu.scheduledCharges.changePaymentMethod('sch_abc123', { paymentMethodId: 42 });
